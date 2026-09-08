@@ -11,46 +11,121 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     <style>
+        /* ================= VARIÁVEIS DE TEMA (CLARO/ESCURO) ================= */
+        :root {
+            --bg-main: #f8fafc;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --border-color: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --brand-green: #00a859;
+            --brand-green-hover: #008f4c;
+            --bg-hover: #f1f5f9;
+            --bg-dashed: #f8fafc;
+            --input-bg: #f1f5f9;
+        }
+
+        .theme-dark {
+            --bg-main: #0f172a;
+            --bg-sidebar: #1e293b;
+            --bg-card: #1e293b;
+            --border-color: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --brand-green: #10b981;
+            --brand-green-hover: #059669;
+            --bg-hover: #334155;
+            --bg-dashed: #0f172a;
+            --input-bg: #111827;
+        }
+
         /* STREAMING_CHUNK:Configurando fontes e variaveis globais do CSS... */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; overflow: hidden; background-color: var(--bg-main); margin: 0; padding: 0; }
         
-        body { font-family: 'Inter', sans-serif; overflow: hidden; background-color: #f3f4f6; margin: 0; padding: 0; }
-        
-        /* NOVO: Estilos do Dashboard Escuro para Projetos */
-        .home-sidebar {
-            width: 260px; background-color: #111827; border-right: 1px solid #1e293b; display: flex; flex-direction: column;
+        /* ================= TELA INICIAL (DASHBOARD FIEL AO PRINT) ================= */
+        #regions-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: var(--bg-main); z-index: 9999;
+            display: flex; font-family: 'Inter', sans-serif; transition: background-color 0.3s ease;
         }
+        
+        /* SIDEBAR (MENU ESQUERDO) */
+        .home-sidebar {
+            width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; transition: all 0.3s ease;
+        }
+        .sidebar-logo {
+            padding: 24px; display: flex; justify-content: space-between; align-items: flex-start;
+        }
+        .sidebar-section-title {
+            font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; padding: 16px 24px 8px 24px; letter-spacing: 0.05em;
+        }
+        .sidebar-item {
+            padding: 10px 24px; display: flex; align-items: center; gap: 12px; color: var(--text-secondary); font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s;
+        }
+        .sidebar-item:hover { background-color: var(--bg-hover); color: var(--text-primary); }
+        .sidebar-item.active { background-color: var(--brand-green); color: white; border-radius: 0 20px 20px 0; margin-right: 16px; width: calc(100% - 16px); }
+        .sidebar-item.active:hover { background-color: var(--brand-green-hover); }
+
+        /* PERFIL DO USUARIO (RODAPÉ SIDEBAR) */
+        .user-profile-box {
+            margin-top: auto; padding: 24px; border-top: 1px solid var(--border-color);
+        }
+        .btn-upgrade {
+            width: 100%; background-color: #0f172a; color: white; padding: 10px; border-radius: 6px; font-size: 12px; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 16px; cursor: pointer;
+        }
+        .sidebar-footer-icons {
+            display: flex; justify-content: space-between; align-items: center; padding-top: 16px; margin-top: 16px; border-top: 1px solid var(--border-color);
+        }
+        .sf-icon {
+            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); border-radius: 6px; cursor: pointer; transition: all 0.2s;
+        }
+        .sf-icon:hover { background-color: var(--bg-hover); color: var(--text-primary); }
+
+        /* ÁREA PRINCIPAL */
         .home-main {
-            flex-grow: 1; display: flex; flex-direction: column; background-color: #0f172a; overflow-y: auto;
+            flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-main); overflow-y: auto; transition: background-color 0.3s ease;
         }
         .home-header {
-            height: 90px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0;
+            padding: 32px 40px 16px 40px; display: flex; align-items: flex-end; justify-content: space-between; flex-shrink: 0;
         }
         .home-content {
-            flex-grow: 1; display: flex; flex-direction: column; position: relative; padding: 40px;
+            flex-grow: 1; display: flex; flex-direction: column; position: relative; padding: 16px 40px 40px 40px;
         }
+        
+        /* BARRA DE PESQUISA TOPO */
+        .top-action-bar { display: flex; align-items: center; gap: 12px; }
+        .search-bar-dash { background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 16px; display: flex; align-items: center; gap: 8px; color: var(--text-secondary); width: 280px; }
+        .search-bar-dash input { background: transparent; border: none; outline: none; color: var(--text-primary); width: 100%; font-size: 13px; }
+        .view-toggles { display: flex; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; background: var(--bg-sidebar); }
+        .view-toggle-btn { padding: 8px 12px; color: var(--text-secondary); background: transparent; border: none; cursor: pointer; }
+        .view-toggle-btn.active { background: var(--bg-hover); color: var(--text-primary); }
+
+        /* GRID E CARDS DE PROJETO */
         #projects-grid {
             display: flex; flex-wrap: wrap; gap: 24px; width: 100%; justify-content: flex-start; align-items: flex-start;
         }
         .project-card {
-            background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; width: 280px; height: 160px; padding: 24px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden;
+            background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; width: 280px; padding: 24px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; position: relative;
         }
-        .project-card:hover { border-color: #3b82f6; transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
-        .project-card::before { content: ''; position: absolute; top: -50px; right: -50px; width: 120px; height: 120px; background-color: #111827; border-radius: 50%; z-index: 0; opacity: 0.5; }
-        #empty-state {
-            display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 60vh;
-        }
-        .btn-green { background-color: #10b981; color: white; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px; border: none; }
-        .btn-green:hover { background-color: #059669; }
-        .search-bar-dark { background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; gap: 8px; color: #94a3b8; width: 300px; }
-        .search-bar-dark input { background: transparent; border: none; outline: none; color: white; width: 100%; font-size: 14px; }
+        .project-card:hover { border-color: var(--brand-green); box-shadow: 0 4px 12px rgba(0,0,0,0.05); transform: translateY(-2px); }
+        .proj-title { color: var(--text-primary); font-size: 16px; font-weight: 700; margin-top: 12px; margin-bottom: 4px; }
+        .proj-sub { color: var(--text-muted); font-size: 11px; }
 
-        /* STREAMING_CHUNK:Estilos da Tela Inicial de Regiões... */
-        #regions-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: #0f172a; z-index: 9999;
-            display: flex; flex-direction: row; align-items: stretch; justify-content: flex-start;
+        /* EMPTY STATE (ESTADO VAZIO) */
+        #empty-state {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 60vh; border: 2px dashed var(--border-color); border-radius: 16px; background-color: var(--bg-dashed);
         }
+
+        .btn-green-dash { background-color: var(--brand-green); color: white; padding: 8px 20px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px; border: none; }
+        .btn-green-dash:hover { background-color: var(--brand-green-hover); }
+
+        /* CHAT FAB (BALÃO VERDE NO CANTO) */
+        .chat-fab { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background-color: var(--brand-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; cursor: pointer; box-shadow: 0 10px 25px rgba(0,168,89,0.4); z-index: 9999; transition: transform 0.2s; }
+        .chat-fab:hover { transform: scale(1.1); }
 
         /* STREAMING_CHUNK:Estilos do Workspace de Mapa... */
         #app-workspace { display: none; width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; }
@@ -70,7 +145,6 @@
         .tool-btn:hover { background: #f3f4f6; }
         .tool-btn.active { background: #f3f4f6; color: #111827; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
 
-        /* NOVO: Barra Vertical Direita para Satélite */
         .right-toolbar { position: absolute; top: 50%; right: 20px; transform: translateY(-50%); background: white; border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 8px; z-index: 2000; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15); border: 1px solid #f3f4f6; }
         .rt-btn { width: 44px; height: 44px; border-radius: 8px; background: transparent; border: none; color: #4b5563; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; position: relative; }
         .rt-btn:hover { background: #f3f4f6; color: #111827; }
@@ -79,10 +153,9 @@
         .info-card { position: absolute; top: 80px; left: 20px; width: 360px; background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); z-index: 1000; padding: 24px; display: none; border: 1px solid #f3f4f6; }
         .action-buttons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
         
-        .btn-primary-blue { background-color: #2563eb; color: white; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s; }
+        .btn-primary-blue { background-color: #2563eb; color: white; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s; border: none; }
         .btn-primary-blue:hover { background-color: #1d4ed8; }
-        
-        .btn-dark { background-color: #0f172a; color: white; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s; }
+        .btn-dark { background-color: #0f172a; color: white; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s; border: none; }
         .btn-dark:hover { background-color: #020617; }
         
         .action-buttons-small-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
@@ -218,34 +291,103 @@
         .dio-badge.active { background-color: #1e3a8a; color: #60a5fa; }
     </style>
 </head>
-<body>
+<body class="theme-light">
 
+    <!-- ================= TELA INICIAL (DASHBOARD FIEL AO PRINT) ================= -->
     <div id="regions-screen">
+        
+        <!-- BARRA LATERAL (SIDEBAR) -->
         <div class="home-sidebar">
-            <div class="p-6 font-black text-xl flex items-center gap-3 text-white border-b border-slate-800">
-                <i class="fa-solid fa-wave-square text-green-500"></i> Roma Planner
+            <div class="sidebar-logo">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-layer-group text-2xl" style="color: var(--brand-green);"></i>
+                    <div>
+                        <h1 class="text-sm font-bold" style="color: var(--text-primary); line-height: 1;">FTTH Planner</h1>
+                        <span class="text-[9px] font-bold" style="color: var(--brand-green);">PRO</span>
+                    </div>
+                </div>
+                <button class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-bars-staggered"></i></button>
             </div>
-            <div class="flex flex-col gap-2 px-4 mt-6">
-                <div class="bg-blue-600/20 text-blue-400 px-4 py-3 rounded-lg font-bold text-sm flex items-center gap-3 cursor-pointer">
-                    <i class="fa-solid fa-folder-open"></i> Meus Projetos
+
+            <div class="flex-grow overflow-y-auto">
+                <div class="sidebar-section-title">Geral</div>
+                <div class="sidebar-item active">
+                    <i class="fa-regular fa-folder-open text-lg"></i> Meus Projetos
                 </div>
-                <div class="text-slate-500 px-4 py-3 rounded-lg font-semibold text-sm flex items-center gap-3 cursor-pointer hover:bg-slate-800 hover:text-slate-300 transition" onclick="window.showToast('Módulo em desenvolvimento.')">
-                    <i class="fa-solid fa-users"></i> Equipe
+                <div class="sidebar-item" onclick="window.showToast('Dashboard Indisponível.')">
+                    <i class="fa-solid fa-border-all text-lg"></i> Dashboard
                 </div>
-                <div class="text-slate-500 px-4 py-3 rounded-lg font-semibold text-sm flex items-center gap-3 cursor-pointer hover:bg-slate-800 hover:text-slate-300 transition" onclick="window.showToast('Módulo em desenvolvimento.')">
-                    <i class="fa-solid fa-gear"></i> Configurações
+                <div class="sidebar-item" onclick="window.showToast('Módulo Indisponível.')">
+                    <i class="fa-solid fa-location-dot text-lg"></i> Viabilidade
+                </div>
+
+                <div class="sidebar-section-title mt-4">Gerenciamento</div>
+                <div class="sidebar-item flex justify-between" onclick="window.showToast('Módulo Indisponível.')">
+                    <div class="flex items-center gap-3"><i class="fa-regular fa-rectangle-list text-lg"></i> Cadastros</div>
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </div>
+                <div class="sidebar-item" onclick="window.showToast('Módulo Indisponível.')">
+                    <i class="fa-solid fa-user-group text-lg"></i> Usuários
+                </div>
+                <div class="sidebar-item" onclick="window.showToast('Módulo Indisponível.')">
+                    <i class="fa-solid fa-puzzle-piece text-lg"></i> Integrações
+                </div>
+                <div class="sidebar-item" onclick="window.showToast('Módulo Indisponível.')">
+                    <i class="fa-regular fa-building text-lg"></i> Organização
+                </div>
+                <div class="sidebar-item" onclick="window.showToast('Módulo Indisponível.')">
+                    <i class="fa-solid fa-gear text-lg"></i> Configurações
+                </div>
+
+                <div class="sidebar-section-title mt-4">Sistema</div>
+                <div class="sidebar-item" onclick="window.showToast('Módulo Indisponível.')">
+                    <i class="fa-regular fa-circle-question text-lg"></i> Ajuda
+                </div>
+            </div>
+
+            <div class="user-profile-box">
+                <div class="flex items-center gap-3">
+                    <div style="width:36px; height:36px; background-color:#d1fae5; color:#059669; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px;">AG</div>
+                    <div class="leading-tight">
+                        <div class="font-bold text-xs" style="color: var(--text-primary);">ROMA</div>
+                        <div class="text-[9px]" style="color: var(--text-muted);">agnaldo25085</div>
+                        <div class="text-[9px] font-bold text-blue-500 mt-0.5">PLANO TRIAL</div>
+                        <div class="text-[9px] font-bold text-red-500">TESTE: 7 DIAS</div>
+                    </div>
+                </div>
+                <button class="btn-upgrade" onclick="window.showToast('Página de Pagamento não configurada.')">
+                    <i class="fa-solid fa-bolt text-yellow-400"></i> Fazer Upgrade
+                </button>
+                <div class="sidebar-footer-icons">
+                    <div class="sf-icon" onclick="window.showToast('Site Indisponível.')"><i class="fa-solid fa-globe"></i></div>
+                    <div class="sf-icon" onclick="window.toggleTheme()"><i id="theme-icon" class="fa-regular fa-moon"></i></div>
+                    <div class="sf-icon" onclick="window.showToast('Ajuda Indisponível.')"><i class="fa-regular fa-circle-question"></i></div>
+                    <div class="sf-icon text-red-400 hover:bg-red-50 hover:text-red-600" onclick="window.showToast('Saindo...')"><i class="fa-solid fa-arrow-right-from-bracket"></i></div>
                 </div>
             </div>
         </div>
         
+        <!-- AREA PRINCIPAL (DIREITA) -->
         <div class="home-main">
             <div class="home-header">
-                <div>
-                    <h1 class="text-2xl font-bold text-white mb-1">Meus Projetos</h1>
-                    <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Gerencie suas redes FTTH.</p>
+                <div class="flex items-start gap-3">
+                    <i class="fa-regular fa-folder-open text-3xl" style="color: var(--brand-green);"></i>
+                    <div>
+                        <h1 class="text-2xl font-bold mb-1" style="color: var(--text-primary);">Meus Projetos</h1>
+                        <p class="text-xs font-medium" style="color: var(--text-secondary);">Gerencie e organize suas redes FTTH.</p>
+                    </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <button class="btn-green" onclick="window.abrirModalNovoProjeto()">
+                
+                <div class="top-action-bar">
+                    <div class="search-bar-dash">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="Buscar...">
+                    </div>
+                    <div class="view-toggles">
+                        <button class="view-toggle-btn active"><i class="fa-solid fa-border-all"></i></button>
+                        <button class="view-toggle-btn"><i class="fa-solid fa-list-ul"></i></button>
+                    </div>
+                    <button class="btn-green-dash" onclick="window.abrirModalNovoProjeto()">
                         <i class="fa-solid fa-plus"></i> Criar Novo Projeto
                     </button>
                 </div>
@@ -255,24 +397,28 @@
                 <div id="projects-grid"></div>
 
                 <div id="empty-state">
-                    <div class="w-24 h-24 bg-slate-800 rounded-3xl flex items-center justify-center mb-6 border border-slate-700">
-                        <i class="fa-solid fa-folder-open text-4xl text-slate-500"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-white mb-2">Você ainda não tem projetos</h2>
-                    <p class="text-slate-400 mb-8 font-medium">Crie seu primeiro projeto para começar a mapear a rede.</p>
-                    <button class="btn-green px-8 py-3 text-base" onclick="window.abrirModalNovoProjeto()">
+                    <i class="fa-regular fa-folder-open text-4xl mb-4" style="color: var(--text-muted);"></i>
+                    <h2 class="text-lg font-bold mb-1" style="color: var(--text-primary);">Você ainda não tem projetos</h2>
+                    <p class="text-sm font-medium mb-6" style="color: var(--text-secondary);">Crie seu primeiro projeto FTTH pra começar a mapear sua rede.</p>
+                    <button class="btn-green-dash" onclick="window.abrirModalNovoProjeto()">
                         <i class="fa-solid fa-plus"></i> Criar primeiro projeto
                     </button>
                 </div>
                 
-                <div class="absolute bottom-8 left-10 flex items-center gap-2 bg-slate-800/80 px-4 py-2 rounded-full border border-slate-700">
+                <div class="absolute bottom-8 left-10 flex items-center gap-2" style="background: var(--bg-card); padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                     <div class="w-2 h-2 rounded-full bg-yellow-500" id="sync-dot"></div>
-                    <span class="text-[10px] font-bold text-slate-300 tracking-wider" id="sync-status">CONECTANDO...</span>
+                    <span class="text-[10px] font-bold tracking-wider" style="color: var(--text-secondary);" id="sync-status">CONECTANDO...</span>
                 </div>
             </div>
         </div>
+        
+        <!-- FAB CHAT (CANTO INFERIOR DIREITO) -->
+        <div class="chat-fab" onclick="window.showToast('Suporte Online em Breve!')">
+            <i class="fa-regular fa-comment-dots"></i>
+        </div>
     </div>
 
+    <!-- MODAL: CRIAR NOVO PROJETO (ESTILO ORIGINAL MANTIDO COM CORES ESCURAS) -->
     <div class="modal-overlay" id="modal-novo-projeto" style="z-index: 100000;">
         <div class="modal-content" style="background:#1e293b; color:white; border:1px solid #334155;">
             <div class="modal-header" style="border-bottom-color:#334155;">
@@ -292,11 +438,12 @@
             </div>
             <div class="modal-footer" style="border-top-color:#334155; background:#1e293b;">
                 <button class="btn-cancel" style="background:#334155; border:none; color:white;" onclick="document.getElementById('modal-novo-projeto').style.display='none'">Cancelar</button>
-                <button class="btn-green" style="flex:1; justify-content:center;" onclick="window.salvarNovoProjeto()"><i class="fa-solid fa-check"></i> Salvar Projeto</button>
+                <button class="btn-green-dash" style="flex:1; justify-content:center;" onclick="window.salvarNovoProjeto()"><i class="fa-solid fa-check"></i> Salvar Projeto</button>
             </div>
         </div>
     </div>
 
+    <!-- AREA DO MAPA DE ENGENHARIA -->
     <div id="app-workspace">
         <div id="map-container"></div>
         <div class="top-toolbar">
@@ -323,7 +470,6 @@
             </div>
         </div>
 
-        <!-- NOVO: Barra lateral direita (Satélite) -->
         <div class="right-toolbar">
             <button class="rt-btn" onclick="window.toggleMapLayer()" title="Alternar Mapa (Satélite / Rua)">
                 <i class="fa-solid fa-earth-americas"></i>
@@ -481,12 +627,28 @@
 
         const THEME_COLORS = ['#0ea5e9', '#1d4ed8', '#f97316', '#ef4444', '#22c55e', '#eab308', '#a855f7', '#ec4899', '#000000', '#737373', '#78350f'];
 
+        // NOVO: Controle de Tema
+        window.toggleTheme = function() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            if (body.classList.contains('theme-dark')) {
+                body.classList.remove('theme-dark');
+                body.classList.add('theme-light');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                body.classList.remove('theme-light');
+                body.classList.add('theme-dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        };
+
         // ==========================================
         // 2. INICIALIZAÇÃO LEAFLET
         // ==========================================
         const map = L.map('map-container', { zoomControl: false, doubleClickZoom: false }).setView([-2.24455, -49.50444], 16);
         
-        // NOVO: Substituído o satélite da ArcGIS (que dava tela branca) pelo Satélite do Google Maps com zoom máximo
         window.streetLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { maxZoom: 22, maxNativeZoom: 19 });
         window.satLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 22, maxNativeZoom: 19 });
         
@@ -635,17 +797,17 @@
                 grid.style.display = 'none'; empty.style.display = 'flex';
             } else {
                 empty.style.display = 'none'; grid.style.display = 'flex';
-                // NOVO: Botão de Lixeira Adicionado
+                // ATUALIZADO: Usando as novas classes baseadas em Variáveis CSS
                 grid.innerHTML = window.appState.projects.map(p => `
                     <div class="project-card" onclick="window.abrirProjeto('${p.id}', ${p.lat}, ${p.lng})">
-                        <button class="absolute top-4 right-4 text-slate-500 hover:text-red-500 transition" style="z-index: 20;" onclick="window.deletarProjeto('${p.id}', event)" title="Deletar Projeto"><i class="fa-solid fa-trash"></i></button>
+                        <button class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition" style="z-index: 20;" onclick="window.deletarProjeto('${p.id}', event)" title="Deletar Projeto"><i class="fa-solid fa-trash"></i></button>
                         <div class="relative z-10">
-                            <i class="fa-solid fa-map-location-dot text-3xl text-blue-500 mb-3"></i>
-                            <h3 class="text-xl font-bold text-white leading-tight">${p.name}</h3>
+                            <i class="fa-solid fa-map-location-dot text-3xl mb-3" style="color: var(--brand-green);"></i>
+                            <h3 class="proj-title leading-tight">${p.name}</h3>
                         </div>
-                        <div class="relative z-10 mt-4 flex items-center justify-between border-t border-slate-700 pt-3">
-                            <span class="text-[10px] font-bold text-slate-400">ABRIR ENGENHARIA</span>
-                            <i class="fa-solid fa-arrow-right text-slate-500"></i>
+                        <div class="relative z-10 mt-4 flex items-center justify-between border-t pt-3" style="border-color: var(--border-color);">
+                            <span class="proj-sub font-bold">ABRIR ENGENHARIA</span>
+                            <i class="fa-solid fa-arrow-right" style="color: var(--text-muted);"></i>
                         </div>
                     </div>
                 `).join('');
@@ -718,6 +880,15 @@
             window.appState.currentProjectId = null;
             document.getElementById('app-workspace').style.display = 'none';
             document.getElementById('regions-screen').style.display = 'flex';
+        };
+
+        window.searchLocation = async () => {
+            const query = document.getElementById('search-input').value; if(!query) return;
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+                const data = await res.json();
+                if(data && data.length > 0) { map.flyTo([data[0].lat, data[0].lon], 18); }
+            } catch(e) {}
         };
 
         // ==========================================
