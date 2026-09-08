@@ -61,7 +61,7 @@
         .mode-placing #map-container { cursor: crosshair !important; }
         .mode-drawing #map-container { cursor: crosshair !important; }
 
-        /* BARRA SUPERIOR E FERRAMENTAS DO SCRIPT FUNCIONAL */
+        /* BARRA SUPERIOR E FERRAMENTAS */
         .top-toolbar { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; gap: 12px; align-items: center; background: transparent; width: 98%; max-width: 1400px; }
         .search-bar { background: white; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; align-items: center; padding: 8px 16px; flex-grow: 1; max-width: 350px; height: 48px; }
         .search-bar input { border: none; outline: none; width: 100%; font-size: 14px; color: #374151; background: transparent; }
@@ -116,10 +116,10 @@
         /* NOTIFICAÇÕES E MAP ICONS */
         .instruction-banner { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 2000; background: #111827; color: white; padding: 12px 24px; border-radius: 30px; font-weight: 600; font-size: 14px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); display: none; align-items: center; gap: 10px; }
         #toast-container { position: absolute; bottom: 20px; right: 20px; z-index: 999999; display: flex; flex-direction: column; gap: 10px; }
-        .toast-msg { background: #111827; color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transform: translateY(20px); transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
+        .toast-msg { background: #111827; color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transform: translateY(20px); transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; border-left: 4px solid #3b82f6; }
         .toast-msg.show { opacity: 1; transform: translateY(0); }
 
-        .map-icon-wrapper { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; border: 2px solid white; transition: transform 0.2s; }
+        .map-icon-wrapper { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; border: 2px solid white; transition: transform 0.2s; cursor: pointer; }
         .map-icon-wrapper.rounded-full { border-radius: 50%; }
         .leaflet-div-icon { background: transparent; border: none; }
         .node-hover .map-icon-wrapper { transform: scale(1.3); border-color: #3b82f6; z-index: 1000 !important;}
@@ -296,7 +296,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
         // 1. ESTADO GLOBAL
@@ -312,9 +312,9 @@
         const THEME_COLORS = ['#3b82f6', '#f97316', '#22c55e', '#ef4444', '#a855f7', '#eab308', '#64748b', '#ec4899'];
 
         // ==========================================
-        // 2. INICIALIZAÇÃO LEAFLET (Mapa Principal e Mini-Mapa)
+        // 2. INICIALIZAÇÃO LEAFLET
         // ==========================================
-        const map = L.map('map-container', { zoomControl: false, doubleClickZoom: false }).setView([-2.245, -49.495], 14); // Mapa CLARO padrão
+        const map = L.map('map-container', { zoomControl: false, doubleClickZoom: false }).setView([-2.245, -49.495], 14); 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 20 }).addTo(map);
         window.cablesLayer = L.layerGroup().addTo(map); 
         window.nodesLayer = L.layerGroup().addTo(map); 
@@ -342,17 +342,14 @@
                 document.getElementById('sync-status').innerText = 'CONECTADO E SINCRONIZADO';
                 document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-green-500';
                 
-                // Escuta Projetos
                 onSnapshot(collection(db, 'planner_projects'), snap => { 
                     window.appState.projects = snap.docs.map(d=>({id:d.id, ...d.data()})); 
                     renderProjectsList(); 
                 });
-                // Escuta Caixas
                 onSnapshot(collection(db, 'planner_nodes'), snap => { 
                     window.appState.allNodes = snap.docs.map(d=>({id:d.id, ...d.data()})); 
                     if(window.appState.currentProjectId) window.renderMap(); 
                 });
-                // Escuta Cabos
                 onSnapshot(collection(db, 'planner_cables'), snap => { 
                     window.appState.allCables = snap.docs.map(d => {
                         let data = d.data();
@@ -369,6 +366,7 @@
         }
 
         window.saveData = async (col, data) => { if(db && auth && auth.currentUser) { return await addDoc(collection(db, col), data); } };
+        window.updateData = async (col, id, data) => { if(db && auth && auth.currentUser) { return await updateDoc(doc(db, col, id), data); } };
         window.deleteData = async (col, id) => { if(db && auth && auth.currentUser) await deleteDoc(doc(db, col, id)); };
 
         // ==========================================
@@ -426,7 +424,6 @@
             const nome = document.getElementById('input-projeto-nome').value || 'Projeto Roma';
             document.getElementById('modal-novo-projeto').style.display = 'none';
             window.showToast('Criando banco de dados do projeto...');
-            
             const docRef = await window.saveData('planner_projects', { name: nome, lat: window.tempProjectCoords[0], lng: window.tempProjectCoords[1], createdAt: Date.now() });
             if(docRef) window.abrirProjeto(docRef.id, window.tempProjectCoords[0], window.tempProjectCoords[1]);
         };
@@ -454,15 +451,38 @@
         };
 
         // ==========================================
-        // 5. MAPA INTERACTIONS (Buidling Cables/Nodes)
+        // 5. MAPA INTERACTIONS E CORREÇÕES (MOVER CAIXAS)
         // ==========================================
         window.setMode = function(m) {
-            window.appState.mode = m; document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-            const banner = document.getElementById('instruction-banner'); window.drawLayer.clearLayers(); window.appState.cablePath = []; window.appState.cableStartNodeId = null; window.appState.tempPolyline = null;
-            document.getElementById('map-container').className = m === 'placing_node' || m === 'drawing_cable' ? 'node-anchorable' : '';
-            if (m === 'view' || m === 'move') { document.getElementById(m === 'view' ? 'btn-navegar' : 'btn-mover').classList.add('active'); map.dragging.enable(); banner.style.display = 'none'; } 
-            else if (m === 'placing_node') { document.getElementById('btn-caixa').classList.add('active'); map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Inserir <b>${window.appState.nodeSetup.name}</b>.`; }
-            else if (m === 'drawing_cable') { document.getElementById('btn-cabo').classList.add('active'); map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Selecione a <b>Caixa Inicial</b>.`; }
+            window.appState.mode = m; 
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            const banner = document.getElementById('instruction-banner'); 
+            window.drawLayer.clearLayers(); window.appState.cablePath = []; window.appState.cableStartNodeId = null; window.appState.tempPolyline = null;
+            
+            // Correção crucial: usar classList ao invés de sobrescrever className para não destruir o Leaflet
+            if (m === 'placing_node' || m === 'drawing_cable') {
+                document.getElementById('map-container').classList.add('node-anchorable');
+            } else {
+                document.getElementById('map-container').classList.remove('node-anchorable');
+            }
+
+            if (m === 'view' || m === 'move') { 
+                document.getElementById(m === 'view' ? 'btn-navegar' : 'btn-mover').classList.add('active'); 
+                map.dragging.enable(); banner.style.display = 'none'; 
+            } 
+            else if (m === 'placing_node') { 
+                document.getElementById('btn-caixa').classList.add('active'); 
+                map.dragging.disable(); banner.style.display = 'flex'; 
+                document.getElementById('instruction-text').innerHTML = `Inserir <b>${window.appState.nodeSetup.name}</b>.`; 
+            }
+            else if (m === 'drawing_cable') { 
+                document.getElementById('btn-cabo').classList.add('active'); 
+                map.dragging.disable(); banner.style.display = 'flex'; 
+                document.getElementById('instruction-text').innerHTML = `Selecione a <b>Caixa Inicial</b>.`; 
+            }
+            
+            // Se ativou o mover, recarrega o mapa para habilitar o draggable
+            if(window.appState.currentProjectId) window.renderMap();
         };
 
         map.on('mousemove', function(e) { 
@@ -476,7 +496,6 @@
         
         map.on('click', async function(e) { 
             if (window.appState.mode === 'placing_node') { 
-                // Salva a caixa atrelando ao ID do Projeto atual
                 await window.saveData('planner_nodes', { projectId: window.appState.currentProjectId, name: window.appState.nodeSetup.name, type: window.appState.nodeSetup.type, icon: window.appState.nodeSetup.icon, color: window.appState.nodeSetup.color, lat: e.latlng.lat, lng: e.latlng.lng });
                 window.setMode('view'); window.showToast('Caixa adicionada!', 'sucesso');
             } else if (window.appState.mode === 'drawing_cable' && window.appState.cableStartNodeId !== null && !window.appState.snapNodePos) { 
@@ -494,7 +513,6 @@
                     } else if (window.appState.cableStartNodeId !== node.id) { 
                         window.appState.cablePath.push([node.lat, node.lng]); 
                         const firebasePath = window.appState.cablePath.map(c => ({ lat: c[0], lng: c[1] }));
-                        // Salva o cabo atrelando ao ID do Projeto atual
                         await window.saveData('planner_cables', { projectId: window.appState.currentProjectId, name: window.appState.cableSetup.name || 'Cabo', capacity: window.appState.cableSetup.capacity, color: window.appState.cableSetup.color, startNode: window.appState.cableStartNodeId, endNode: node.id, path: firebasePath }); 
                         window.showToast(`Cabo finalizado!`, "sucesso"); window.setMode('view'); 
                     }
@@ -508,30 +526,47 @@
             if(!window.appState.currentProjectId) return;
             window.nodesLayer.clearLayers(); window.cablesLayer.clearLayers(); 
             
-            // Filtra e desenha apenas caixas e cabos do projeto atual
             const currentCables = window.appState.allCables.filter(c => c.projectId === window.appState.currentProjectId);
             const currentNodes = window.appState.allNodes.filter(n => n.projectId === window.appState.currentProjectId);
+            const isMovable = window.appState.mode === 'move';
 
             currentCables.forEach(c => { 
                 const linhaCabo = L.polyline(c.path, { color: c.color, weight: 5, opacity: 0.9 }).addTo(window.cablesLayer);
                 linhaCabo.bindTooltip(`<b>${c.name}</b>`, {sticky: true});
                 linhaCabo.on('click', () => { if (window.appState.mode === 'view' && confirm(`Excluir a rota "${c.name}"?`)) { window.deleteData('planner_cables', c.id); window.showToast('Excluído.'); } });
             }); 
+            
             currentNodes.forEach(n => { 
                 const shape = (n.type === 'POP / DC' || n.type === 'DC') ? 'rounded-lg' : (n.type === 'CEO' ? 'rounded-full' : 'rounded');
-                const iconHtml = L.divIcon({ html: `<div class="map-icon-wrapper ${shape}" style="width: 32px; height: 32px; border-color: ${n.color}"><div style="background-color: ${n.color}; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px;" class="${shape}"><i class="fa-solid ${n.icon}"></i></div></div>`, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
-                const marker = L.marker([n.lat, n.lng], { icon: iconHtml }).addTo(window.nodesLayer); 
+                const iconHtml = L.divIcon({ html: `<div class="map-icon-wrapper ${shape}" style="width: 32px; height: 32px; border-color: ${n.color}; cursor: ${isMovable ? 'grab' : 'pointer'}"><div style="background-color: ${n.color}; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px;" class="${shape}"><i class="fa-solid ${n.icon}"></i></div></div>`, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
+                
+                // Agora o marcador é arrastável apenas quando o modo MOVER estiver ativo
+                const marker = L.marker([n.lat, n.lng], { icon: iconHtml, draggable: isMovable }).addTo(window.nodesLayer); 
                 const label = L.divIcon({ html: `<div style="text-align: center; font-weight: 700; font-size: 11px; color: #111827; text-shadow: 1px 1px 2px white, -1px -1px 2px white; margin-top: 4px;">${n.name}</div>`, className: '', iconSize: [100, 20], iconAnchor: [50, -16] }); 
                 L.marker([n.lat, n.lng], { icon: label, interactive: false }).addTo(window.nodesLayer); 
+                
                 marker.on('click', (e) => { L.DomEvent.stopPropagation(e); window.handleNodeInteraction(n, 'click'); }); 
                 marker.on('mouseover', (e) => { window.handleNodeInteraction(n, 'mouseover'); if(window.appState.mode === 'drawing_cable') e.target.getElement().classList.add('node-hover'); }); 
                 marker.on('mouseout', (e) => { window.handleNodeInteraction(n, 'mouseout'); e.target.getElement().classList.remove('node-hover'); }); 
+                
+                // NOVA FUNÇÃO: Salvar posição ao arrastar e atualizar os cabos grudados nela
+                marker.on('dragend', async (e) => {
+                    const pos = e.target.getLatLng();
+                    await window.updateData('planner_nodes', n.id, { lat: pos.lat, lng: pos.lng });
+                    
+                    const connectedCables = currentCables.filter(c => c.startNode === n.id || c.endNode === n.id);
+                    for(let c of connectedCables) {
+                        let newPath = [...c.path];
+                        if(c.startNode === n.id) newPath[0] = {lat: pos.lat, lng: pos.lng};
+                        if(c.endNode === n.id) newPath[newPath.length-1] = {lat: pos.lat, lng: pos.lng};
+                        await window.updateData('planner_cables', c.id, { path: newPath });
+                    }
+                    window.showToast('Posição atualizada com sucesso!', 'sucesso');
+                });
             }); 
         };
 
-        // ==========================================
-        // 6. UI HELPERS (INFO CARD E MODAIS)
-        // ==========================================
+        // UI Helpers
         window.openModal = function(type) { 
             window.setMode('view'); 
             if(type === 'caixa') { 
