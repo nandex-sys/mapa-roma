@@ -16,12 +16,7 @@
         
         body { font-family: 'Inter', sans-serif; overflow: hidden; background-color: #f3f4f6; margin: 0; padding: 0; }
         
-        /* STREAMING_CHUNK:Estilos da Tela Inicial de Regiões... */
-        #regions-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: #0f172a; z-index: 9999;
-            display: flex; font-family: 'Inter', sans-serif;
-        }
+        /* NOVO: Estilos do Dashboard Escuro para Projetos */
         .home-sidebar {
             width: 260px; background-color: #111827; border-right: 1px solid #1e293b; display: flex; flex-direction: column;
         }
@@ -34,7 +29,6 @@
         .home-content {
             flex-grow: 1; display: flex; flex-direction: column; position: relative; padding: 40px;
         }
-        
         #projects-grid {
             display: flex; flex-wrap: wrap; gap: 24px; width: 100%; justify-content: flex-start; align-items: flex-start;
         }
@@ -43,15 +37,20 @@
         }
         .project-card:hover { border-color: #3b82f6; transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
         .project-card::before { content: ''; position: absolute; top: -50px; right: -50px; width: 120px; height: 120px; background-color: #111827; border-radius: 50%; z-index: 0; opacity: 0.5; }
-        
         #empty-state {
             display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 60vh;
         }
-
         .btn-green { background-color: #10b981; color: white; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px; border: none; }
         .btn-green:hover { background-color: #059669; }
         .search-bar-dark { background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; gap: 8px; color: #94a3b8; width: 300px; }
         .search-bar-dark input { background: transparent; border: none; outline: none; color: white; width: 100%; font-size: 14px; }
+
+        /* STREAMING_CHUNK:Estilos da Tela Inicial de Regiões... */
+        #regions-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #0f172a; z-index: 9999;
+            display: flex; flex-direction: row; align-items: stretch; justify-content: flex-start;
+        }
 
         /* STREAMING_CHUNK:Estilos do Workspace de Mapa... */
         #app-workspace { display: none; width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; }
@@ -61,12 +60,6 @@
         
         .mode-placing #map-container { cursor: crosshair !important; }
         .mode-drawing #map-container { cursor: crosshair !important; }
-
-        /* Nova Barra Lateral Direita para Satélite */
-        .right-toolbar { position: absolute; top: 50%; right: 20px; transform: translateY(-50%); background: white; border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 8px; z-index: 2000; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15); border: 1px solid #f3f4f6; }
-        .rt-btn { width: 44px; height: 44px; border-radius: 8px; background: transparent; border: none; color: #4b5563; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; position: relative; }
-        .rt-btn:hover { background: #f3f4f6; color: #111827; }
-        .rt-btn.active { background: #2563eb; color: white; }
 
         .top-toolbar { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; gap: 12px; align-items: center; background: transparent; width: 98%; max-width: 1400px; }
         .search-bar { background: white; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; align-items: center; padding: 8px 16px; flex-grow: 1; max-width: 350px; height: 48px; }
@@ -80,10 +73,10 @@
         .info-card { position: absolute; top: 80px; left: 20px; width: 360px; background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); z-index: 1000; padding: 24px; display: none; border: 1px solid #f3f4f6; }
         .action-buttons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
         
-        .btn-primary-blue { background-color: #2563eb; color: white; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s; border: none; }
+        .btn-primary-blue { background-color: #2563eb; color: white; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s; }
         .btn-primary-blue:hover { background-color: #1d4ed8; }
         
-        .btn-dark { background-color: #0f172a; color: white; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s; border: none; }
+        .btn-dark { background-color: #0f172a; color: white; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s; }
         .btn-dark:hover { background-color: #020617; }
         
         .action-buttons-small-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
@@ -93,7 +86,7 @@
         .btn-small-action.danger:hover { background: #fef2f2; border-color: #fca5a5; }
 
         /* STREAMING_CHUNK:Estilizando Modais Pop-up e Novo Modal de Caixa... */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); z-index: 20000; display: none; align-items: center; justify-content: center; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(2px); z-index: 20000; display: none; align-items: center; justify-content: center; }
         .modal-content { background: white; border-radius: 20px; width: 100%; max-width: 480px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; }
         .modal-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f3f4f6; }
         .modal-header h2 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
@@ -221,7 +214,6 @@
 </head>
 <body>
 
-    <!-- ================= NOVO: TELA INICIAL (DASHBOARD DARK) COM OPÇÃO DE DELETAR ================= -->
     <div id="regions-screen">
         <div class="home-sidebar">
             <div class="p-6 font-black text-xl flex items-center gap-3 text-white border-b border-slate-800">
@@ -254,10 +246,8 @@
             </div>
             
             <div class="home-content">
-                <!-- Grid de Projetos -->
                 <div id="projects-grid"></div>
 
-                <!-- Empty State -->
                 <div id="empty-state">
                     <div class="w-24 h-24 bg-slate-800 rounded-3xl flex items-center justify-center mb-6 border border-slate-700">
                         <i class="fa-solid fa-folder-open text-4xl text-slate-500"></i>
@@ -277,7 +267,6 @@
         </div>
     </div>
 
-    <!-- ================= NOVO: MODAL CRIAR PROJETO ================= -->
     <div class="modal-overlay" id="modal-novo-projeto" style="z-index: 100000;">
         <div class="modal-content" style="background:#1e293b; color:white; border:1px solid #334155;">
             <div class="modal-header" style="border-bottom-color:#334155;">
@@ -302,14 +291,10 @@
         </div>
     </div>
 
-
-    <!-- STREAMING_CHUNK:Workspace Principal (Mapa e Ferramentas)... -->
     <div id="app-workspace">
         <div id="map-container"></div>
         <div class="top-toolbar">
-            <!-- NOVO: Botão Voltar -->
             <button class="bg-white rounded-lg shadow w-12 h-12 flex items-center justify-center text-gray-500 hover:text-gray-700 transition" onclick="window.voltarParaProjetos()"><i class="fa-solid fa-arrow-left"></i></button>
-            
             <div class="search-bar">
                 <i class="fa-solid fa-magnifying-glass text-gray-400 mr-2"></i>
                 <input type="text" id="search-input" placeholder="Buscar Coordenadas / Endereço...">
@@ -332,13 +317,6 @@
             </div>
         </div>
 
-        <!-- NOVO: Barra lateral direita (Satélite) -->
-        <div class="right-toolbar">
-            <button class="rt-btn" onclick="window.toggleMapLayer()" title="Alternar Mapa (Satélite / Rua)">
-                <i class="fa-solid fa-earth-americas"></i>
-            </button>
-        </div>
-
         <div id="inventory-panel">
             <div class="inv-header"><h3 class="font-bold text-gray-800 text-sm flex items-center gap-2"><i class="fa-solid fa-boxes-stacked text-blue-500"></i> Tabela de Rastreio</h3><button onclick="window.toggleInventory()" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button></div>
             <div class="px-4 py-2 border-b border-gray-100 flex gap-2"><button class="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded" onclick="window.renderInventoryList('all')">Todos</button><button class="text-[10px] font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded" onclick="window.renderInventoryList('nodes')">Caixas</button><button class="text-[10px] font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded" onclick="window.renderInventoryList('cables')">Cabos</button></div>
@@ -347,7 +325,6 @@
 
         <div class="instruction-banner" id="instruction-banner"><i class="fa-solid fa-circle-info text-blue-400"></i><span id="instruction-text">Clique no mapa...</span><button class="ml-4 bg-white/20 hover:bg-white/30 px-3 py-1 rounded text-xs" onclick="window.setMode('view')">Cancelar</button></div>
 
-        <!-- Info Card Flutuante -->
         <div class="info-card" id="info-card">
             <div class="flex justify-between items-start">
                 <div class="flex gap-4">
@@ -372,7 +349,6 @@
             </div>
         </div>
 
-        <!-- STREAMING_CHUNK:Novo Modal de Caixa Fiel a Imagem... -->
         <div class="modal-overlay" id="modal-caixa">
             <div class="modal-content">
                 <div class="modal-header">
@@ -420,7 +396,6 @@
         
         <div class="modal-overlay" id="modal-cabo"><div class="modal-content"><div class="modal-header"><h2 class="text-orange-500"><i class="fa-solid fa-share-nodes"></i> Lançar Cabo</h2><button class="text-gray-400 hover:text-gray-600" onclick="window.closeModal('cabo')"><i class="fa-solid fa-xmark"></i></button></div><div class="modal-body"><div class="mb-5"><label class="input-label">NOME DO CABO</label><input type="text" id="input-cabo-nome" class="custom-input" placeholder="Ex: Rota 01"></div><div class="flex gap-4 mb-6"><div class="flex-1"><label class="input-label">CAPACIDADE</label><select id="input-cabo-capacidade" class="custom-input bg-white cursor-pointer"><option value="6">6 FO</option><option value="12" selected>12 FO</option><option value="36">36 FO</option></select></div><div class="flex-1"><label class="input-label">PADRÃO</label><select class="custom-input bg-white cursor-pointer"><option>ABNT</option></select></div></div><div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100"><div class="flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-blue-500" id="preview-cable-color"></div><span class="text-sm font-semibold text-gray-700">Cor</span></div></div></div><div class="modal-footer"><button class="btn-cancel" onclick="window.closeModal('cabo')">Cancelar</button><button class="btn-submit-orange" onclick="window.startCableDrawing()">Iniciar Traçado</button></div></div></div>
 
-        <!-- STREAMING_CHUNK:Diagrama Canvas Interativo (Whiteboard OSP)... -->
         <div id="diagram-view">
             <div class="diagram-toolbar">
                 <div class="diag-tb-group">
@@ -452,7 +427,6 @@
                 </div>
             </div>
 
-            <!-- Fundo Interativo e Arrastável -->
             <div class="diagram-canvas-area" id="diagram-canvas" onmousemove="window.handleFusionDragMove(event)" onmouseup="window.handleFusionDragEnd(event)" onmouseleave="window.handleFusionDragEnd(event)">
                 <svg id="fusion-lines">
                     <path id="active-fusion-line" d="" />
@@ -466,25 +440,23 @@
             </div>
         </div>
 
-        <!-- Tela Inside Plant (Apenas para POP / DC) -->
         <div id="inside-plant-view">
             <div id="diagram-content-isp"></div>
         </div>
 
-    </div> <!-- Fim de app-workspace -->
-    <div id="toast-container"></div>
+    </div> <div id="toast-container"></div>
 
-    <!-- Script Module para inicializar Firebase e Funções Window -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
-        // 1. ESTADO GLOBAL (MODIFICADO COM PROJETOS E CAMADAS)
+        // 1. ESTADO GLOBAL
         // ==========================================
         window.appState = {
-            currentProjectId: null, projects: [], mapLayerType: 'street',
+            currentProjectId: null, // NOVO
+            projects: [], // NOVO
             mode: 'view', nodes: [], cables: [], fusions: [],
             selectedNodeId: null, editingNodeId: null,
             nodeSetup: { name: 'CEO 01', type: 'CEO', icon: 'fa-layer-group', color: '#f97316', splitter: null },
@@ -496,29 +468,16 @@
         const THEME_COLORS = ['#0ea5e9', '#1d4ed8', '#f97316', '#ef4444', '#22c55e', '#eab308', '#a855f7', '#ec4899', '#000000', '#737373', '#78350f'];
 
         // ==========================================
-        // 2. INICIALIZAÇÃO LEAFLET (MODIFICADO COM SATÉLITE E MINI MAPA)
+        // 2. INICIALIZAÇÃO LEAFLET
         // ==========================================
         const map = L.map('map-container', { zoomControl: false, doubleClickZoom: false }).setView([-15.77798, -47.93041], 16);
-        
-        // NOVO: Adicionado maxNativeZoom para evitar tela branca ao dar zoom máximo no Satélite
-        window.streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 22, maxNativeZoom: 19 });
-        window.satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 22, maxNativeZoom: 18 });
-        
-        window.streetLayer.addTo(map);
-        
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 20 }); osmLayer.addTo(map);
         const cablesLayer = L.layerGroup().addTo(map); 
         const nodesLayer = L.layerGroup().addTo(map); 
         const drawLayer = L.layerGroup().addTo(map);
 
+        // NOVO: Inicialização do Mini Mapa do Modal de Projetos
         let miniMap = null; let miniMapMarker = null; window.tempProjectCoords = [-15.77798, -47.93041];
-
-        window.toggleMapLayer = function() {
-            if(window.appState.mapLayerType === 'street') {
-                map.removeLayer(window.streetLayer); window.satLayer.addTo(map); window.appState.mapLayerType = 'satellite'; window.showToast('Visão de Satélite ativada.', 'sucesso');
-            } else {
-                map.removeLayer(window.satLayer); window.streetLayer.addTo(map); window.appState.mapLayerType = 'street'; window.showToast('Visão de Rua ativada.', 'sucesso');
-            }
-        };
 
         // ==========================================
         // 3. FIREBASE SETUP
@@ -557,7 +516,7 @@
         function setupRealtimeListeners() {
             if(!auth || !auth.currentUser) return;
             
-            // Listener de Projetos
+            // NOVO: Listener de Projetos
             onSnapshot(getCollectionPath('projects'), (snapshot) => {
                 window.appState.projects = []; snapshot.forEach(doc => { window.appState.projects.push({ id: doc.id, ...doc.data() }); });
                 if(window.renderProjectsList) window.renderProjectsList();
@@ -620,10 +579,6 @@
             if(!db || !auth || !auth.currentUser) { window.appState.cables.push({id: 'local_'+Date.now(), ...cableData}); window.renderMap(); return; } 
             try { await addDoc(getCollectionPath('cables'), cableData); } catch(e) { window.appState.cables.push({id: 'local_'+Date.now(), ...cableData}); window.renderMap(); }
         };
-        window.updateCableInFirebase = async (id, cableData) => { 
-            if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.cables.findIndex(c=>c.id===id); if(idx>-1) window.appState.cables[idx] = {...window.appState.cables[idx], ...cableData}; window.renderMap(); return; } 
-            try { await updateDoc(getDocPath('cables', id), cableData); } catch(e) { const idx = window.appState.cables.findIndex(c=>c.id===id); if(idx>-1) window.appState.cables[idx] = {...window.appState.cables[idx], ...cableData}; window.renderMap(); }
-        };
         window.deleteCableFromFirebase = async (id) => { 
             if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { window.appState.cables = window.appState.cables.filter(c=>c.id!==id); window.renderMap(); return; } 
             try { await deleteDoc(getDocPath('cables', id)); } catch(e) { window.appState.cables = window.appState.cables.filter(c=>c.id!==id); window.renderMap(); }
@@ -634,7 +589,7 @@
         };
 
         // ==========================================
-        // NOVO: LÓGICA DE PROJETOS E TELA INICIAL
+        // NOVO: LÓGICAS DE PROJETOS E TELA INICIAL
         // ==========================================
         window.renderProjectsList = function() {
             const grid = document.getElementById('projects-grid');
@@ -645,7 +600,6 @@
                 grid.style.display = 'none'; empty.style.display = 'flex';
             } else {
                 empty.style.display = 'none'; grid.style.display = 'flex';
-                // NOVO: Adicionado Botão de Deletar Projeto na renderização do Card
                 grid.innerHTML = window.appState.projects.map(p => `
                     <div class="project-card" onclick="window.abrirProjeto('${p.id}', ${p.lat}, ${p.lng})">
                         <button class="absolute top-4 right-4 text-slate-500 hover:text-red-500 transition" style="z-index: 20;" onclick="window.deletarProjeto('${p.id}', event)" title="Deletar Projeto"><i class="fa-solid fa-trash"></i></button>
@@ -662,17 +616,13 @@
             }
         };
 
-        // NOVO: Função para deletar projetos e seus vínculos
         window.deletarProjeto = async (id, event) => {
-            event.stopPropagation(); // Impede que o clique no lixo abra o projeto
+            event.stopPropagation();
             if(confirm('Tem certeza que deseja excluir este projeto e todos os seus elementos?')) {
                 if(db && auth && auth.currentUser) {
                     await deleteDoc(getDocPath('projects', id));
-                    
-                    // Varre e limpa as caixas e cabos órfãos desse projeto
                     window.appState.nodes.filter(n => n.projectId === id).forEach(n => deleteDoc(getDocPath('nodes', n.id)));
                     window.appState.cables.filter(c => c.projectId === id).forEach(c => deleteDoc(getDocPath('cables', c.id)));
-                    
                     window.showToast('Projeto deletado com sucesso.', 'sucesso');
                 } else {
                     window.showToast('Erro: Não conectado na nuvem.', 'erro');
@@ -715,7 +665,7 @@
             } else {
                 window.showToast('Modo Local: Projeto não salvo na nuvem.', 'erro');
                 window.appState.currentProjectId = 'local_proj';
-                window.enterWorkspace(nome);
+                window.abrirProjeto('local_proj', window.tempProjectCoords[0], window.tempProjectCoords[1]);
             }
         };
 
@@ -732,15 +682,6 @@
             document.getElementById('regions-screen').style.display = 'flex';
         };
 
-        window.searchLocation = async () => {
-            const query = document.getElementById('search-input').value; if(!query) return;
-            try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
-                const data = await res.json();
-                if(data && data.length > 0) { map.flyTo([data[0].lat, data[0].lon], 18); }
-            } catch(e) {}
-        };
-
         // ==========================================
         // 4. MAPA INTERACTIONS (Buidling Cables/Nodes)
         // ==========================================
@@ -752,9 +693,6 @@
             else if (newMode === 'placing_node') { document.body.classList.add('mode-placing'); document.getElementById('btn-caixa').classList.add('active'); map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Inserir <b>${window.appState.nodeSetup.name}</b>.`; }
             else if (newMode === 'drawing_cable') { document.body.classList.add('mode-drawing'); document.getElementById('btn-cabo').classList.add('active'); map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Selecione a <b>Caixa Inicial</b>.`; document.getElementById('map-container').classList.add('node-anchorable'); }
             document.onkeydown = function(evt) { if (evt.key === "Escape") { window.setMode('view'); } };
-            
-            // Recarrega o mapa para habilitar/desabilitar bolinhas de arrastar
-            if(window.appState.currentProjectId) window.renderMap();
         };
 
         map.on('mousemove', function(e) { 
@@ -827,13 +765,12 @@
         };
 
         window.renderMap = function() { 
-            if(!window.appState.currentProjectId) return;
             nodesLayer.clearLayers(); cablesLayer.clearLayers(); 
             
+            // NOVO: Filtrar pelo projeto atual
             const currentCables = window.appState.currentProjectId ? window.appState.cables.filter(c => c.projectId === window.appState.currentProjectId || !c.projectId) : window.appState.cables;
             const currentNodes = window.appState.currentProjectId ? window.appState.nodes.filter(n => n.projectId === window.appState.currentProjectId || !n.projectId) : window.appState.nodes;
-            const isMovable = window.appState.mode === 'move';
-            
+
             currentCables.forEach(c => { 
                 const linhaCabo = L.polyline(c.path, { color: c.color, weight: 5, opacity: 0.9 }).addTo(cablesLayer);
                 linhaCabo.bindTooltip(`<b>${c.name}</b><br><span style="font-size:10px; color:#ef4444;">Clique para excluir</span>`, {sticky: true});
@@ -846,58 +783,18 @@
                         }
                     }
                 });
-
-                // NOVO: PONTOS EDITÁVEIS NO CABO (Arrastar Vértices)
-                if (isMovable) {
-                    for(let i=1; i < c.path.length-1; i++) {
-                        const iconMid = L.divIcon({ html: `<div style="width:12px; height:12px; background:white; border:3px solid ${c.color}; border-radius:50%; box-shadow:0 0 4px rgba(0,0,0,0.5);"></div>`, className: '', iconSize: [12,12], iconAnchor: [6,6] });
-                        const mkr = L.marker([c.path[i][0], c.path[i][1]], {icon: iconMid, draggable: true}).addTo(cablesLayer);
-                        mkr.on('dragend', async (e) => {
-                            const pos = e.target.getLatLng();
-                            let newPath = [...c.path]; newPath[i] = [pos.lat, pos.lng];
-                            await window.updateCableInFirebase(c.id, {path: newPath});
-                            window.showToast('Rota do cabo ajustada!', 'sucesso');
-                        });
-                    }
-                    for(let i=0; i < c.path.length-1; i++) {
-                        const p1 = c.path[i], p2 = c.path[i+1];
-                        const mLat = (p1[0] + p2[0])/2, mLng = (p1[1] + p2[1])/2;
-                        const iconGhost = L.divIcon({ html: `<div style="width:12px; height:12px; background:${c.color}; opacity:0.5; border-radius:50%;"></div>`, className: '', iconSize: [12,12], iconAnchor: [6,6] });
-                        const ghost = L.marker([mLat, mLng], {icon: iconGhost, draggable: true}).addTo(cablesLayer);
-                        ghost.on('dragend', async (e) => {
-                            const pos = e.target.getLatLng();
-                            let newPath = [...c.path]; newPath.splice(i+1, 0, [pos.lat, pos.lng]);
-                            await window.updateCableInFirebase(c.id, {path: newPath});
-                            window.showToast('Novo ponto criado na rota!', 'sucesso');
-                        });
-                    }
-                }
             }); 
             
             currentNodes.forEach(n => { 
                 const shape = (n.type === 'POP / DC' || n.type === 'DC') ? 'rounded-lg' : (n.type === 'CEO' ? 'rounded-full' : 'rounded');
-                const iconHtml = L.divIcon({ html: `<div class="map-icon-wrapper ${shape}" style="width: 32px; height: 32px; border-color: ${n.color}; cursor: ${isMovable ? 'grab' : 'pointer'}"><div style="background-color: ${n.color}; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px;" class="${shape}"><i class="fa-solid ${n.icon}"></i></div></div>`, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
-                const marker = L.marker([n.lat, n.lng], { icon: iconHtml, draggable: isMovable }).addTo(nodesLayer); 
+                const iconHtml = L.divIcon({ html: `<div class="map-icon-wrapper ${shape}" style="width: 32px; height: 32px; border-color: ${n.color}"><div style="background-color: ${n.color}; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px;" class="${shape}"><i class="fa-solid ${n.icon}"></i></div></div>`, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
+                const marker = L.marker([n.lat, n.lng], { icon: iconHtml }).addTo(nodesLayer); 
                 const label = L.divIcon({ html: `<div style="text-align: center; font-weight: 700; font-size: 11px; color: #111827; text-shadow: 1px 1px 2px white, -1px -1px 2px white; margin-top: 4px;">${n.name}</div>`, className: '', iconSize: [100, 20], iconAnchor: [50, -16] }); 
                 L.marker([n.lat, n.lng], { icon: label, interactive: false }).addTo(nodesLayer); 
                 
                 marker.on('click', (e) => { L.DomEvent.stopPropagation(e); window.handleNodeInteraction(n, 'click'); }); 
                 marker.on('mouseover', (e) => { window.handleNodeInteraction(n, 'mouseover'); if(window.appState.mode === 'drawing_cable') e.target.getElement().classList.add('node-hover'); }); 
                 marker.on('mouseout', (e) => { window.handleNodeInteraction(n, 'mouseout'); e.target.getElement().classList.remove('node-hover'); }); 
-                
-                // NOVO: Arrastar Caixa e atualizar Cabos
-                marker.on('dragend', async (e) => {
-                    const pos = e.target.getLatLng();
-                    await window.updateNodeInFirebase(n.id, { lat: pos.lat, lng: pos.lng });
-                    const connectedCables = currentCables.filter(c => c.startNode === n.id || c.endNode === n.id);
-                    for(let c of connectedCables) {
-                        let newPath = [...c.path];
-                        if(c.startNode === n.id) newPath[0] = [pos.lat, pos.lng];
-                        if(c.endNode === n.id) newPath[newPath.length-1] = [pos.lat, pos.lng];
-                        await window.updateCableInFirebase(c.id, { path: newPath });
-                    }
-                    window.showToast('Caixa e cabos atualizados!', 'sucesso');
-                });
             }); 
         };
 
@@ -906,7 +803,8 @@
         // ==========================================
         window.enterWorkspace = function(regionName) { document.getElementById('regions-screen').style.display = 'none'; document.getElementById('app-workspace').style.display = 'block'; setTimeout(() => { map.invalidateSize(); window.showToast(`Área conectada.`); }, 100); };
         window.createNewRegion = function() { window.enterWorkspace('Minha Rede FTTH'); };
-        
+        window.backToRegions = function() { document.getElementById('app-workspace').style.display = 'none'; document.getElementById('regions-screen').style.display = 'flex'; };
+
         window.openModal = function(type) { 
             window.setMode('view'); 
             if(type === 'caixa') { 
