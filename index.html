@@ -71,6 +71,14 @@
         .tool-btn:hover { background: #f3f4f6; }
         .tool-btn.active { background: #f3f4f6; color: #111827; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
 
+        /* BARRA VERTICAL DIREITA (BOTÕES FLUTUANTES NO MAPA) */
+        .right-toolbar { position: absolute; top: 50%; right: 20px; transform: translateY(-50%); background: white; border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 8px; z-index: 2000; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); }
+        .rt-btn { width: 44px; height: 44px; border-radius: 8px; background: transparent; border: none; color: #4b5563; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; position: relative; }
+        .rt-btn:hover { background: #f3f4f6; color: #111827; }
+        .rt-btn.active { background: #2563eb; color: white; }
+        .rt-btn::after { content: attr(data-tooltip); position: absolute; right: 100%; top: 50%; transform: translateY(-50%); margin-right: 12px; background: #111827; color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+        .rt-btn:hover::after { opacity: 1; }
+
         /* INFO CARD E MODAIS FLUTUANTES */
         .info-card { position: absolute; top: 80px; left: 20px; width: 360px; background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); z-index: 2000; padding: 24px; display: none; border: 1px solid #f3f4f6; }
         .action-buttons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
@@ -230,6 +238,12 @@
             </div>
         </div>
 
+        <div class="right-toolbar">
+            <button class="rt-btn" onclick="window.toggleMapLayer()" data-tooltip="Alternar Mapa (Satélite / Rua)">
+                <i class="fa-solid fa-earth-americas"></i>
+            </button>
+        </div>
+
         <div class="instruction-banner" id="instruction-banner">
             <i class="fa-solid fa-circle-info text-blue-300"></i>
             <span id="instruction-text">Clique no mapa...</span>
@@ -307,15 +321,21 @@
             mode: 'view', selectedNodeId: null,
             nodeSetup: { name: 'CEO 01', type: 'CEO', icon: 'fa-layer-group', color: '#f97316' },
             cableSetup: { name: '', capacity: 12, color: '#3b82f6' },
-            cablePath: [], cableStartNodeId: null, tempPolyline: null, snapNodePos: null
+            cablePath: [], cableStartNodeId: null, tempPolyline: null, snapNodePos: null,
+            mapLayerType: 'street'
         };
         const THEME_COLORS = ['#3b82f6', '#f97316', '#22c55e', '#ef4444', '#a855f7', '#eab308', '#64748b', '#ec4899'];
 
         // ==========================================
-        // 2. INICIALIZAÇÃO LEAFLET
+        // 2. INICIALIZAÇÃO LEAFLET E LAYERS DE SATÉLITE
         // ==========================================
-        const map = L.map('map-container', { zoomControl: false, doubleClickZoom: false }).setView([-2.245, -49.495], 14); 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 20 }).addTo(map);
+        const map = L.map('map-container', { zoomControl: false, doubleClickZoom: false }).setView([-2.245, -49.495], 14);
+        
+        window.streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 20 });
+        window.satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20 });
+        
+        window.streetLayer.addTo(map); // Inicia com o mapa de ruas
+
         window.cablesLayer = L.layerGroup().addTo(map); 
         window.nodesLayer = L.layerGroup().addTo(map); 
         window.drawLayer = L.layerGroup().addTo(map);
@@ -450,8 +470,22 @@
             } catch(e) {}
         };
 
+        window.toggleMapLayer = () => {
+            if(window.appState.mapLayerType === 'street') {
+                map.removeLayer(window.streetLayer);
+                window.satLayer.addTo(map);
+                window.appState.mapLayerType = 'satellite';
+                window.showToast('Visão de Satélite ativada.', 'sucesso');
+            } else {
+                map.removeLayer(window.satLayer);
+                window.streetLayer.addTo(map);
+                window.appState.mapLayerType = 'street';
+                window.showToast('Visão de Rua ativada.', 'sucesso');
+            }
+        };
+
         // ==========================================
-        // 5. MAPA INTERACTIONS E CORREÇÕES (MOVER CAIXAS)
+        // 5. MAPA INTERACTIONS E EDIÇÃO DE CABOS (ARRASATAR)
         // ==========================================
         window.setMode = function(m) {
             window.appState.mode = m; 
@@ -459,29 +493,21 @@
             const banner = document.getElementById('instruction-banner'); 
             window.drawLayer.clearLayers(); window.appState.cablePath = []; window.appState.cableStartNodeId = null; window.appState.tempPolyline = null;
             
-            // Correção crucial: usar classList ao invés de sobrescrever className para não destruir o Leaflet
-            if (m === 'placing_node' || m === 'drawing_cable') {
-                document.getElementById('map-container').classList.add('node-anchorable');
-            } else {
-                document.getElementById('map-container').classList.remove('node-anchorable');
-            }
+            if (m === 'placing_node' || m === 'drawing_cable') { document.getElementById('map-container').classList.add('node-anchorable'); } 
+            else { document.getElementById('map-container').classList.remove('node-anchorable'); }
 
             if (m === 'view' || m === 'move') { 
                 document.getElementById(m === 'view' ? 'btn-navegar' : 'btn-mover').classList.add('active'); 
                 map.dragging.enable(); banner.style.display = 'none'; 
             } 
             else if (m === 'placing_node') { 
-                document.getElementById('btn-caixa').classList.add('active'); 
-                map.dragging.disable(); banner.style.display = 'flex'; 
+                document.getElementById('btn-caixa').classList.add('active'); map.dragging.disable(); banner.style.display = 'flex'; 
                 document.getElementById('instruction-text').innerHTML = `Inserir <b>${window.appState.nodeSetup.name}</b>.`; 
             }
             else if (m === 'drawing_cable') { 
-                document.getElementById('btn-cabo').classList.add('active'); 
-                map.dragging.disable(); banner.style.display = 'flex'; 
+                document.getElementById('btn-cabo').classList.add('active'); map.dragging.disable(); banner.style.display = 'flex'; 
                 document.getElementById('instruction-text').innerHTML = `Selecione a <b>Caixa Inicial</b>.`; 
             }
-            
-            // Se ativou o mover, recarrega o mapa para habilitar o draggable
             if(window.appState.currentProjectId) window.renderMap();
         };
 
@@ -534,13 +560,40 @@
                 const linhaCabo = L.polyline(c.path, { color: c.color, weight: 5, opacity: 0.9 }).addTo(window.cablesLayer);
                 linhaCabo.bindTooltip(`<b>${c.name}</b>`, {sticky: true});
                 linhaCabo.on('click', () => { if (window.appState.mode === 'view' && confirm(`Excluir a rota "${c.name}"?`)) { window.deleteData('planner_cables', c.id); window.showToast('Excluído.'); } });
+                
+                // --- NOVA FUNÇÃO: PONTOS EDITÁVEIS NO CABO ---
+                if (isMovable) {
+                    // 1. Bolinhas brancas para mover vértices que já existem
+                    for(let i=1; i < c.path.length-1; i++) {
+                        const iconMid = L.divIcon({ html: `<div style="width:12px; height:12px; background:white; border:3px solid ${c.color}; border-radius:50%; box-shadow:0 0 4px rgba(0,0,0,0.5);"></div>`, className: '', iconSize: [12,12], iconAnchor: [6,6] });
+                        const mkr = L.marker([c.path[i].lat, c.path[i].lng], {icon: iconMid, draggable: true}).addTo(window.cablesLayer);
+                        mkr.on('dragend', async (e) => {
+                            const pos = e.target.getLatLng();
+                            let newPath = [...c.path]; newPath[i] = {lat: pos.lat, lng: pos.lng};
+                            await window.updateData('planner_cables', c.id, {path: newPath});
+                            window.showToast('Rota do cabo ajustada!', 'sucesso');
+                        });
+                    }
+                    // 2. Bolinhas transparentes no meio da linha para criar um novo vértice/curva
+                    for(let i=0; i < c.path.length-1; i++) {
+                        const p1 = c.path[i], p2 = c.path[i+1];
+                        const mLat = (p1.lat + p2.lat)/2, mLng = (p1.lng + p2.lng)/2;
+                        const iconGhost = L.divIcon({ html: `<div style="width:12px; height:12px; background:${c.color}; opacity:0.5; border-radius:50%;"></div>`, className: '', iconSize: [12,12], iconAnchor: [6,6] });
+                        const ghost = L.marker([mLat, mLng], {icon: iconGhost, draggable: true}).addTo(window.cablesLayer);
+                        ghost.on('dragend', async (e) => {
+                            const pos = e.target.getLatLng();
+                            let newPath = [...c.path]; newPath.splice(i+1, 0, {lat: pos.lat, lng: pos.lng});
+                            await window.updateData('planner_cables', c.id, {path: newPath});
+                            window.showToast('Novo ponto criado na rota!', 'sucesso');
+                        });
+                    }
+                }
             }); 
             
             currentNodes.forEach(n => { 
                 const shape = (n.type === 'POP / DC' || n.type === 'DC') ? 'rounded-lg' : (n.type === 'CEO' ? 'rounded-full' : 'rounded');
                 const iconHtml = L.divIcon({ html: `<div class="map-icon-wrapper ${shape}" style="width: 32px; height: 32px; border-color: ${n.color}; cursor: ${isMovable ? 'grab' : 'pointer'}"><div style="background-color: ${n.color}; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px;" class="${shape}"><i class="fa-solid ${n.icon}"></i></div></div>`, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
                 
-                // Agora o marcador é arrastável apenas quando o modo MOVER estiver ativo
                 const marker = L.marker([n.lat, n.lng], { icon: iconHtml, draggable: isMovable }).addTo(window.nodesLayer); 
                 const label = L.divIcon({ html: `<div style="text-align: center; font-weight: 700; font-size: 11px; color: #111827; text-shadow: 1px 1px 2px white, -1px -1px 2px white; margin-top: 4px;">${n.name}</div>`, className: '', iconSize: [100, 20], iconAnchor: [50, -16] }); 
                 L.marker([n.lat, n.lng], { icon: label, interactive: false }).addTo(window.nodesLayer); 
@@ -549,11 +602,9 @@
                 marker.on('mouseover', (e) => { window.handleNodeInteraction(n, 'mouseover'); if(window.appState.mode === 'drawing_cable') e.target.getElement().classList.add('node-hover'); }); 
                 marker.on('mouseout', (e) => { window.handleNodeInteraction(n, 'mouseout'); e.target.getElement().classList.remove('node-hover'); }); 
                 
-                // NOVA FUNÇÃO: Salvar posição ao arrastar e atualizar os cabos grudados nela
                 marker.on('dragend', async (e) => {
                     const pos = e.target.getLatLng();
                     await window.updateData('planner_nodes', n.id, { lat: pos.lat, lng: pos.lng });
-                    
                     const connectedCables = currentCables.filter(c => c.startNode === n.id || c.endNode === n.id);
                     for(let c of connectedCables) {
                         let newPath = [...c.path];
@@ -561,7 +612,7 @@
                         if(c.endNode === n.id) newPath[newPath.length-1] = {lat: pos.lat, lng: pos.lng};
                         await window.updateData('planner_cables', c.id, { path: newPath });
                     }
-                    window.showToast('Posição atualizada com sucesso!', 'sucesso');
+                    window.showToast('Caixa e cabos atualizados!', 'sucesso');
                 });
             }); 
         };
