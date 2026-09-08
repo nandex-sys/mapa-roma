@@ -127,7 +127,7 @@
 
         /* STREAMING_CHUNK:Estilizando UI Flutuante de Notificações... */
         .instruction-banner { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; background: #111827; color: white; padding: 12px 24px; border-radius: 30px; font-weight: 600; font-size: 14px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); display: none; align-items: center; gap: 10px; }
-        #toast-container { position: absolute; bottom: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; }
+        #toast-container { position: absolute; bottom: 20px; right: 20px; z-index: 999999; display: flex; flex-direction: column; gap: 10px; }
         .toast-msg { background: #111827; color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transform: translateY(20px); transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
         .toast-msg.show { opacity: 1; transform: translateY(0); }
 
@@ -484,10 +484,10 @@
         // ==========================================
         // 2. INICIALIZAÇÃO LEAFLET
         // ==========================================
-        const map = L.map('map-container', { zoomControl: false, doubleClickZoom: false }).setView([-15.77798, -47.93041], 16);
+        const map = L.map('map-container', { zoomControl: false, doubleClickZoom: false }).setView([-2.24455, -49.50444], 16);
         
         // NOVO: Substituído o satélite da ArcGIS (que dava tela branca) pelo Satélite do Google Maps com zoom máximo
-        window.streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 22, maxNativeZoom: 19 });
+        window.streetLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { maxZoom: 22, maxNativeZoom: 19 });
         window.satLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 22, maxNativeZoom: 19 });
         
         window.streetLayer.addTo(map);
@@ -497,7 +497,7 @@
         const drawLayer = L.layerGroup().addTo(map);
 
         // NOVO: Inicialização do Mini Mapa do Modal de Projetos
-        let miniMap = null; let miniMapMarker = null; window.tempProjectCoords = [-15.77798, -47.93041];
+        let miniMap = null; let miniMapMarker = null; window.tempProjectCoords = [-2.24455, -49.50444];
 
         // NOVO: Função para alternar o mapa
         window.toggleMapLayer = function() {
@@ -587,12 +587,12 @@
             document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-red-500';
             
             window.appState.nodes = [
-                { id: 'n1', name: 'POP Central', type: 'POP / DC', icon: 'fa-server', color: '#111827', lat: -15.77798, lng: -47.93041, internal: {hasDIO:false, splitters:[]} },
-                { id: 'n2', name: 'CEO 01', type: 'CEO', icon: 'fa-layer-group', color: '#f97316', lat: -15.77600, lng: -47.92800, internal: {hasDIO:false, splitters:[]} },
-                { id: 'n3', name: 'CTO 01', type: 'CTO', icon: 'fa-box', color: '#f59e0b', lat: -15.77450, lng: -47.92950, internal: {hasDIO:false, splitters:[{type:'1x16'}]} }
+                { id: 'n1', name: 'POP Central', type: 'POP / DC', icon: 'fa-server', color: '#111827', lat: -2.24455, lng: -49.50444, internal: {hasDIO:false, splitters:[]} },
+                { id: 'n2', name: 'CEO 01', type: 'CEO', icon: 'fa-layer-group', color: '#f97316', lat: -2.24500, lng: -49.50500, internal: {hasDIO:false, splitters:[]} },
+                { id: 'n3', name: 'CTO 01', type: 'CTO', icon: 'fa-box', color: '#f59e0b', lat: -2.24600, lng: -49.50600, internal: {hasDIO:false, splitters:[{type:'1x16'}]} }
             ];
             window.appState.cables = [
-                { id: 'c1', name: 'Cabo Tronco', capacity: 12, color: '#f97316', startNode: 'n1', endNode: 'n2', path: [[-15.77798, -47.93041], [-15.77700, -47.92900], [-15.77600, -47.92800]]}
+                { id: 'c1', name: 'Cabo Tronco', capacity: 12, color: '#f97316', startNode: 'n1', endNode: 'n2', path: [[-2.24455, -49.50444], [-2.24480, -49.50480], [-2.24500, -49.50500]]}
             ];
             window.renderMap();
         }
@@ -673,7 +673,7 @@
             setTimeout(() => {
                 if(!miniMap) {
                     miniMap = L.map('mini-map-container', { zoomControl: false }).setView(window.tempProjectCoords, 13);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(miniMap);
+                    L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { maxZoom: 22, maxNativeZoom: 19 }).addTo(miniMap);
                     miniMapMarker = L.marker(window.tempProjectCoords).addTo(miniMap);
                 } else { miniMap.invalidateSize(); miniMap.setView(window.tempProjectCoords, 13); miniMapMarker.setLatLng(window.tempProjectCoords); }
             }, 200);
