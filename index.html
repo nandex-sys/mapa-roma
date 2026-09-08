@@ -26,11 +26,12 @@
 
         /* NOVO LAYOUT: SIDEBAR E MAPA */
         #app-workspace { display: none; width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; flex-direction: row; }
+        #app-workspace.active { display: flex !important; }
         #sidebar { width: 260px; background-color: #111827; height: 100vh; flex-shrink: 0; border-right: 1px solid #1f2937; display: flex; flex-direction: column; z-index: 2000; }
         #map-area { flex-grow: 1; position: relative; height: 100vh; }
         #map-container { position: absolute; top: 0; left: 0; height: 100%; width: 100%; z-index: 10; }
         
-        /* TRUQUE MÁGICO: Transforma o mapa OpenStreetMap grátis em Dark Mode */
+        /* TRUQUE: Transforma o mapa OpenStreetMap grátis em Dark Mode para não usar API Paga */
         .leaflet-tile { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
         .leaflet-control-zoom { display: none !important; }
         .mode-placing #map-container, .mode-drawing #map-container { cursor: crosshair !important; }
@@ -115,7 +116,7 @@
                 <div>
                     <i class="fa-solid fa-map-location-dot text-2xl text-slate-400 mb-2"></i>
                     <h2 class="text-xl font-bold">Rede Principal</h2>
-                    <p class="text-xs text-slate-400">Cametá - PA</p>
+                    <p class="text-xs text-slate-400">Brasil</p>
                 </div>
                 <div class="flex items-center gap-2 mt-4"><div class="w-2 h-2 rounded-full bg-yellow-500" id="sync-dot"></div><span class="text-[10px] font-bold text-yellow-500" id="sync-status">CONECTANDO...</span></div>
             </div>
@@ -173,4 +174,48 @@
 
     <div class="modal-overlay" id="modal-caixa">
         <div class="modal-content">
-            <div class="modal-header"><h2 class="text-lg"><i class="fa-solid fa-box text-blue-500 mr-2"></i> Adicionar Elemento</h2><button onclick="window.closeModal('caixa')" class="text-
+            <div class="modal-header"><h2 class="text-lg"><i class="fa-solid fa-box text-blue-500 mr-2"></i> Adicionar Elemento</h2><button onclick="window.closeModal('caixa')" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="modal-body">
+                <label class="input-label">NOME</label>
+                <input type="text" id="input-caixa-nome" class="custom-input mb-4" placeholder="Ex: POP Central">
+                
+                <label class="input-label">TIPO</label>
+                <div class="structure-grid">
+                    <button class="structure-btn selected" data-type="POP" data-icon="fa-server" data-color="#3b82f6" onclick="window.selectStructure(this)"><i class="fa-solid fa-server"></i> POP / DC</button>
+                    <button class="structure-btn" data-type="CEO" data-icon="fa-layer-group" data-color="#f97316" onclick="window.selectStructure(this)"><i class="fa-solid fa-layer-group"></i> CEO</button>
+                    <button class="structure-btn" data-type="CTO" data-icon="fa-box" data-color="#22c55e" onclick="window.selectStructure(this)"><i class="fa-solid fa-box"></i> CTO</button>
+                    <button class="structure-btn" data-type="Cliente" data-icon="fa-user" data-color="#a855f7" onclick="window.selectStructure(this)"><i class="fa-solid fa-user"></i> Cliente</button>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="px-4 py-2 rounded bg-slate-700 text-white font-bold text-sm" onclick="window.closeModal('caixa')">Cancelar</button><button class="px-4 py-2 rounded bg-blue-600 text-white font-bold text-sm" onclick="window.startNodePlacement()">Inserir no Mapa</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-cabo">
+        <div class="modal-content">
+            <div class="modal-header"><h2 class="text-lg"><i class="fa-solid fa-route text-orange-500 mr-2"></i> Lançar Cabo</h2><button onclick="window.closeModal('cabo')" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="modal-body">
+                <label class="input-label">NOME DA ROTA</label>
+                <input type="text" id="input-cabo-nome" class="custom-input mb-4" placeholder="Ex: Tronco 01">
+                <label class="input-label">CAPACIDADE</label>
+                <select id="input-cabo-capacidade" class="custom-input">
+                    <option value="6">Cabo 06 FO</option>
+                    <option value="12" selected>Cabo 12 FO</option>
+                    <option value="36">Cabo 36 FO</option>
+                </select>
+            </div>
+            <div class="modal-footer"><button class="px-4 py-2 rounded bg-slate-700 text-white font-bold text-sm" onclick="window.closeModal('cabo')">Cancelar</button><button class="px-4 py-2 rounded bg-orange-600 text-white font-bold text-sm" onclick="window.startCableDrawing()">Traçar no Mapa</button></div>
+        </div>
+    </div>
+
+    <div id="diagram-view">
+        <div class="diagram-toolbar">
+            <div class="flex items-center gap-4 text-white">
+                <button onclick="window.closeCanvasDiagram()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-arrow-left"></i></button>
+                <div><h3 class="font-bold text-sm" id="diag-title">CEO 01</h3><p class="text-[10px] text-blue-400">Diagrama de Emendas</p></div>
+            </div>
+            <div class="flex gap-2">
+                <button class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded text-xs font-bold" onclick="window.autoPatch()"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Patch</button>
+                <button class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded text-xs font-bold" onclick="window.addSplitterToCanvas()"><i class="fa-solid fa-sitemap"></i> Add Splitter</button>
+                <button class="bg-yellow-600 hover:bg-yellow-500 text-white px-3 py-1.5 rounded text-xs font-bold" onclick="window.calculateBudget()"><i class="fa-solid fa-bolt"></i> Perda Óptica</button>
+                <button class="bg
