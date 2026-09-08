@@ -12,114 +12,125 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; overflow: hidden; background-color: #f3f4f6; margin: 0; padding: 0; }
         
-        body { font-family: 'Inter', sans-serif; overflow: hidden; background-color: #0f172a; margin: 0; padding: 0; }
-        
-        /* TELA INICIAL (DASHBOARD) */
+        /* ================= TELA INICIAL (DASHBOARD) ================= */
         #regions-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background-color: #0f172a; z-index: 9999;
             display: flex; font-family: 'Inter', sans-serif;
         }
         .home-sidebar {
-            width: 260px; background-color: #111827; border-right: 1px solid #1e293b;
-            display: flex; flex-direction: column;
+            width: 260px; background-color: #111827; border-right: 1px solid #1e293b; display: flex; flex-direction: column;
         }
         .home-main {
-            flex-grow: 1; display: flex; flex-direction: column; background-color: #0f172a;
+            flex-grow: 1; display: flex; flex-direction: column; background-color: #0f172a; overflow-y: auto;
         }
         .home-header {
-            height: 90px; border-bottom: 1px solid #1e293b; display: flex;
-            align-items: center; justify-content: space-between; padding: 0 40px;
+            height: 90px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0;
         }
         .home-content {
-            flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            flex-grow: 1; display: flex; flex-direction: column; position: relative; padding: 40px;
         }
-        .btn-green {
-            background-color: #10b981; color: white; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px; border: none;
+        
+        /* Grid de Projetos */
+        #projects-grid {
+            display: flex; flex-wrap: wrap; gap: 24px; width: 100%; justify-content: flex-start; align-items: flex-start;
         }
+        .project-card {
+            background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; width: 280px; height: 160px; padding: 24px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden;
+        }
+        .project-card:hover { border-color: #3b82f6; transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); }
+        .project-card::before { content: ''; position: absolute; top: -50px; right: -50px; width: 120px; height: 120px; background-color: #111827; border-radius: 50%; z-index: 0; opacity: 0.5; }
+        
+        /* Empty State */
+        #empty-state {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 60vh;
+        }
+
+        .btn-green { background-color: #10b981; color: white; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px; border: none; }
         .btn-green:hover { background-color: #059669; }
-        .search-bar-dark {
-            background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; gap: 8px; color: #94a3b8; width: 300px;
-        }
+        .search-bar-dark { background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; gap: 8px; color: #94a3b8; width: 300px; }
         .search-bar-dark input { background: transparent; border: none; outline: none; color: white; width: 100%; font-size: 14px; }
 
-        /* TRUQUE: Transforma o mapa OpenStreetMap grátis em Dark Mode */
-        .leaflet-tile { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
-
-        /* WORKSPACE DE MAPA */
-        #app-workspace { display: none; width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; flex-direction: row; }
-        #app-workspace.active { display: flex !important; }
-        
-        #map-area { flex-grow: 1; position: relative; height: 100vh; }
-        #map-container { position: absolute; top: 0; left: 0; height: 100%; width: 100%; z-index: 10; }
+        /* ================= WORKSPACE DE MAPA ================= */
+        #app-workspace { display: none; width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1000; }
+        #map-container { position: absolute; top: 0; left: 0; height: 100vh; width: 100vw; z-index: 10; }
         .leaflet-control-zoom { display: none !important; }
         
         .mode-placing #map-container { cursor: crosshair !important; }
         .mode-drawing #map-container { cursor: crosshair !important; }
 
-        /* TOP TOOLBAR E SEARCH */
-        .top-toolbar { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; gap: 12px; align-items: center; background: transparent; width: 98%; max-width: 1400px; }
-        .tools-group { background: #1e293b; border: 1px solid #334155; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; align-items: center; padding: 4px; height: 48px; }
-        .tool-btn { background: transparent; border: none; padding: 8px 16px; font-size: 12px; font-weight: 700; color: #94a3b8; cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
-        .tool-btn:hover { background: #334155; color: white; }
-        .tool-btn.active { background: #3b82f6; color: white; }
+        /* BARRA SUPERIOR E FERRAMENTAS DO SCRIPT FUNCIONAL */
+        .top-toolbar { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; gap: 12px; align-items: center; background: transparent; width: 98%; max-width: 1400px; }
+        .search-bar { background: white; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; align-items: center; padding: 8px 16px; flex-grow: 1; max-width: 350px; height: 48px; }
+        .search-bar input { border: none; outline: none; width: 100%; font-size: 14px; color: #374151; background: transparent; }
+        
+        .tools-group { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; align-items: center; padding: 4px; height: 48px; }
+        .tool-btn { background: transparent; border: none; padding: 8px 16px; font-size: 12px; font-weight: 700; color: #4b5563; cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+        .tool-btn:hover { background: #f3f4f6; }
+        .tool-btn.active { background: #f3f4f6; color: #111827; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
 
-        /* INFO CARD E MODAIS */
-        .info-card { position: absolute; top: 80px; left: 20px; width: 360px; background: #1e293b; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 24px; display: none; border: 1px solid #334155; color: white; }
+        /* INFO CARD E MODAIS FLUTUANTES */
+        .info-card { position: absolute; top: 80px; left: 20px; width: 360px; background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); z-index: 2000; padding: 24px; display: none; border: 1px solid #f3f4f6; }
         .action-buttons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
         .btn-primary-blue { background-color: #2563eb; color: white; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s; border: none; }
         .btn-primary-blue:hover { background-color: #1d4ed8; }
-        .btn-dark { background-color: #0f172a; color: white; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; border: 1px solid #334155; }
+        .btn-dark { background-color: #0f172a; color: white; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s; border: none; }
         .btn-dark:hover { background-color: #020617; }
         
         .action-buttons-small-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
-        .btn-small-action { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-size: 10px; font-weight: 700; color: #94a3b8; cursor: pointer; transition: all 0.2s; }
-        .btn-small-action:hover { background: #1e293b; color: white; }
+        .btn-small-action { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-size: 10px; font-weight: 700; color: #6b7280; cursor: pointer; transition: all 0.2s; }
+        .btn-small-action:hover { background: #f9fafb; border-color: #d1d5db; }
         .btn-small-action.danger { color: #ef4444; }
-        .btn-small-action.danger:hover { background: #450a0a; border-color: #991b1b; }
+        .btn-small-action.danger:hover { background: #fef2f2; border-color: #fca5a5; }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; }
-        .modal-content { background: #1e293b; border-radius: 20px; width: 100%; max-width: 480px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; color: white; border: 1px solid #334155; }
-        .modal-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; }
-        .modal-header h2 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-        .modal-body { padding: 24px; max-height: 75vh; overflow-y: auto; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(2px); z-index: 99999; display: none; align-items: center; justify-content: center; }
+        .modal-content { background: white; border-radius: 20px; width: 100%; max-width: 480px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; }
+        .modal-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f3f4f6; }
+        .modal-header h2 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; color: #1e293b; }
+        .modal-body { padding: 24px; max-height: 70vh; overflow-y: auto; }
         
-        .input-label { display: block; font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
-        .custom-input { width: 100%; padding: 12px 16px; border: 1px solid #475569; background: #0f172a; border-radius: 8px; font-size: 14px; font-weight: 600; color: white; outline: none; transition: border-color 0.2s; }
-        .custom-input:focus { border-color: #3b82f6; }
-        .custom-input::placeholder { color: #475569; font-weight: 500; }
+        .input-label { display: block; font-size: 11px; font-weight: 700; color: #6b7280; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .custom-input { width: 100%; padding: 12px 16px; border: 2px solid #0ea5e9; border-radius: 8px; font-size: 14px; font-weight: 600; color: #111827; outline: none; transition: border-color 0.2s; }
+        .custom-input::placeholder { color: #94a3b8; font-weight: 500; }
         
         .structure-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
-        .structure-btn { border: 1px solid #334155; background: #0f172a; border-radius: 8px; padding: 16px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font-size: 11px; font-weight: 700; color: #94a3b8; cursor: pointer; transition: all 0.2s; }
-        .structure-btn i { font-size: 20px; transition: color 0.2s; }
-        .structure-btn:hover { border-color: #475569; background-color: #1e293b; }
-        .structure-btn.selected { border-color: #60a5fa; background-color: #1e3a8a; color: white; }
+        .structure-btn { border: 1px solid #e2e8f0; background: white; border-radius: 8px; padding: 16px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font-size: 11px; font-weight: 700; color: #64748b; cursor: pointer; transition: all 0.2s; }
+        .structure-btn i { font-size: 20px; color: #94a3b8; transition: color 0.2s; }
+        .structure-btn:hover { border-color: #cbd5e1; background-color: #f8fafc; }
+        .structure-btn.selected { border-color: #60a5fa; background-color: #eff6ff; color: #1e293b; box-shadow: 0 0 0 1px #60a5fa inset; }
+        .structure-btn.selected i { color: inherit; } 
         
-        .color-palette { display: flex; gap: 12px; flex-wrap: wrap; background: #0f172a; padding: 12px; border-radius: 12px; border: 1px solid #334155; }
-        .color-btn { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: transform 0.1s; border: 2px solid transparent; }
+        .color-palette { display: flex; gap: 12px; flex-wrap: wrap; background: #f8fafc; padding: 12px; border-radius: 12px; }
+        .color-btn { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; border: 2px solid transparent; }
         .color-btn:hover { transform: scale(1.1); }
-        .color-btn.selected { box-shadow: 0 0 0 3px #1e293b, 0 0 0 5px white; }
+        .color-btn.selected { box-shadow: 0 0 0 3px white, 0 0 0 5px #334155; }
         
-        .modal-footer { padding: 20px 24px; border-top: 1px solid #334155; display: flex; justify-content: space-between; gap: 16px; }
+        .modal-footer { padding: 20px 24px; border-top: 1px solid #f3f4f6; display: flex; justify-content: space-between; gap: 16px; }
+        .btn-cancel { flex: 1; padding: 14px; background: white; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 700; color: #475569; cursor: pointer; transition: background 0.2s; }
+        .btn-cancel:hover { background: #f1f5f9; }
+        .btn-submit-dark { flex: 1; padding: 14px; background: #0f172a; border: none; border-radius: 8px; font-weight: 700; color: white; cursor: pointer; transition: background 0.2s; }
+        .btn-submit-dark:hover { background: #1e293b; }
 
         /* NOTIFICAÇÕES E MAP ICONS */
-        .instruction-banner { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; background: #2563eb; color: white; padding: 12px 24px; border-radius: 30px; font-weight: 600; font-size: 14px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); display: none; align-items: center; gap: 10px; }
-        #toast-container { position: absolute; bottom: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; }
-        .toast-msg { background: #1e293b; color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.3); opacity: 0; transform: translateY(20px); transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; border-left: 4px solid #3b82f6; }
+        .instruction-banner { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 2000; background: #111827; color: white; padding: 12px 24px; border-radius: 30px; font-weight: 600; font-size: 14px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); display: none; align-items: center; gap: 10px; }
+        #toast-container { position: absolute; bottom: 20px; right: 20px; z-index: 999999; display: flex; flex-direction: column; gap: 10px; }
+        .toast-msg { background: #111827; color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transform: translateY(20px); transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
         .toast-msg.show { opacity: 1; transform: translateY(0); }
 
-        .map-icon-wrapper { background-color: #1e293b; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; border: 2px solid white; transition: transform 0.2s; }
+        .map-icon-wrapper { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; border: 2px solid white; transition: transform 0.2s; }
         .map-icon-wrapper.rounded-full { border-radius: 50%; }
         .leaflet-div-icon { background: transparent; border: none; }
         .node-hover .map-icon-wrapper { transform: scale(1.3); border-color: #3b82f6; z-index: 1000 !important;}
+        .preview-line-active { stroke-dasharray: 10, 10; animation: dash 1s linear infinite; }
+        @keyframes dash { to { stroke-dashoffset: -20; } }
+
     </style>
 </head>
 <body>
 
-    <!-- TELA INICIAL (DASHBOARD) -->
     <div id="regions-screen">
-        <!-- Sidebar do Dashboard -->
         <div class="home-sidebar">
             <div class="p-6 font-black text-xl flex items-center gap-3 text-white border-b border-slate-800">
                 <i class="fa-solid fa-wave-square text-green-500"></i> Roma Planner
@@ -128,194 +139,154 @@
                 <div class="bg-blue-600/20 text-blue-400 px-4 py-3 rounded-lg font-bold text-sm flex items-center gap-3 cursor-pointer">
                     <i class="fa-solid fa-folder-open"></i> Meus Projetos
                 </div>
-                <div class="text-slate-500 px-4 py-3 rounded-lg font-semibold text-sm flex items-center gap-3 cursor-pointer hover:bg-slate-800 hover:text-slate-300 transition">
+                <div class="text-slate-500 px-4 py-3 rounded-lg font-semibold text-sm flex items-center gap-3 cursor-pointer hover:bg-slate-800 hover:text-slate-300 transition" onclick="window.showToast('Módulo em desenvolvimento.')">
                     <i class="fa-solid fa-users"></i> Equipe
-                </div>
-                <div class="text-slate-500 px-4 py-3 rounded-lg font-semibold text-sm flex items-center gap-3 cursor-pointer hover:bg-slate-800 hover:text-slate-300 transition">
-                    <i class="fa-solid fa-gear"></i> Configurações
                 </div>
             </div>
         </div>
         
-        <!-- Área Principal do Dashboard -->
         <div class="home-main">
-            <!-- Cabeçalho -->
             <div class="home-header">
                 <div>
                     <h1 class="text-2xl font-bold text-white mb-1">Meus Projetos</h1>
-                    <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Gerencie e organize suas redes FTTH.</p>
+                    <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Gerencie suas redes FTTH.</p>
                 </div>
                 <div class="flex items-center gap-4">
-                    <div class="search-bar-dark">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" placeholder="Buscar projeto existente...">
-                    </div>
                     <button class="btn-green" onclick="window.abrirModalNovoProjeto()">
                         <i class="fa-solid fa-plus"></i> Criar Novo Projeto
                     </button>
                 </div>
             </div>
             
-            <!-- Conteúdo Central -->
             <div class="home-content">
-                <div class="w-24 h-24 bg-slate-800 rounded-3xl flex items-center justify-center mb-6 shadow-inner border border-slate-700">
-                    <i class="fa-solid fa-folder-open text-4xl text-slate-500"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-white mb-2">Você ainda não tem projetos</h2>
-                <p class="text-slate-400 mb-8 font-medium">Crie seu primeiro projeto FTTH para começar a mapear sua rede.</p>
-                <button class="btn-green px-8 py-3 text-base" onclick="window.abrirModalNovoProjeto()">
-                    <i class="fa-solid fa-plus"></i> Criar primeiro projeto
-                </button>
-                
-                <div class="mt-12 flex items-center gap-2 bg-slate-800/50 px-5 py-2.5 rounded-full border border-slate-700/50">
-                    <div class="w-2.5 h-2.5 rounded-full bg-yellow-500" id="sync-dot"></div>
-                    <span class="text-[10px] font-bold text-slate-300 tracking-wider" id="sync-status">CONECTANDO AO BANCO...</span>
-                </div>
-            </div>
-        </div>
-    </div>
+                <div id="projects-grid"></div>
 
-    <!-- MODAL: CRIAR NOVO PROJETO (Geolocalização) -->
-    <div class="modal-overlay" id="modal-novo-projeto" style="z-index: 10000;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="text-lg"><i class="fa-solid fa-map-location-dot text-blue-500 mr-2"></i> Criar Novo Projeto</h2>
-                <button class="text-slate-400 hover:text-white transition" onclick="document.getElementById('modal-novo-projeto').style.display='none'">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <label class="input-label">NOME DO PROJETO</label>
-                <input type="text" id="input-projeto-nome" class="custom-input mb-6" placeholder="Ex: Projeto Roma Cametá">
-                
-                <label class="input-label">LOCALIZAÇÃO INICIAL DA REDE</label>
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="input-projeto-busca" class="custom-input flex-grow" placeholder="Ex: Cametá, Pará" onkeypress="if(event.key==='Enter') window.buscarLocalNovoProjeto()">
-                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-5 rounded-lg font-bold transition flex items-center justify-center" onclick="window.buscarLocalNovoProjeto()">
-                        <i class="fa-solid fa-magnifying-glass"></i>
+                <div id="empty-state">
+                    <div class="w-24 h-24 bg-slate-800 rounded-3xl flex items-center justify-center mb-6 border border-slate-700">
+                        <i class="fa-solid fa-folder-open text-4xl text-slate-500"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Você ainda não tem projetos</h2>
+                    <p class="text-slate-400 mb-8 font-medium">Crie seu primeiro projeto para começar a mapear a rede.</p>
+                    <button class="btn-green px-8 py-3 text-base" onclick="window.abrirModalNovoProjeto()">
+                        <i class="fa-solid fa-plus"></i> Criar primeiro projeto
                     </button>
                 </div>
-
-                <!-- Mini Mapa de Preview -->
-                <div id="mini-map-container" style="height: 200px; width: 100%; border-radius: 8px; border: 1px solid #334155; background: #0f172a; z-index: 10;"></div>
-                <p class="text-[10px] text-slate-500 mt-2 text-center">Pesquise a cidade para centralizar o mapa de engenharia.</p>
-            </div>
-            <div class="modal-footer">
-                <button class="px-5 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-bold text-sm transition" onclick="document.getElementById('modal-novo-projeto').style.display='none'">Cancelar</button>
-                <button class="px-5 py-2.5 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold text-sm transition" onclick="window.confirmarNovoProjeto()">Criar Projeto</button>
+                
+                <div class="absolute bottom-8 left-10 flex items-center gap-2 bg-slate-800/80 px-4 py-2 rounded-full border border-slate-700">
+                    <div class="w-2 h-2 rounded-full bg-yellow-500" id="sync-dot"></div>
+                    <span class="text-[10px] font-bold text-slate-300 tracking-wider" id="sync-status">CONECTANDO...</span>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- WORKSPACE PRINCIPAL (MAPA) -->
+    <div class="modal-overlay" id="modal-novo-projeto" style="z-index: 100000;">
+        <div class="modal-content" style="background:#1e293b; color:white; border:1px solid #334155;">
+            <div class="modal-header" style="border-bottom-color:#334155;">
+                <h2 style="color:white;"><i class="fa-solid fa-map-location-dot text-blue-500 mr-2"></i> Criar Novo Projeto</h2>
+                <button class="text-slate-400 hover:text-white" onclick="document.getElementById('modal-novo-projeto').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <label class="input-label" style="color:#94a3b8;">NOME DO PROJETO</label>
+                <input type="text" id="input-projeto-nome" class="custom-input mb-6" style="background:#0f172a; border-color:#475569; color:white;" placeholder="Ex: Projeto Roma Cametá">
+                
+                <label class="input-label" style="color:#94a3b8;">PESQUISAR CIDADE INICIAL</label>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="input-projeto-busca" class="custom-input flex-grow" style="background:#0f172a; border-color:#475569; color:white;" placeholder="Ex: Cametá, Pará" onkeypress="if(event.key==='Enter') window.buscarLocalNovoProjeto()">
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-5 rounded-lg font-bold" onclick="window.buscarLocalNovoProjeto()"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </div>
+                <div id="mini-map-container" style="height: 200px; width: 100%; border-radius: 8px; border: 1px solid #334155; background: #0f172a; z-index: 10;"></div>
+            </div>
+            <div class="modal-footer" style="border-top-color:#334155; background:#1e293b;">
+                <button class="btn-cancel" style="background:#334155; border:none; color:white;" onclick="document.getElementById('modal-novo-projeto').style.display='none'">Cancelar</button>
+                <button class="btn-green" style="flex:1; justify-content:center;" onclick="window.salvarNovoProjeto()"><i class="fa-solid fa-check"></i> Salvar Projeto</button>
+            </div>
+        </div>
+    </div>
+
+
     <div id="app-workspace">
         <div id="map-container"></div>
         
         <div class="top-toolbar">
-            <button class="bg-[#1e293b] text-white border border-slate-600 rounded-lg shadow w-12 h-12 flex items-center justify-center hover:bg-slate-700 transition" onclick="window.voltarParaProjetos()" title="Voltar para Projetos">
+            <button class="bg-white rounded-lg shadow w-12 h-12 flex items-center justify-center text-gray-500 hover:text-gray-700 transition" onclick="window.voltarParaProjetos()" title="Voltar para Projetos">
                 <i class="fa-solid fa-arrow-left"></i>
             </button>
             
-            <div class="search-bar-dark flex-grow" style="max-width: 400px; height: 48px; background: #1e293b; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="main-search-input" placeholder="Buscar endereço no mapa..." onkeypress="if(event.key==='Enter') window.searchMainLocation()">
-                <button class="bg-blue-600 text-white w-8 h-8 rounded-md flex items-center justify-center ml-2 hover:bg-blue-500" onclick="window.searchMainLocation()"><i class="fa-solid fa-location-arrow text-xs"></i></button>
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass text-gray-400 mr-2"></i>
+                <input type="text" id="main-search-input" placeholder="Buscar Coordenadas ou Endereço..." onkeypress="if(event.key==='Enter') window.searchMainLocation()">
+                <button class="bg-slate-900 text-white w-8 h-8 rounded-md flex items-center justify-center ml-2 hover:bg-slate-700" onclick="window.searchMainLocation()"><i class="fa-solid fa-location-arrow text-xs"></i></button>
             </div>
             
             <div class="tools-group">
                 <button class="tool-btn active" id="btn-navegar" onclick="window.setMode('view')"><i class="fa-solid fa-location-crosshairs"></i> NAVEGAR</button>
-                <div class="w-px h-6 bg-slate-600 mx-1"></div>
+                <div class="w-px h-6 bg-gray-200 mx-1"></div>
                 <button class="tool-btn" id="btn-caixa" onclick="window.openModal('caixa')"><i class="fa-solid fa-location-dot"></i> CAIXA / POP</button>
-                <div class="w-px h-6 bg-slate-600 mx-1"></div>
+                <div class="w-px h-6 bg-gray-200 mx-1"></div>
                 <button class="tool-btn" id="btn-cabo" onclick="window.openModal('cabo')"><i class="fa-solid fa-share-nodes"></i> CABO</button>
-                <div class="w-px h-6 bg-slate-600 mx-1"></div>
+                <div class="w-px h-6 bg-gray-200 mx-1"></div>
                 <button class="tool-btn" id="btn-mover" onclick="window.setMode('move')"><i class="fa-solid fa-arrows-up-down-left-right"></i> MOVER</button>
             </div>
         </div>
 
         <div class="instruction-banner" id="instruction-banner">
-            <i class="fa-solid fa-circle-info text-blue-200"></i>
+            <i class="fa-solid fa-circle-info text-blue-300"></i>
             <span id="instruction-text">Clique no mapa...</span>
-            <button class="ml-4 bg-black/30 hover:bg-black/50 px-3 py-1 rounded text-xs transition" onclick="window.setMode('view')">Cancelar</button>
+            <button class="ml-4 bg-white/20 hover:bg-white/30 px-3 py-1 rounded text-xs transition" onclick="window.setMode('view')">Cancelar</button>
         </div>
 
-        <!-- Info Card Flutuante do Mapa -->
         <div class="info-card" id="info-card">
             <div class="flex justify-between items-start">
                 <div class="flex gap-4">
-                    <div class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl border" id="card-icon-container"><i class="fa-solid fa-server" id="card-icon"></i></div>
-                    <div><h2 class="text-xl font-bold text-white leading-tight" id="card-title">Nome</h2><p class="text-xs font-bold text-slate-400 tracking-wider mt-1" id="card-subtitle">TIPO</p></div>
+                    <div class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl shadow-inner border" id="card-icon-container"><i class="fa-solid fa-server" id="card-icon"></i></div>
+                    <div><h2 class="text-xl font-bold text-gray-900 leading-tight" id="card-title">Nome</h2><p class="text-xs font-bold text-gray-400 tracking-wider mt-1" id="card-subtitle">TIPO</p></div>
                 </div>
-                <button onclick="window.closeInfoCard()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="window.closeInfoCard()" class="text-gray-400 hover:text-gray-700 bg-gray-50 rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="action-buttons-grid">
-                <button class="btn-primary-blue" id="btn-card-type-action" onclick="window.handleCardAction()"><i class="fa-solid fa-server"></i> INSIDE PLANT</button>
-                <button class="btn-dark" onclick="window.showToast('Diagramas estarão na próxima atualização!')"><i class="fa-solid fa-diagram-project"></i> DIAGRAMA</button>
-            </div>
-            <div class="action-buttons-small-grid">
-                <button class="btn-small-action" onclick="window.showToast('OTDR Indisponível.')"><i class="fa-solid fa-satellite-dish text-purple-500 text-lg mb-1"></i><span>OTDR</span></button>
-                <button class="btn-small-action" onclick="window.showToast('Galeria vazia.')"><i class="fa-solid fa-camera text-blue-500 text-lg mb-1"></i><span>FOTOS</span></button>
-                <button class="btn-small-action" onclick="window.openEditModal()"><i class="fa-solid fa-pen-to-square text-slate-400 text-lg mb-1"></i><span>EDITAR</span></button>
+            <div class="action-buttons-small-grid mt-6">
                 <button class="btn-small-action danger" onclick="window.deleteSelectedNode()"><i class="fa-solid fa-trash-can text-red-400 text-lg mb-1"></i><span>EXCLUIR</span></button>
-            </div>
-            <div class="mt-5 border-t border-slate-700 pt-4 bg-slate-800/50 -mx-6 -mb-6 p-6 rounded-b-16">
-                <p class="text-[10px] font-bold text-slate-400 flex items-center gap-2 mb-2"><i class="fa-solid fa-circle-info"></i> COORDENADAS GPS</p>
-                <div class="bg-slate-900 border border-slate-700 rounded-lg p-3 flex justify-between items-center text-xs font-mono text-slate-300 shadow-inner mt-2">
-                    <div class="flex items-center gap-2"><span id="card-coords">0, 0</span></div>
-                    <button class="text-blue-400 hover:text-blue-300" onclick="window.copyCoords()"><i class="fa-regular fa-copy"></i> Copiar</button>
-                </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAIS DE CRIAÇÃO (MAPA) -->
     <div class="modal-overlay" id="modal-caixa">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="text-lg"><i class="fa-solid fa-location-dot text-blue-500 mr-2"></i> Nova Caixa/Prédio</h2>
-                <button class="text-slate-400 hover:text-white transition" onclick="window.closeModal('caixa')"><i class="fa-solid fa-xmark"></i></button>
+                <h2 class="text-slate-800 text-xl"><i class="fa-solid fa-location-dot text-cyan-500 mr-1"></i> Nova Caixa/Prédio</h2>
+                <button class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center" onclick="window.closeModal('caixa')"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body">
-                <label class="input-label">NOME</label>
-                <input type="text" id="input-caixa-nome" class="custom-input mb-6" placeholder="Ex: CEO 01">
-                
-                <label class="input-label">TIPO DE ESTRUTURA</label>
+                <div class="mb-6"><input type="text" id="input-caixa-nome" class="custom-input shadow-sm" placeholder="Ex: CEO 01"></div>
+                <label class="input-label mb-3">TIPO DE ESTRUTURA</label>
                 <div class="structure-grid" id="structure-type-grid">
-                    <button class="structure-btn" data-type="POP / DC" data-icon="fa-server" data-color="#3b82f6" onclick="window.selectStructure(this)"><i class="fa-solid fa-server"></i> DC</button>
+                    <button class="structure-btn" data-type="POP / DC" data-icon="fa-server" data-color="#111827" onclick="window.selectStructure(this)"><i class="fa-solid fa-server"></i> DC</button>
                     <button class="structure-btn selected" data-type="CEO" data-icon="fa-layer-group" data-color="#f97316" onclick="window.selectStructure(this)"><i class="fa-solid fa-layer-group"></i> CEO</button>
                     <button class="structure-btn" data-type="CTO" data-icon="fa-box" data-color="#22c55e" onclick="window.selectStructure(this)"><i class="fa-solid fa-box"></i> CTO</button>
                     <button class="structure-btn" data-type="Cliente" data-icon="fa-user" data-color="#a855f7" onclick="window.selectStructure(this)"><i class="fa-solid fa-user"></i> Cliente</button>
                 </div>
-
-                <label class="input-label">COR DE IDENTIFICAÇÃO</label>
+                <label class="input-label mb-3">COR DE IDENTIFICAÇÃO</label>
                 <div class="color-palette" id="caixa-color-palette"></div>
             </div>
             <div class="modal-footer">
-                <button class="px-5 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 font-bold text-sm" onclick="window.closeModal('caixa')">Cancelar</button>
-                <button class="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 font-bold text-sm" onclick="window.startNodePlacement()">Ancorar no Mapa</button>
+                <button class="btn-cancel" onclick="window.closeModal('caixa')">Cancelar</button>
+                <button class="btn-submit-dark" onclick="window.startNodePlacement()">Ancorar no Mapa</button>
             </div>
         </div>
     </div>
 
     <div class="modal-overlay" id="modal-cabo">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="text-lg text-orange-500"><i class="fa-solid fa-share-nodes"></i> Lançar Cabo</h2>
-                <button class="text-slate-400 hover:text-white" onclick="window.closeModal('cabo')"><i class="fa-solid fa-xmark"></i></button>
-            </div>
+            <div class="modal-header"><h2 class="text-orange-500"><i class="fa-solid fa-share-nodes"></i> Lançar Cabo</h2><button class="text-gray-400 hover:text-gray-600" onclick="window.closeModal('cabo')"><i class="fa-solid fa-xmark"></i></button></div>
             <div class="modal-body">
-                <label class="input-label">NOME DA ROTA</label>
-                <input type="text" id="input-cabo-nome" class="custom-input mb-6" placeholder="Ex: Rota 01 Tronco">
-                <label class="input-label">CAPACIDADE DE FIBRAS</label>
-                <select id="input-cabo-capacidade" class="custom-input mb-4 cursor-pointer">
-                    <option value="6">6 FO</option>
-                    <option value="12" selected>12 FO</option>
-                    <option value="36">36 FO</option>
-                </select>
+                <div class="mb-5"><label class="input-label">NOME DO CABO</label><input type="text" id="input-cabo-nome" class="custom-input" placeholder="Ex: Rota 01"></div>
+                <div class="flex gap-4 mb-6">
+                    <div class="flex-1"><label class="input-label">CAPACIDADE</label><select id="input-cabo-capacidade" class="custom-input bg-white cursor-pointer"><option value="6">6 FO</option><option value="12" selected>12 FO</option><option value="36">36 FO</option></select></div>
+                </div>
             </div>
             <div class="modal-footer">
-                <button class="px-5 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 font-bold text-sm" onclick="window.closeModal('cabo')">Cancelar</button>
-                <button class="px-5 py-2.5 rounded-lg bg-orange-600 hover:bg-orange-500 font-bold text-sm" onclick="window.startCableDrawing()">Iniciar Traçado</button>
+                <button class="btn-cancel" onclick="window.closeModal('cabo')">Cancelar</button>
+                <button class="btn-submit-orange" style="background:#f97316; color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; flex:1;" onclick="window.startCableDrawing()">Iniciar Traçado</button>
             </div>
         </div>
     </div>
@@ -325,13 +296,15 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
-        // ESTADO GLOBAL
+        // 1. ESTADO GLOBAL
         // ==========================================
         window.appState = {
-            mode: 'view', nodes: [], cables: [], selectedNodeId: null, editingNodeId: null,
+            currentProjectId: null,
+            projects: [], allNodes: [], allCables: [],
+            mode: 'view', selectedNodeId: null,
             nodeSetup: { name: 'CEO 01', type: 'CEO', icon: 'fa-layer-group', color: '#f97316' },
             cableSetup: { name: '', capacity: 12, color: '#3b82f6' },
             cablePath: [], cableStartNodeId: null, tempPolyline: null, snapNodePos: null
@@ -339,99 +312,18 @@
         const THEME_COLORS = ['#3b82f6', '#f97316', '#22c55e', '#ef4444', '#a855f7', '#eab308', '#64748b', '#ec4899'];
 
         // ==========================================
-        // INICIALIZAÇÃO LEAFLET MAIN MAP
+        // 2. INICIALIZAÇÃO LEAFLET (Mapa Principal e Mini-Mapa)
         // ==========================================
-        const map = L.map('map-container', { zoomControl: false, doubleClickZoom: false }).setView([-2.245, -49.495], 14); // Cametá default
+        const map = L.map('map-container', { zoomControl: false, doubleClickZoom: false }).setView([-2.245, -49.495], 14); // Mapa CLARO padrão
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 20 }).addTo(map);
-        const cablesLayer = L.layerGroup().addTo(map); 
-        const nodesLayer = L.layerGroup().addTo(map); 
-        const drawLayer = L.layerGroup().addTo(map);
+        window.cablesLayer = L.layerGroup().addTo(map); 
+        window.nodesLayer = L.layerGroup().addTo(map); 
+        window.drawLayer = L.layerGroup().addTo(map);
+
+        let miniMap = null; let miniMapMarker = null; window.tempProjectCoords = [-2.245, -49.495];
 
         // ==========================================
-        // LÓGICA DO MODAL "CRIAR NOVO PROJETO" (Geolocalização)
-        // ==========================================
-        let miniMap = null;
-        let miniMapMarker = null;
-        window.tempProjectCoords = [-2.245, -49.495]; // Default Cametá
-
-        window.abrirModalNovoProjeto = () => {
-            document.getElementById('modal-novo-projeto').style.display = 'flex';
-            document.getElementById('input-projeto-nome').value = '';
-            document.getElementById('input-projeto-busca').value = '';
-            
-            // O Leaflet precisa de um delay para renderizar mapas dentro de divs escondidas
-            setTimeout(() => {
-                if(!miniMap) {
-                    miniMap = L.map('mini-map-container', { zoomControl: false, attributionControl: false }).setView(window.tempProjectCoords, 13);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(miniMap);
-                    miniMapMarker = L.marker(window.tempProjectCoords).addTo(miniMap);
-                } else {
-                    miniMap.invalidateSize();
-                    miniMap.setView(window.tempProjectCoords, 13);
-                    miniMapMarker.setLatLng(window.tempProjectCoords);
-                }
-            }, 200);
-        };
-
-        window.buscarLocalNovoProjeto = async () => {
-            const query = document.getElementById('input-projeto-busca').value;
-            if(!query) return;
-            try {
-                window.showToast('Buscando cidade via satélite...');
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
-                const data = await res.json();
-                if(data && data.length > 0) {
-                    window.tempProjectCoords = [data[0].lat, data[0].lon];
-                    miniMap.flyTo(window.tempProjectCoords, 15);
-                    if(miniMapMarker) miniMapMarker.setLatLng(window.tempProjectCoords);
-                    window.showToast('Localização encontrada com sucesso!', 'sucesso');
-                } else {
-                    window.showToast('Não foi possível encontrar este endereço.', 'erro');
-                }
-            } catch(e) { console.error(e); window.showToast('Erro na comunicação com o satélite.', 'erro'); }
-        };
-
-        window.confirmarNovoProjeto = () => {
-            const nome = document.getElementById('input-projeto-nome').value || 'Projeto Roma FTTH';
-            document.getElementById('modal-novo-projeto').style.display = 'none';
-            window.enterWorkspace(nome, window.tempProjectCoords);
-        };
-
-        // ==========================================
-        // FLUXO DO WORKSPACE E BUSCA PRINCIPAL
-        // ==========================================
-        window.enterWorkspace = function(projectName, coords) { 
-            document.getElementById('regions-screen').style.display = 'none'; 
-            document.getElementById('app-workspace').classList.add('active'); 
-            
-            setTimeout(() => { 
-                map.invalidateSize(); 
-                if (coords) map.flyTo(coords, 15); // Voa para a cidade escolhida no novo projeto
-                window.showToast(`Projeto aberto. Pronto para desenhar!`, 'sucesso'); 
-            }, 300); 
-        };
-
-        window.voltarParaProjetos = function() {
-            document.getElementById('app-workspace').classList.remove('active');
-            document.getElementById('regions-screen').style.display = 'flex';
-        };
-
-        window.searchMainLocation = async () => {
-            const query = document.getElementById('main-search-input').value;
-            if(!query) return;
-            try {
-                window.showToast('Buscando rua...');
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
-                const data = await res.json();
-                if(data && data.length > 0) {
-                    map.flyTo([data[0].lat, data[0].lon], 18);
-                    window.showToast('Endereço centralizado!', 'sucesso');
-                } else { window.showToast('Rua não encontrada.', 'erro'); }
-            } catch(e) { console.error(e); }
-        };
-
-        // ==========================================
-        // FIREBASE E DADOS
+        // 3. FIREBASE SETUP
         // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyCWMuCACgriWGTrkxALGzF9j5Z7EvL7Lcg",
@@ -447,34 +339,126 @@
             try {
                 const app = initializeApp(firebaseConfig); db = getFirestore(app); auth = getAuth(app);
                 await signInAnonymously(auth);
-                document.getElementById('sync-status').innerText = 'SINCRONIZADO NA NUVEM';
+                document.getElementById('sync-status').innerText = 'CONECTADO E SINCRONIZADO';
                 document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-green-500';
                 
-                onSnapshot(collection(db, 'planner_nodes'), snap => { window.appState.nodes = snap.docs.map(d=>({id:d.id, ...d.data()})); window.renderMap(); });
+                // Escuta Projetos
+                onSnapshot(collection(db, 'planner_projects'), snap => { 
+                    window.appState.projects = snap.docs.map(d=>({id:d.id, ...d.data()})); 
+                    renderProjectsList(); 
+                });
+                // Escuta Caixas
+                onSnapshot(collection(db, 'planner_nodes'), snap => { 
+                    window.appState.allNodes = snap.docs.map(d=>({id:d.id, ...d.data()})); 
+                    if(window.appState.currentProjectId) window.renderMap(); 
+                });
+                // Escuta Cabos
                 onSnapshot(collection(db, 'planner_cables'), snap => { 
-                    window.appState.cables = snap.docs.map(d => {
+                    window.appState.allCables = snap.docs.map(d => {
                         let data = d.data();
                         if (data.path && typeof data.path[0] === 'object' && !Array.isArray(data.path[0])) data.path = data.path.map(p => [p.lat, p.lng]);
                         return {id:d.id, ...data};
                     }); 
-                    window.renderMap(); 
+                    if(window.appState.currentProjectId) window.renderMap(); 
                 });
             } catch (e) {
                 console.error(e);
-                document.getElementById('sync-status').innerText = 'MODO LOCAL (ERRO)';
+                document.getElementById('sync-status').innerText = 'MODO LOCAL (ERRO DE CONEXÃO)';
                 document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-red-500';
             }
         }
 
-        window.saveData = async (col, data) => { if(db && auth && auth.currentUser) await addDoc(collection(db, col), data); };
+        window.saveData = async (col, data) => { if(db && auth && auth.currentUser) { return await addDoc(collection(db, col), data); } };
         window.deleteData = async (col, id) => { if(db && auth && auth.currentUser) await deleteDoc(doc(db, col, id)); };
 
         // ==========================================
-        // LÓGICA DE MAPA E DESENHO
+        // 4. LÓGICA DE PROJETOS E TELA INICIAL
+        // ==========================================
+        function renderProjectsList() {
+            const grid = document.getElementById('projects-grid');
+            const empty = document.getElementById('empty-state');
+            
+            if(window.appState.projects.length === 0) {
+                grid.style.display = 'none'; empty.style.display = 'flex';
+            } else {
+                empty.style.display = 'none'; grid.style.display = 'flex';
+                grid.innerHTML = window.appState.projects.map(p => `
+                    <div class="project-card" onclick="window.abrirProjeto('${p.id}', ${p.lat}, ${p.lng})">
+                        <div class="relative z-10">
+                            <i class="fa-solid fa-map-location-dot text-3xl text-blue-500 mb-3"></i>
+                            <h3 class="text-xl font-bold text-white leading-tight">${p.name}</h3>
+                        </div>
+                        <div class="relative z-10 mt-4 flex items-center justify-between border-t border-slate-700 pt-3">
+                            <span class="text-[10px] font-bold text-slate-400">ABRIR ENGENHARIA</span>
+                            <i class="fa-solid fa-arrow-right text-slate-500"></i>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        window.abrirModalNovoProjeto = () => {
+            document.getElementById('modal-novo-projeto').style.display = 'flex';
+            setTimeout(() => {
+                if(!miniMap) {
+                    miniMap = L.map('mini-map-container', { zoomControl: false }).setView(window.tempProjectCoords, 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(miniMap);
+                    miniMapMarker = L.marker(window.tempProjectCoords).addTo(miniMap);
+                } else { miniMap.invalidateSize(); miniMap.setView(window.tempProjectCoords, 13); miniMapMarker.setLatLng(window.tempProjectCoords); }
+            }, 200);
+        };
+
+        window.buscarLocalNovoProjeto = async () => {
+            const query = document.getElementById('input-projeto-busca').value; if(!query) return;
+            try {
+                window.showToast('Buscando via satélite...');
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+                const data = await res.json();
+                if(data && data.length > 0) {
+                    window.tempProjectCoords = [data[0].lat, data[0].lon];
+                    miniMap.flyTo(window.tempProjectCoords, 15); miniMapMarker.setLatLng(window.tempProjectCoords);
+                    window.showToast('Localização encontrada!', 'sucesso');
+                } else { window.showToast('Local não encontrado.', 'erro'); }
+            } catch(e) { console.error(e); }
+        };
+
+        window.salvarNovoProjeto = async () => {
+            const nome = document.getElementById('input-projeto-nome').value || 'Projeto Roma';
+            document.getElementById('modal-novo-projeto').style.display = 'none';
+            window.showToast('Criando banco de dados do projeto...');
+            
+            const docRef = await window.saveData('planner_projects', { name: nome, lat: window.tempProjectCoords[0], lng: window.tempProjectCoords[1], createdAt: Date.now() });
+            if(docRef) window.abrirProjeto(docRef.id, window.tempProjectCoords[0], window.tempProjectCoords[1]);
+        };
+
+        window.abrirProjeto = (id, lat, lng) => {
+            window.appState.currentProjectId = id;
+            document.getElementById('regions-screen').style.display = 'none';
+            document.getElementById('app-workspace').style.display = 'block';
+            setTimeout(() => { map.invalidateSize(); map.flyTo([lat, lng], 15); window.renderMap(); window.showToast('Projeto Carregado.', 'sucesso'); }, 300);
+        };
+
+        window.voltarParaProjetos = () => {
+            window.appState.currentProjectId = null;
+            document.getElementById('app-workspace').style.display = 'none';
+            document.getElementById('regions-screen').style.display = 'flex';
+        };
+
+        window.searchMainLocation = async () => {
+            const query = document.getElementById('main-search-input').value; if(!query) return;
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+                const data = await res.json();
+                if(data && data.length > 0) { map.flyTo([data[0].lat, data[0].lon], 18); }
+            } catch(e) {}
+        };
+
+        // ==========================================
+        // 5. MAPA INTERACTIONS (Buidling Cables/Nodes)
         // ==========================================
         window.setMode = function(m) {
             window.appState.mode = m; document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-            const banner = document.getElementById('instruction-banner'); drawLayer.clearLayers(); window.appState.cablePath = []; window.appState.cableStartNodeId = null; window.appState.tempPolyline = null;
+            const banner = document.getElementById('instruction-banner'); window.drawLayer.clearLayers(); window.appState.cablePath = []; window.appState.cableStartNodeId = null; window.appState.tempPolyline = null;
             document.getElementById('map-container').className = m === 'placing_node' || m === 'drawing_cable' ? 'node-anchorable' : '';
             if (m === 'view' || m === 'move') { document.getElementById(m === 'view' ? 'btn-navegar' : 'btn-mover').classList.add('active'); map.dragging.enable(); banner.style.display = 'none'; } 
             else if (m === 'placing_node') { document.getElementById('btn-caixa').classList.add('active'); map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Inserir <b>${window.appState.nodeSetup.name}</b>.`; }
@@ -484,15 +468,16 @@
         map.on('mousemove', function(e) { 
             if (window.appState.mode === 'drawing_cable' && window.appState.cableStartNodeId !== null) { 
                 const endPos = window.appState.snapNodePos ? window.appState.snapNodePos : [e.latlng.lat, e.latlng.lng]; 
-                const dynamicPath = [...window.appState.cablePath, endPos]; 
-                if (!window.appState.tempPolyline) window.appState.tempPolyline = L.polyline(dynamicPath, { color: window.appState.cableSetup.color, weight: 4, opacity: 0.8, className: 'preview-line-active' }).addTo(drawLayer); 
-                else window.appState.tempPolyline.setLatLngs(dynamicPath); 
+                const dPath = [...window.appState.cablePath, endPos]; 
+                if (!window.appState.tempPolyline) window.appState.tempPolyline = L.polyline(dPath, { color: window.appState.cableSetup.color, weight: 4, opacity: 0.8, className: 'preview-line-active' }).addTo(window.drawLayer); 
+                else window.appState.tempPolyline.setLatLngs(dPath); 
             } 
         });
         
         map.on('click', async function(e) { 
             if (window.appState.mode === 'placing_node') { 
-                await window.saveData('planner_nodes', { name: window.appState.nodeSetup.name, type: window.appState.nodeSetup.type, icon: window.appState.nodeSetup.icon, color: window.appState.nodeSetup.color, lat: e.latlng.lat, lng: e.latlng.lng });
+                // Salva a caixa atrelando ao ID do Projeto atual
+                await window.saveData('planner_nodes', { projectId: window.appState.currentProjectId, name: window.appState.nodeSetup.name, type: window.appState.nodeSetup.type, icon: window.appState.nodeSetup.icon, color: window.appState.nodeSetup.color, lat: e.latlng.lat, lng: e.latlng.lng });
                 window.setMode('view'); window.showToast('Caixa adicionada!', 'sucesso');
             } else if (window.appState.mode === 'drawing_cable' && window.appState.cableStartNodeId !== null && !window.appState.snapNodePos) { 
                 window.appState.cablePath.push([e.latlng.lat, e.latlng.lng]); 
@@ -505,11 +490,12 @@
                 if (window.appState.mode === 'view') { window.openInfoCard(node); } 
                 else if (window.appState.mode === 'drawing_cable') {
                     if (window.appState.cableStartNodeId === null) { 
-                        window.appState.cableStartNodeId = node.id; window.appState.cablePath.push([node.lat, node.lng]); window.showToast(`Origem: ${node.name}.`); 
+                        window.appState.cableStartNodeId = node.id; window.appState.cablePath.push([node.lat, node.lng]); window.showToast(`Origem conectada.`); 
                     } else if (window.appState.cableStartNodeId !== node.id) { 
                         window.appState.cablePath.push([node.lat, node.lng]); 
                         const firebasePath = window.appState.cablePath.map(c => ({ lat: c[0], lng: c[1] }));
-                        await window.saveData('planner_cables', { name: window.appState.cableSetup.name || 'Cabo Drop', capacity: window.appState.cableSetup.capacity, color: window.appState.cableSetup.color, startNode: window.appState.cableStartNodeId, endNode: node.id, path: firebasePath }); 
+                        // Salva o cabo atrelando ao ID do Projeto atual
+                        await window.saveData('planner_cables', { projectId: window.appState.currentProjectId, name: window.appState.cableSetup.name || 'Cabo', capacity: window.appState.cableSetup.capacity, color: window.appState.cableSetup.color, startNode: window.appState.cableStartNodeId, endNode: node.id, path: firebasePath }); 
                         window.showToast(`Cabo finalizado!`, "sucesso"); window.setMode('view'); 
                     }
                 }
@@ -519,25 +505,33 @@
         };
 
         window.renderMap = function() { 
-            nodesLayer.clearLayers(); cablesLayer.clearLayers(); 
-            window.appState.cables.forEach(c => { 
-                const linhaCabo = L.polyline(c.path, { color: c.color, weight: 5, opacity: 0.9 }).addTo(cablesLayer);
+            if(!window.appState.currentProjectId) return;
+            window.nodesLayer.clearLayers(); window.cablesLayer.clearLayers(); 
+            
+            // Filtra e desenha apenas caixas e cabos do projeto atual
+            const currentCables = window.appState.allCables.filter(c => c.projectId === window.appState.currentProjectId);
+            const currentNodes = window.appState.allNodes.filter(n => n.projectId === window.appState.currentProjectId);
+
+            currentCables.forEach(c => { 
+                const linhaCabo = L.polyline(c.path, { color: c.color, weight: 5, opacity: 0.9 }).addTo(window.cablesLayer);
                 linhaCabo.bindTooltip(`<b>${c.name}</b>`, {sticky: true});
-                linhaCabo.on('click', () => { if (window.appState.mode === 'view' && confirm(`Excluir o cabo "${c.name}"?`)) { window.deleteData('planner_cables', c.id); window.showToast('Cabo excluído.'); } });
+                linhaCabo.on('click', () => { if (window.appState.mode === 'view' && confirm(`Excluir a rota "${c.name}"?`)) { window.deleteData('planner_cables', c.id); window.showToast('Excluído.'); } });
             }); 
-            window.appState.nodes.forEach(n => { 
+            currentNodes.forEach(n => { 
                 const shape = (n.type === 'POP / DC' || n.type === 'DC') ? 'rounded-lg' : (n.type === 'CEO' ? 'rounded-full' : 'rounded');
                 const iconHtml = L.divIcon({ html: `<div class="map-icon-wrapper ${shape}" style="width: 32px; height: 32px; border-color: ${n.color}"><div style="background-color: ${n.color}; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px;" class="${shape}"><i class="fa-solid ${n.icon}"></i></div></div>`, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
-                const marker = L.marker([n.lat, n.lng], { icon: iconHtml }).addTo(nodesLayer); 
-                const label = L.divIcon({ html: `<div style="text-align: center; font-weight: 700; font-size: 11px; color: white; text-shadow: 1px 1px 2px black, -1px -1px 2px black; margin-top: 4px;">${n.name}</div>`, className: '', iconSize: [100, 20], iconAnchor: [50, -16] }); 
-                L.marker([n.lat, n.lng], { icon: label, interactive: false }).addTo(nodesLayer); 
+                const marker = L.marker([n.lat, n.lng], { icon: iconHtml }).addTo(window.nodesLayer); 
+                const label = L.divIcon({ html: `<div style="text-align: center; font-weight: 700; font-size: 11px; color: #111827; text-shadow: 1px 1px 2px white, -1px -1px 2px white; margin-top: 4px;">${n.name}</div>`, className: '', iconSize: [100, 20], iconAnchor: [50, -16] }); 
+                L.marker([n.lat, n.lng], { icon: label, interactive: false }).addTo(window.nodesLayer); 
                 marker.on('click', (e) => { L.DomEvent.stopPropagation(e); window.handleNodeInteraction(n, 'click'); }); 
                 marker.on('mouseover', (e) => { window.handleNodeInteraction(n, 'mouseover'); if(window.appState.mode === 'drawing_cable') e.target.getElement().classList.add('node-hover'); }); 
                 marker.on('mouseout', (e) => { window.handleNodeInteraction(n, 'mouseout'); e.target.getElement().classList.remove('node-hover'); }); 
             }); 
         };
 
-        // UI Helpers
+        // ==========================================
+        // 6. UI HELPERS (INFO CARD E MODAIS)
+        // ==========================================
         window.openModal = function(type) { 
             window.setMode('view'); 
             if(type === 'caixa') { 
@@ -554,8 +548,7 @@
         window.closeModal = function(type) { document.getElementById(`modal-${type}`).style.display = 'none'; };
         
         window.selectStructure = function(btn) { 
-            document.querySelectorAll('.structure-btn').forEach(b => b.classList.remove('selected')); 
-            btn.classList.add('selected'); 
+            document.querySelectorAll('.structure-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); 
             window.appState.nodeSetup.type = btn.getAttribute('data-type'); window.appState.nodeSetup.icon = btn.getAttribute('data-icon'); window.appState.nodeSetup.color = btn.getAttribute('data-color');
             document.getElementById('input-caixa-nome').value = window.appState.nodeSetup.type + ' 01'; 
         };
@@ -567,11 +560,18 @@
             document.getElementById('card-title').innerText = node.name; document.getElementById('card-subtitle').innerText = node.type.toUpperCase(); 
             document.getElementById('card-coords').innerText = `${node.lat.toFixed(5)}, ${node.lng.toFixed(5)}`; 
             document.getElementById('card-icon').className = `fa-solid ${node.icon}`; 
-            const iconC = document.getElementById('card-icon-container'); iconC.style.color = node.color; iconC.style.backgroundColor = node.color + '20'; iconC.style.borderColor = node.color + '50'; 
+            const iconC = document.getElementById('card-icon-container'); iconC.style.color = node.color; iconC.style.borderColor = node.color; 
             card.style.display = 'block'; 
         };
         window.closeInfoCard = function() { document.getElementById('info-card').style.display = 'none'; window.appState.selectedNodeId = null; };
-        window.deleteSelectedNode = async function() { const nId = window.appState.selectedNodeId; if (!nId) return; if(!confirm("Excluir este elemento e seus cabos?")) return; const connectedCables = window.appState.cables.filter(c => c.startNode === nId || c.endNode === nId); for(let c of connectedCables) { await window.deleteData('planner_cables', c.id); } await window.deleteData('planner_nodes', nId); window.closeInfoCard(); window.showToast('Excluído do banco.', 'sucesso'); };
+        window.deleteSelectedNode = async function() { 
+            const nId = window.appState.selectedNodeId; if (!nId) return; 
+            if(!confirm("Excluir este elemento e todos os seus cabos?")) return; 
+            const connectedCables = window.appState.allCables.filter(c => c.startNode === nId || c.endNode === nId); 
+            for(let c of connectedCables) { await window.deleteData('planner_cables', c.id); } 
+            await window.deleteData('planner_nodes', nId); 
+            window.closeInfoCard(); window.showToast('Excluído do banco.', 'sucesso'); 
+        };
         window.copyCoords = function() { navigator.clipboard.writeText(document.getElementById('card-coords').innerText); window.showToast("Copiado!"); };
         window.showToast = function(msg, type='info') { const c = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast-msg show'; t.style.borderLeftColor = type==='erro'?'#ef4444':'#3b82f6'; t.innerHTML = `<i class="fa-solid fa-info-circle text-blue-400"></i> <span>${msg}</span>`; c.appendChild(t); setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 300); }, 3000); };
 
