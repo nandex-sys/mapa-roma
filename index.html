@@ -469,7 +469,6 @@
                 snapshot.forEach(doc => { 
                     const data = doc.data();
                     
-                    // CORREÇÃO: Converter os Objetos de volta para Arrays para o mapa (Leaflet) conseguir desenhar
                     if (data.path && data.path.length > 0 && typeof data.path[0] === 'object' && !Array.isArray(data.path[0])) {
                         data.path = data.path.map(p => [p.lat, p.lng]);
                     }
@@ -585,7 +584,6 @@
                     else if (window.appState.cableStartNodeId !== node.id) { 
                         window.appState.cablePath.push([node.lat, node.lng]); 
                         
-                        // CORREÇÃO: Converter Array bidimensional para Array de Objetos pro Firebase aceitar
                         const firebasePath = window.appState.cablePath.map(coord => ({ lat: coord[0], lng: coord[1] }));
                         
                         await window.saveCableToFirebase({ 
@@ -594,7 +592,7 @@
                             color: window.appState.cableSetup.color, 
                             startNode: window.appState.cableStartNodeId, 
                             endNode: node.id, 
-                            path: firebasePath // Enviando o payload formatado
+                            path: firebasePath
                         }); 
                         
                         window.showToast(`Cabo finalizado!`, "sucesso"); 
@@ -610,7 +608,21 @@
 
         window.renderMap = function() { 
             nodesLayer.clearLayers(); cablesLayer.clearLayers(); 
-            window.appState.cables.forEach(c => { L.polyline(c.path, { color: c.color, weight: 4, opacity: 0.9 }).addTo(cablesLayer).bindTooltip(`<b>${c.name}</b>`, {sticky: true}); }); 
+            
+            window.appState.cables.forEach(c => { 
+                const linhaCabo = L.polyline(c.path, { color: c.color, weight: 5, opacity: 0.9 }).addTo(cablesLayer);
+                linhaCabo.bindTooltip(`<b>${c.name}</b><br><span style="font-size:10px; color:#ef4444;">Clique para excluir</span>`, {sticky: true});
+                
+                linhaCabo.on('click', () => {
+                    if (window.appState.mode === 'view') {
+                        if (confirm(`Tem certeza que deseja excluir o cabo "${c.name}"?`)) {
+                            window.deleteCableFromFirebase(c.id);
+                            window.showToast('Cabo excluído com sucesso.', 'sucesso');
+                        }
+                    }
+                });
+            }); 
+            
             window.appState.nodes.forEach(n => { 
                 const shape = (n.type === 'POP / DC' || n.type === 'DC') ? 'rounded-lg' : (n.type === 'CEO' ? 'rounded-full' : 'rounded');
                 const iconHtml = L.divIcon({ html: `<div class="map-icon-wrapper ${shape}" style="width: 32px; height: 32px; border-color: ${n.color}"><div style="background-color: ${n.color}; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px;" class="${shape}"><i class="fa-solid ${n.icon}"></i></div></div>`, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
@@ -618,7 +630,6 @@
                 const label = L.divIcon({ html: `<div style="text-align: center; font-weight: 700; font-size: 11px; color: #111827; text-shadow: 1px 1px 2px white, -1px -1px 2px white; margin-top: 4px;">${n.name}</div>`, className: '', iconSize: [100, 20], iconAnchor: [50, -16] }); 
                 L.marker([n.lat, n.lng], { icon: label, interactive: false }).addTo(nodesLayer); 
                 
-                // EVENT BUBBLING FIX
                 marker.on('click', (e) => { L.DomEvent.stopPropagation(e); window.handleNodeInteraction(n, 'click'); }); 
                 marker.on('mouseover', (e) => { window.handleNodeInteraction(n, 'mouseover'); if(window.appState.mode === 'drawing_cable') e.target.getElement().classList.add('node-hover'); }); 
                 marker.on('mouseout', (e) => { window.handleNodeInteraction(n, 'mouseout'); e.target.getElement().classList.remove('node-hover'); }); 
