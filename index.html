@@ -25,7 +25,7 @@
         .region-card-active:hover { border-color: #475569; transform: translateY(-2px); }
 
         /* NOVO LAYOUT: SIDEBAR E MAPA */
-        #app-workspace { display: none; width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; display: flex; flex-direction: row; }
+        #app-workspace { display: none; width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; flex-direction: row; }
         #sidebar { width: 260px; background-color: #111827; height: 100vh; flex-shrink: 0; border-right: 1px solid #1f2937; display: flex; flex-direction: column; z-index: 2000; }
         #map-area { flex-grow: 1; position: relative; height: 100vh; }
         #map-container { position: absolute; top: 0; left: 0; height: 100%; width: 100%; z-index: 10; }
@@ -150,7 +150,7 @@
                 <button class="rt-btn" id="btn-cabo" onclick="window.openModal('cabo')" data-tooltip="Traçar Cabo"><i class="fa-solid fa-route"></i></button>
                 <button class="rt-btn" id="btn-mover" onclick="window.setMode('move')" data-tooltip="Mover Elementos"><i class="fa-solid fa-arrows-up-down-left-right"></i></button>
                 <div class="w-full h-px bg-slate-700 my-1"></div>
-                <button class="rt-btn" onclick="window.showToast('Medidor de Orçamento Óptico Ativo')" data-tooltip="Medir Potência"><i class="fa-solid fa-bolt text-yellow-500"></i></button>
+                <button class="rt-btn" onclick="window.calculateBudget()" data-tooltip="Medir Potência (Apenas no Canvas)"><i class="fa-solid fa-bolt text-yellow-500"></i></button>
             </div>
 
             <div class="instruction-banner" id="instruction-banner"><i class="fa-solid fa-info-circle"></i> <span id="instruction-text">Clique no mapa...</span> <button class="ml-4 bg-black/20 px-2 py-1 rounded" onclick="window.setMode('view')">Cancelar</button></div>
@@ -173,17 +173,4 @@
 
     <div class="modal-overlay" id="modal-caixa">
         <div class="modal-content">
-            <div class="modal-header"><h2 class="text-lg"><i class="fa-solid fa-box text-blue-500 mr-2"></i> Adicionar Elemento</h2><button onclick="window.closeModal('caixa')" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button></div>
-            <div class="modal-body">
-                <label class="input-label">NOME</label>
-                <input type="text" id="input-caixa-nome" class="custom-input mb-4" placeholder="Ex: POP Central">
-                
-                <label class="input-label">TIPO</label>
-                <div class="structure-grid">
-                    <button class="structure-btn selected" data-type="POP" data-icon="fa-server" data-color="#3b82f6" onclick="window.selectStructure(this)"><i class="fa-solid fa-server"></i> POP / DC</button>
-                    <button class="structure-btn" data-type="CEO" data-icon="fa-layer-group" data-color="#f97316" onclick="window.selectStructure(this)"><i class="fa-solid fa-layer-group"></i> CEO</button>
-                    <button class="structure-btn" data-type="CTO" data-icon="fa-box" data-color="#22c55e" onclick="window.selectStructure(this)"><i class="fa-solid fa-box"></i> CTO</button>
-                    <button class="structure-btn" data-type="Cliente" data-icon="fa-user" data-color="#a855f7" onclick="window.selectStructure(this)"><i class="fa-solid fa-user"></i> Cliente</button>
-                </div>
-            </div>
-            <div class
+            <div class="modal-header"><h2 class="text-lg"><i class="fa-solid fa-box text-blue-500 mr-2"></i> Adicionar Elemento</h2><button onclick="window.closeModal('caixa')" class="text-
