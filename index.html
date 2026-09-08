@@ -486,9 +486,9 @@
         // ==========================================
         const map = L.map('map-container', { zoomControl: false, doubleClickZoom: false }).setView([-15.77798, -47.93041], 16);
         
-        // NOVO: Camadas com maxNativeZoom para evitar tela branca
+        // NOVO: Substituído o satélite da ArcGIS (que dava tela branca) pelo Satélite do Google Maps com zoom máximo
         window.streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 22, maxNativeZoom: 19 });
-        window.satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 22, maxNativeZoom: 18 });
+        window.satLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 22, maxNativeZoom: 19 });
         
         window.streetLayer.addTo(map);
 
@@ -805,6 +805,7 @@
         window.renderMap = function() { 
             nodesLayer.clearLayers(); cablesLayer.clearLayers(); 
             
+            // NOVO: Filtrar pelo projeto atual
             const currentCables = window.appState.currentProjectId ? window.appState.cables.filter(c => c.projectId === window.appState.currentProjectId || !c.projectId) : window.appState.cables;
             const currentNodes = window.appState.currentProjectId ? window.appState.nodes.filter(n => n.projectId === window.appState.currentProjectId || !n.projectId) : window.appState.nodes;
 
