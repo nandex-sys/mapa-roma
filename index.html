@@ -19,35 +19,31 @@
         /* STREAMING_CHUNK:Estilos da Tela Inicial de Regiões... */
         #regions-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: #f8fafc; z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background-color: #0f172a; z-index: 9999;
+            display: flex; font-family: 'Inter', sans-serif;
         }
-        
-        .regions-icon-wrapper {
-            background: white; border: 2px solid #e2e8f0; border-radius: 20px;
-            width: 70px; height: 48px; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); margin-bottom: 24px;
+        .home-sidebar {
+            width: 260px; background-color: #111827; border-right: 1px solid #1e293b;
+            display: flex; flex-direction: column;
         }
-
-        .region-card-new {
-            background-color: #f8fafc; border: 2px dashed #93c5fd; border-radius: 24px;
-            width: 280px; height: 180px; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
+        .home-main {
+            flex-grow: 1; display: flex; flex-direction: column; background-color: #0f172a;
         }
-        .region-card-new:hover { background-color: #eff6ff; border-color: #3b82f6; }
-        
-        .region-card-active {
-            background-color: white; border: 1px solid #f1f5f9; border-radius: 24px;
-            width: 280px; height: 180px; padding: 24px; cursor: pointer;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); transition: all 0.2s;
-            position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;
+        .home-header {
+            height: 90px; border-bottom: 1px solid #1e293b; display: flex;
+            align-items: center; justify-content: space-between; padding: 0 40px;
         }
-        .region-card-active:hover { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); transform: translateY(-2px); }
-        
-        .region-card-active::before {
-            content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px;
-            background-color: #f8fafc; border-radius: 50%; z-index: 0;
+        .home-content {
+            flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
+        .btn-green {
+            background-color: #10b981; color: white; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px; border: none;
+        }
+        .btn-green:hover { background-color: #059669; }
+        .search-bar-dark {
+            background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; gap: 8px; color: #94a3b8; width: 300px;
+        }
+        .search-bar-dark input { background: transparent; border: none; outline: none; color: white; width: 100%; font-size: 14px; }
 
         /* STREAMING_CHUNK:Estilos do Workspace de Mapa... */
         #app-workspace { display: none; width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; }
@@ -213,19 +209,56 @@
 
     <!-- STREAMING_CHUNK:Estrutura da Tela Inicial (Seleção de Regiões)... -->
     <div id="regions-screen">
-        <div class="regions-icon-wrapper"><i class="fa-regular fa-paper-plane text-2xl text-blue-600"></i></div>
-        <h1 class="text-4xl font-black text-slate-900 mb-4 tracking-tight">Mapa da Rede</h1>
-        <p class="text-slate-500 text-center max-w-lg mb-12">Selecione uma região abaixo para carregar o mapa e os diagramas.</p>
-        <div class="flex gap-6 items-center">
-            <div class="region-card-new" onclick="window.createNewRegion()">
-                <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center border shadow-sm mb-4"><i class="fa-solid fa-plus text-blue-600 text-xl"></i></div>
-                <span class="font-bold text-blue-600 text-sm tracking-wide">NOVA REGIÃO</span>
+        <!-- Sidebar -->
+        <div class="home-sidebar">
+            <div class="p-6 font-black text-xl flex items-center gap-3 text-white border-b border-slate-800">
+                <i class="fa-solid fa-wave-square text-green-500"></i> FTTH Planner
             </div>
-            <div class="region-card-active" onclick="window.enterWorkspace('Bairro novo')">
-                <div class="relative z-10"><div class="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 mb-6"><i class="fa-solid fa-location-dot text-lg"></i></div></div>
-                <div class="relative z-10 mt-auto">
-                    <h2 class="text-2xl font-black text-slate-900 tracking-tight leading-none mb-3">Bairro novo</h2>
-                    <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-yellow-500" id="sync-dot"></div><span class="text-[10px] font-bold text-yellow-600 tracking-wider" id="sync-status">INICIANDO...</span></div>
+            <div class="flex flex-col gap-2 px-4 mt-6">
+                <div class="bg-green-500/10 text-green-500 px-4 py-3 rounded-lg font-bold text-sm flex items-center gap-3 cursor-pointer">
+                    <i class="fa-solid fa-folder-open"></i> Meus Projetos
+                </div>
+                <div class="text-slate-500 px-4 py-3 rounded-lg font-semibold text-sm flex items-center gap-3 cursor-pointer hover:bg-slate-800 hover:text-slate-300 transition">
+                    <i class="fa-solid fa-users"></i> Usuários
+                </div>
+                <div class="text-slate-500 px-4 py-3 rounded-lg font-semibold text-sm flex items-center gap-3 cursor-pointer hover:bg-slate-800 hover:text-slate-300 transition">
+                    <i class="fa-solid fa-gear"></i> Configurações
+                </div>
+            </div>
+        </div>
+        <!-- Main -->
+        <div class="home-main">
+            <!-- Header -->
+            <div class="home-header">
+                <div>
+                    <h1 class="text-2xl font-bold text-white mb-1">Meus Projetos</h1>
+                    <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Gerencie e organize suas redes FTTH.</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="search-bar-dark">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="Buscar projeto...">
+                    </div>
+                    <button class="btn-green" onclick="window.enterWorkspace('Projeto Roma')">
+                        <i class="fa-solid fa-plus"></i> Criar Novo Projeto
+                    </button>
+                </div>
+            </div>
+            <!-- Empty State -->
+            <div class="home-content">
+                <div class="w-24 h-24 bg-slate-800 rounded-3xl flex items-center justify-center mb-6 shadow-inner">
+                    <i class="fa-solid fa-folder-open text-4xl text-slate-500"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">Você ainda não tem projetos</h2>
+                <p class="text-slate-400 mb-8 font-medium">Crie seu primeiro projeto FTTH para começar a mapear sua rede.</p>
+                <button class="btn-green px-8 py-3 text-base" onclick="window.enterWorkspace('Projeto Roma')">
+                    <i class="fa-solid fa-plus"></i> Criar primeiro projeto
+                </button>
+                
+                <!-- Sincronização Firebase (Mantido do original) -->
+                <div class="mt-12 flex items-center gap-2 bg-slate-800/50 px-5 py-2.5 rounded-full border border-slate-700/50">
+                    <div class="w-2.5 h-2.5 rounded-full bg-yellow-500" id="sync-dot"></div>
+                    <span class="text-[10px] font-bold text-slate-300 tracking-wider" id="sync-status">CONECTANDO AO BANCO...</span>
                 </div>
             </div>
         </div>
