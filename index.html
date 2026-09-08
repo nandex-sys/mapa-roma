@@ -10,17 +10,13 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-    <!-- STREAMING_CHUNK: Bibliotecas extras para exportação futura (PDF/Imagens) mantidas por segurança -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
     <style>
         /* STREAMING_CHUNK:Configurando fontes e variaveis globais do CSS... */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
         body { font-family: 'Inter', sans-serif; overflow: hidden; background-color: #f3f4f6; margin: 0; padding: 0; }
         
-        /* ================= TELA INICIAL (DASHBOARD) - NOVO LAYOUT ESCURO ================= */
+        /* STREAMING_CHUNK:Estilos da Tela Inicial de Regiões... */
         #regions-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background-color: #0f172a; z-index: 9999;
@@ -225,7 +221,7 @@
 </head>
 <body>
 
-    <!-- ================= NOVO: TELA INICIAL (DASHBOARD DARK) ================= -->
+    <!-- ================= NOVO: TELA INICIAL (DASHBOARD DARK) COM OPÇÃO DE DELETAR ================= -->
     <div id="regions-screen">
         <div class="home-sidebar">
             <div class="p-6 font-black text-xl flex items-center gap-3 text-white border-b border-slate-800">
@@ -503,8 +499,11 @@
         // 2. INICIALIZAÇÃO LEAFLET (MODIFICADO COM SATÉLITE E MINI MAPA)
         // ==========================================
         const map = L.map('map-container', { zoomControl: false, doubleClickZoom: false }).setView([-15.77798, -47.93041], 16);
-        window.streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 20 });
-        window.satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 20 });
+        
+        // NOVO: Adicionado maxNativeZoom para evitar tela branca ao dar zoom máximo no Satélite
+        window.streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 22, maxNativeZoom: 19 });
+        window.satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 22, maxNativeZoom: 18 });
+        
         window.streetLayer.addTo(map);
         
         const cablesLayer = L.layerGroup().addTo(map); 
@@ -558,7 +557,7 @@
         function setupRealtimeListeners() {
             if(!auth || !auth.currentUser) return;
             
-            // NOVO: Listener de Projetos
+            // Listener de Projetos
             onSnapshot(getCollectionPath('projects'), (snapshot) => {
                 window.appState.projects = []; snapshot.forEach(doc => { window.appState.projects.push({ id: doc.id, ...doc.data() }); });
                 if(window.renderProjectsList) window.renderProjectsList();
@@ -604,7 +603,7 @@
             window.renderMap();
         }
 
-        /* Firebase CRUD Wrappers... (Mantidos Intactos e Adicionado updateCable) */
+        /* Firebase CRUD Wrappers... */
         window.saveNodeToFirebase = async (nodeData) => { 
             if(!db || !auth || !auth.currentUser) { window.appState.nodes.push({id: 'local_'+Date.now(), ...nodeData}); window.renderMap(); return; } 
             try { await addDoc(getCollectionPath('nodes'), nodeData); } catch(e) { window.appState.nodes.push({id: 'local_'+Date.now(), ...nodeData}); window.renderMap(); }
@@ -646,8 +645,10 @@
                 grid.style.display = 'none'; empty.style.display = 'flex';
             } else {
                 empty.style.display = 'none'; grid.style.display = 'flex';
+                // NOVO: Adicionado Botão de Deletar Projeto na renderização do Card
                 grid.innerHTML = window.appState.projects.map(p => `
                     <div class="project-card" onclick="window.abrirProjeto('${p.id}', ${p.lat}, ${p.lng})">
+                        <button class="absolute top-4 right-4 text-slate-500 hover:text-red-500 transition" style="z-index: 20;" onclick="window.deletarProjeto('${p.id}', event)" title="Deletar Projeto"><i class="fa-solid fa-trash"></i></button>
                         <div class="relative z-10">
                             <i class="fa-solid fa-map-location-dot text-3xl text-blue-500 mb-3"></i>
                             <h3 class="text-xl font-bold text-white leading-tight">${p.name}</h3>
@@ -658,6 +659,24 @@
                         </div>
                     </div>
                 `).join('');
+            }
+        };
+
+        // NOVO: Função para deletar projetos e seus vínculos
+        window.deletarProjeto = async (id, event) => {
+            event.stopPropagation(); // Impede que o clique no lixo abra o projeto
+            if(confirm('Tem certeza que deseja excluir este projeto e todos os seus elementos?')) {
+                if(db && auth && auth.currentUser) {
+                    await deleteDoc(getDocPath('projects', id));
+                    
+                    // Varre e limpa as caixas e cabos órfãos desse projeto
+                    window.appState.nodes.filter(n => n.projectId === id).forEach(n => deleteDoc(getDocPath('nodes', n.id)));
+                    window.appState.cables.filter(c => c.projectId === id).forEach(c => deleteDoc(getDocPath('cables', c.id)));
+                    
+                    window.showToast('Projeto deletado com sucesso.', 'sucesso');
+                } else {
+                    window.showToast('Erro: Não conectado na nuvem.', 'erro');
+                }
             }
         };
 
@@ -722,7 +741,6 @@
             } catch(e) {}
         };
 
-
         // ==========================================
         // 4. MAPA INTERACTIONS (Buidling Cables/Nodes)
         // ==========================================
@@ -735,6 +753,7 @@
             else if (newMode === 'drawing_cable') { document.body.classList.add('mode-drawing'); document.getElementById('btn-cabo').classList.add('active'); map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Selecione a <b>Caixa Inicial</b>.`; document.getElementById('map-container').classList.add('node-anchorable'); }
             document.onkeydown = function(evt) { if (evt.key === "Escape") { window.setMode('view'); } };
             
+            // Recarrega o mapa para habilitar/desabilitar bolinhas de arrastar
             if(window.appState.currentProjectId) window.renderMap();
         };
 
@@ -808,12 +827,13 @@
         };
 
         window.renderMap = function() { 
+            if(!window.appState.currentProjectId) return;
             nodesLayer.clearLayers(); cablesLayer.clearLayers(); 
             
             const currentCables = window.appState.currentProjectId ? window.appState.cables.filter(c => c.projectId === window.appState.currentProjectId || !c.projectId) : window.appState.cables;
             const currentNodes = window.appState.currentProjectId ? window.appState.nodes.filter(n => n.projectId === window.appState.currentProjectId || !n.projectId) : window.appState.nodes;
             const isMovable = window.appState.mode === 'move';
-
+            
             currentCables.forEach(c => { 
                 const linhaCabo = L.polyline(c.path, { color: c.color, weight: 5, opacity: 0.9 }).addTo(cablesLayer);
                 linhaCabo.bindTooltip(`<b>${c.name}</b><br><span style="font-size:10px; color:#ef4444;">Clique para excluir</span>`, {sticky: true});
@@ -827,7 +847,7 @@
                     }
                 });
 
-                // NOVO: PONTOS EDITÁVEIS NO CABO (Arrastar)
+                // NOVO: PONTOS EDITÁVEIS NO CABO (Arrastar Vértices)
                 if (isMovable) {
                     for(let i=1; i < c.path.length-1; i++) {
                         const iconMid = L.divIcon({ html: `<div style="width:12px; height:12px; background:white; border:3px solid ${c.color}; border-radius:50%; box-shadow:0 0 4px rgba(0,0,0,0.5);"></div>`, className: '', iconSize: [12,12], iconAnchor: [6,6] });
@@ -865,7 +885,7 @@
                 marker.on('mouseover', (e) => { window.handleNodeInteraction(n, 'mouseover'); if(window.appState.mode === 'drawing_cable') e.target.getElement().classList.add('node-hover'); }); 
                 marker.on('mouseout', (e) => { window.handleNodeInteraction(n, 'mouseout'); e.target.getElement().classList.remove('node-hover'); }); 
                 
-                // NOVO: Arrastar Caixa e atualizar Cabos Conectados
+                // NOVO: Arrastar Caixa e atualizar Cabos
                 marker.on('dragend', async (e) => {
                     const pos = e.target.getLatLng();
                     await window.updateNodeInFirebase(n.id, { lat: pos.lat, lng: pos.lng });
@@ -981,7 +1001,7 @@
         window.toggleInventory = function() { const p = document.getElementById('inventory-panel'); p.style.display = (p.style.display === 'flex') ? 'none' : 'flex'; if(p.style.display === 'flex') window.renderInventoryList('all'); };
         window.renderInventoryList = function(filter) { const container = document.getElementById('inventory-list-content'); container.innerHTML = ''; let items = []; if(filter === 'all' || filter === 'nodes') { window.appState.nodes.forEach(n => items.push({ type: 'node', data: n, name: n.name, sub: n.type, icon: n.icon, color: n.color })); } if(filter === 'all' || filter === 'cables') { window.appState.cables.forEach(c => items.push({ type: 'cable', data: c, name: c.name, sub: `${c.capacity} Fibras`, icon: 'fa-share-nodes', color: c.color })); } if(items.length === 0) { container.innerHTML = '<p class="text-sm text-gray-400 text-center p-4">Vazio.</p>'; return; } items.forEach(item => { const el = document.createElement('div'); el.className = 'inv-item'; el.innerHTML = `<div class="flex items-center gap-3"><div class="w-8 h-8 rounded flex items-center justify-center text-white text-xs" style="background-color: ${item.color}"><i class="fa-solid ${item.icon}"></i></div><div><p class="text-sm font-bold text-gray-800 leading-tight">${item.name}</p><p class="text-[10px] text-gray-500 uppercase">${item.sub}</p></div></div><button class="text-gray-400 hover:text-blue-500"><i class="fa-solid fa-crosshairs"></i></button>`; el.onclick = () => { if(item.type === 'node') { map.flyTo([item.data.lat, item.data.lng], 18); window.openInfoCard(item.data); } else if (item.type === 'cable') { map.flyToBounds(L.polyline(item.data.path).getBounds()); } }; container.appendChild(el); }); };
         window.copyCoords = function() { navigator.clipboard.writeText(document.getElementById('card-coords').innerText); window.showToast("Copiado!"); };
-        window.showToast = function(msg, type='info') { const c = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast-msg show'; t.style.borderLeftColor = type==='erro'?'#ef4444':'#3b82f6'; t.innerHTML = `<i class="fa-solid fa-info-circle text-blue-400"></i> <span>${msg}</span>`; c.appendChild(t); setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 300); }, 3000); };
+        window.showToast = function(msg, type='info') { const c = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast-msg show'; t.innerHTML = `<i class="fa-solid fa-info-circle text-blue-400"></i> <span>${msg}</span>`; c.appendChild(t); setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 300); }, 3000); };
 
 
         // ==========================================
