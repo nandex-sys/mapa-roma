@@ -302,7 +302,7 @@
                 <div class="flex items-center gap-3">
                     <i class="fa-solid fa-layer-group text-2xl" style="color: var(--brand-green);"></i>
                     <div>
-                        <h1 class="text-sm font-bold" style="color: var(--text-primary); line-height: 1;">FTTH Planner</h1>
+                        <h1 class="text-sm font-bold" style="color: var(--text-primary); line-height: 1;">Roma Telecom</h1>
                         <span class="text-[9px] font-bold" style="color: var(--brand-green);">PRO</span>
                     </div>
                 </div>
@@ -349,10 +349,8 @@
                 <div class="flex items-center gap-3">
                     <div style="width:36px; height:36px; background-color:#d1fae5; color:#059669; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px;">AG</div>
                     <div class="leading-tight">
-                        <div class="font-bold text-xs" style="color: var(--text-primary);">ROMA</div>
-                        <div class="text-[9px]" style="color: var(--text-muted);">agnaldo25085</div>
-                        <div class="text-[9px] font-bold text-blue-500 mt-0.5">PLANO TRIAL</div>
-                        <div class="text-[9px] font-bold text-red-500">TESTE: 7 DIAS</div>
+                        <div class="font-bold text-xs" style="color: var(--text-primary);">AGNALDO</div>
+                        <div class="text-[9px]" style="color: var(--text-muted);">Admin</div>
                     </div>
                 </div>
                 <button class="btn-upgrade" onclick="window.showToast('Página de Pagamento não configurada.')">
@@ -649,6 +647,7 @@
         // ==========================================
         const map = L.map('map-container', { zoomControl: false, doubleClickZoom: false }).setView([-2.24455, -49.50444], 16);
         
+        // NOVO: Substituído o satélite da ArcGIS (que dava tela branca) pelo Satélite do Google Maps com zoom máximo
         window.streetLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { maxZoom: 22, maxNativeZoom: 19 });
         window.satLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 22, maxNativeZoom: 19 });
         
@@ -1198,4 +1197,6 @@
         initFirebase();
     </script>
 </body>
-</html>
+</html> Pronto, ficou excelente o layout, igualzinho. Mas me fala por que você tirou as o nome dos das caixas quando a gente afasta o mapa e as caixas ficam lá. Você tirou o nome e só quando eu coloco em cima da caixa aparece o nome. Antes, no script que tava funcionando, que eu te mandei agorinha, não era assim. Eram todas as caixas aparecia embaixo do ícone o nome delas que a gente estipulou, né? Quero que você ajeite isso lá como tava no no no no projeto, né? Outra coisa, vamos pra pro passo 2 que a gente ia fazer, que era na aba na aba não, perdão, na quando a gente entra no mapa, ter aquele menu lá de de na aba esquerda, onde a gente tava conversando. E eu quero que a gente modifique como você tinha falado anteriormente, mas com as funções do que a gente quer. Por exemplo, eh ali na onde tá escrito Buscar CTO, eu não quero que fique ali, não precisa estar ali, tá? Vai ser a aba geral e a aba de elementos, tá bom? Daqui daquele mapa. Daí é o seguinte, a aba geral vai ter a vai ter ali em cima em vez daquela seta, em vez daquela seta apontando para a esquerda para a gente voltar nos meus projetos, eu quero que fique exatamente como tá ali. Olha, ali no cantinho tem um ícone de mapa e um e uma caixinha com a aba e uma abinha com a caixinha, né? Aí quando a gente clica lá naquele botão de cima onde tem um onde tá uma abinha, a gente pode voltar para lá, entendeu? Quero que seja assim, daquele jeito do print que eu te mandei por último, do mapa e aquele negócio. Isso. Tem que fazer assim. Daí para que a gente possa eh implementar aqui o menu esquerdo do do de do mapa, né, da onde a gente tá na rede. Ali no na aba eh ali no cantinho superior esquerdo de onde a gente entra, tá o mapa, mas eu te mandei um print aqui agora mostrando que aquele mapa não precisa ficar ali. Você já vai pegar e arrastar a aba geral para cá para para cima, né? Esse eh essa aba geral, ela vai ter três botões, né, três funções ali. A primeira delas é análise de rede que tá ali no primeiro no print e a segunda tabela de fusões, se você puder reparar aqui no print, tá bom? E o terceiro botão vai ser configurações, tá beleza. Essa é a aba geral do nosso mapa. Vai ter essas três funções, só adicionar elas para mim do jeito que tá o layout, com os ícones que estão lá no layout também, tudo certinho. Aí embaixo, aba elementos. Na aba elementos, a gente vai colocar CTO, CEO, POP, eh DIO. Só que todas essas essas essas funções da aba elementos vão ter esse olhinho do lado. Quando a gente clicar nesse olhinho, ele vai ocultar esse elemento do mapa. Se a gente clicar de novo, vai mostrar esse elemento do mapa, entende? Basicamente isso eu quero que você faça agora, mantendo todas as funções anteriores sem perder nenhuma linha de código. Consegue?
+
+There is a file you can reference named "image_2ea4ca.jpg". Refer to this file by its name verbatim.
