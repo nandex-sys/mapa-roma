@@ -661,8 +661,8 @@
                         const name1 = `${cable.capacity} FO - ${nodeA ? nodeA.name : 'Origem'} sentido ${node.name}`;
                         const name2 = `${cable.capacity} FO - ${node.name} sentido ${nodeB ? nodeB.name : 'Destino'}`;
                         
-                        const c1Data = { projectId: cable.projectId, name: name1, capacity: cable.capacity, color: cable.color, startNode: cable.startNode, endNode: node.id, path: path1.map(p => ({lat: p[0], lng: p[1]})) };
-                        const c2Data = { projectId: cable.projectId, name: name2, capacity: cable.capacity, color: cable.color, startNode: node.id, endNode: cable.endNode, path: path2.map(p => ({lat: p[0], lng: p[1]})) };
+                        const c1Data = { projectId: cable.projectId, name: name1, capacity: cable.capacity, color: cable.color, startNode: cable.startNode, endNode: node.id, path: path1.map(p => ({lat: p[0], lng: p[1]})), diagram: { [node.id]: { x: 300, y: 300, rotation: 270, flipped: false } } };
+                        const c2Data = { projectId: cable.projectId, name: name2, capacity: cable.capacity, color: cable.color, startNode: node.id, endNode: cable.endNode, path: path2.map(p => ({lat: p[0], lng: p[1]})), diagram: { [node.id]: { x: 800, y: 300, rotation: 90, flipped: true } } };
                         
                         await window.deleteCableFromFirebase(cable.id);
                         const c1Id = await window.saveCableToFirebase(c1Data);
@@ -829,6 +829,21 @@
             window.appState.nodeSetup.type = btn.getAttribute('data-type'); 
             window.appState.nodeSetup.icon = btn.getAttribute('data-icon'); 
             
+            // NOVO: Padrão CTO = Roxo e 1x8
+            if(window.appState.nodeSetup.type.includes('CTO')) {
+                window.appState.nodeSetup.color = '#a855f7';
+                window.appState.nodeSetup.splitter = '1x8';
+                
+                document.querySelectorAll('.color-btn').forEach(b => {
+                    b.classList.remove('selected');
+                    if(b.style.backgroundColor.includes('a855f7') || b.style.backgroundColor === 'rgb(168, 85, 247)') { b.classList.add('selected'); }
+                });
+
+                document.querySelectorAll('.splitter-pill').forEach(p => p.classList.remove('selected'));
+                const pill1x8 = document.querySelector('.splitter-pill[data-val="1x8"]');
+                if(pill1x8) pill1x8.classList.add('selected');
+            }
+
             if(!window.appState.editingNodeId) {
                 const type = window.appState.nodeSetup.type;
                 const sameTypeNodes = window.appState.nodes.filter(n => n.type === type && n.projectId === window.appState.currentProjectId);
@@ -847,7 +862,23 @@
         window.selectSplitterPill = function(pill) { document.querySelectorAll('.splitter-pill').forEach(p => p.classList.remove('selected')); pill.classList.add('selected'); window.appState.nodeSetup.splitter = pill.getAttribute('data-val') === 'Nenhum' ? null : pill.getAttribute('data-val'); };
         
         window.startNodePlacement = async function() { 
-            window.appState.nodeSetup.name = document.getElementById('input-caixa-nome').value; 
+            const newName = document.getElementById('input-caixa-nome').value.trim();
+            if(!newName) { window.showToast('Digite o nome da caixa', 'erro'); return; }
+
+            // NOVO: Verificar se o nome já existe
+            const isDuplicate = window.appState.nodes.some(n => 
+                n.projectId === window.appState.currentProjectId && 
+                n.name.toLowerCase() === newName.toLowerCase() && 
+                n.id !== window.appState.editingNodeId
+            );
+
+            if(isDuplicate) {
+                window.showToast('Erro: Já existe uma caixa com esse nome!', 'erro');
+                return;
+            }
+
+            window.appState.nodeSetup.name = newName; 
+            
             if (window.appState.editingNodeId) {
                 const node = window.appState.nodes.find(n => n.id === window.appState.editingNodeId);
                 if(node) {
@@ -1059,14 +1090,24 @@
             draggedBlock = null; document.onmousemove = null; document.onmouseup = null; 
         };
         
+        // NOVO: Cálculo Dinâmico do Lado da Conexão
         window.startFusionDrag = function(e, portId) { 
-            e.stopPropagation(); window.appState.isDraggingFusion = true; window.appState.fusionStartPort = portId; 
+            e.stopPropagation(); 
+            
+            // PREVINE FIBRA MORTA EM PORTA OCUPADA
+            const isOccupied = window.appState.fusions.some(f => f.nodeId === window.appState.selectedNodeId && (f.from === portId || f.to === portId));
+            if(isOccupied) {
+                window.showToast('Erro: Fibra já conectada!', 'erro');
+                return;
+            }
+
+            window.appState.isDraggingFusion = true; window.appState.fusionStartPort = portId; 
             const port = document.getElementById(portId); const portRect = port.getBoundingClientRect(); const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const zoom = window.appState.diagramZoom || 1;
             
             let pX = (portRect.left - canvasRect.left + (portRect.width/2)) / zoom;
             let pY = (portRect.top - canvasRect.top + (portRect.height/2)) / zoom;
-            window.appState.fusionStartCoords = { x: pX, y: pY }; 
             
+            window.appState.fusionStartCoords = { x: pX, y: pY }; 
             const activeLine = document.getElementById('active-fusion-line');
             activeLine.setAttribute('stroke', window.getPortColor(portId)); 
             activeLine.setAttribute('d', `M ${window.appState.fusionStartCoords.x} ${window.appState.fusionStartCoords.y} L ${window.appState.fusionStartCoords.x} ${window.appState.fusionStartCoords.y}`); 
@@ -1076,35 +1117,32 @@
             if(!window.appState.isDraggingFusion) return; 
             const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const zoom = window.appState.diagramZoom || 1;
             
-            const p1El = document.getElementById(window.appState.fusionStartPort); const r1 = p1El.getBoundingClientRect();
-            let p1X = (r1.left - canvasRect.left + (r1.width/2)) / zoom; let p1Y = (r1.top - canvasRect.top + (r1.height/2)) / zoom;
-            let p2X = (e.clientX - canvasRect.left) / zoom; let p2Y = (e.clientY - canvasRect.top) / zoom; 
+            const p1El = document.getElementById(window.appState.fusionStartPort);
+            const r1 = p1El.getBoundingClientRect();
+            
+            let p1X = (r1.left - canvasRect.left + (r1.width/2)) / zoom;
+            let p1Y = (r1.top - canvasRect.top + (r1.height/2)) / zoom;
+            let p2X = (e.clientX - canvasRect.left) / zoom; 
+            let p2Y = (e.clientY - canvasRect.top) / zoom; 
             
             const isSp1 = p1El.classList.contains('sp-port');
             if(isSp1) p1X = (p2X > p1X) ? ((r1.left - canvasRect.left + r1.width) / zoom) : ((r1.left - canvasRect.left) / zoom);
             
-            const v1 = window.getPortVector(window.appState.fusionStartPort, p1X, p1Y, p2X, p2Y);
-            const dist = Math.hypot(p2X - p1X, p2Y - p1Y);
-            const offset = Math.max(120, dist / 2); 
+            // NOVO: Ajuste do Offset do Curvamento para garantir linha reta
+            const cpOffset = Math.max(120, Math.abs(p2X - p1X) / 1.5); 
             
-            const cp1X = p1X + v1.x * offset; const cp1Y = p1Y + v1.y * offset;
-            const cp2X = p2X - v1.x * offset; const cp2Y = p2Y - v1.y * offset;
-            
-            const d = `M ${p1X} ${p1Y} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${p2X} ${p2Y}`; 
+            const d = `M ${p1X} ${p1Y} C ${p1X + cpOffset} ${p1Y}, ${p2X - cpOffset} ${p2Y}, ${p2X} ${p2Y}`; 
             document.getElementById('active-fusion-line').setAttribute('d', d); 
         };
         
         // NOVO: Lógica da Fibra Morta no Vazio
         window.handleFusionDragEnd = async function(e) { 
             if(!window.appState.isDraggingFusion) return; 
-            e.stopPropagation();
             
             const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); 
-            const canvasContainer = document.getElementById('diagram-canvas').parentElement;
             const zoom = window.appState.diagramZoom || 1;
-            
-            const dropX = (e.clientX - canvasRect.left + canvasContainer.scrollLeft) / zoom;
-            const dropY = (e.clientY - canvasRect.top + canvasContainer.scrollTop) / zoom;
+            const dropX = (e.clientX - canvasRect.left) / zoom;
+            const dropY = (e.clientY - canvasRect.top) / zoom;
             
             await window.saveFusionToFirebase({ 
                 nodeId: window.appState.selectedNodeId, 
@@ -1113,15 +1151,13 @@
                 deadX: dropX,
                 deadY: dropY
             });
-            window.showToast('Fibra Morta separada!', 'info');
+            window.showToast('Fibra Morta criada!', 'info');
             
             window.appState.isDraggingFusion = false; document.getElementById('active-fusion-line').setAttribute('d', ''); 
         };
         
         window.endFusionDrag = async function(e, targetPortId) { 
-            e.stopPropagation(); 
-            if(!window.appState.isDraggingFusion) return; 
-            
+            if(!window.appState.isDraggingFusion) return; e.stopPropagation(); 
             if(window.appState.fusionStartPort !== targetPortId) { 
                 const existing = window.appState.fusions.find(f => (f.nodeId === window.appState.selectedNodeId) && (f.from === targetPortId || f.to === targetPortId || f.from === window.appState.fusionStartPort || f.to === window.appState.fusionStartPort));
                 if(existing) { window.showToast('Porta ocupada.', 'aviso'); } else {
@@ -1165,23 +1201,16 @@
 
                 const isSp1 = p1El.classList.contains('sp-port');
                 
+                // Ajuste de Saída dos Splitters baseado na Posição de Destino
                 if(isSp1) p1X = (p2X > p1X) ? ((r1.left - canvasRect.left + r1.width) / zoom) : ((r1.left - canvasRect.left) / zoom);
                 if(isSp2) {
                     const p2El = document.getElementById(fusion.to); const r2 = p2El.getBoundingClientRect();
                     p2X = (p1X > p2X) ? ((r2.left - canvasRect.left + r2.width) / zoom) : ((r2.left - canvasRect.left) / zoom);
                 }
                 
-                const v1 = window.getPortVector(fusion.from, p1X, p1Y, p2X, p2Y);
-                let v2;
-                if(isDeadEnd) { v2 = { x: -v1.x, y: -v1.y }; } else { v2 = window.getPortVector(fusion.to, p2X, p2Y, p1X, p1Y); }
-                
-                const dist = Math.hypot(p2X - p1X, p2Y - p1Y);
-                const offset = Math.max(120, dist / 2); 
-                
-                const cp1X = p1X + v1.x * offset; const cp1Y = p1Y + v1.y * offset;
-                const cp2X = p2X + v2.x * offset; const cp2Y = p2Y + v2.y * offset;
-                
-                const d = `M ${p1X} ${p1Y} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${p2X} ${p2Y}`;
+                // NOVO: Ajuste do Curvamento para garantir linha reta (Bézier Curve)
+                const cpOffset = Math.max(120, Math.abs(p2X - p1X) / 1.5); 
+                const d = `M ${p1X} ${p1Y} C ${p1X + cpOffset} ${p1Y}, ${p2X - cpOffset} ${p2Y}, ${p2X} ${p2Y}`;
                 
                 const color1 = window.getPortColor(fusion.from);
                 const color2 = isDeadEnd ? '#ef4444' : window.getPortColor(fusion.to);
@@ -1189,7 +1218,8 @@
 
                 if(defs) {
                     const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-                    grad.setAttribute('id', gradId); grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+                    grad.setAttribute('id', gradId);
+                    grad.setAttribute('gradientUnits', 'userSpaceOnUse');
                     grad.setAttribute('x1', p1X); grad.setAttribute('y1', p1Y);
                     grad.setAttribute('x2', p2X); grad.setAttribute('y2', p2Y);
                     grad.innerHTML = `<stop offset="50%" stop-color="${color1}"/><stop offset="50%" stop-color="${color2}"/>`;
@@ -1197,7 +1227,8 @@
                 }
 
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); 
-                path.setAttribute('d', d); path.setAttribute('stroke', `url(#${gradId})`); 
+                path.setAttribute('d', d); 
+                path.setAttribute('stroke', `url(#${gradId})`); 
                 path.setAttribute('stroke-width', '4'); path.setAttribute('fill', 'none'); path.setAttribute('stroke-linecap', 'round'); 
                 
                 path.classList.add('fusion-line-clickable');
@@ -1212,7 +1243,9 @@
                     trash.onmouseleave = () => trash.style.display = 'none';
                     trash.onclick = () => { trash.style.display = 'none'; window.deletarFusao(fusion.id); };
                 };
-                path.onmouseleave = function(e) { setTimeout(() => { const trash = document.getElementById('floating-trash'); if(trash && !trash.matches(':hover')) trash.style.display = 'none'; }, 100); };
+                path.onmouseleave = function(e) {
+                    setTimeout(() => { const trash = document.getElementById('floating-trash'); if(trash && !trash.matches(':hover')) trash.style.display = 'none'; }, 100);
+                };
                 
                 if(isDeadEnd) {
                     const deadLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
