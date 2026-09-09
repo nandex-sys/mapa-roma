@@ -436,7 +436,7 @@
                 </div>
                 <div id="cto-settings" style="display:none;" class="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
                     <label class="input-label text-slate-600 mb-3">SPLITTER INTERNO (OPCIONAL)</label>
-                    <div class="splitter-pills" id="splitter-pills-container"><div class="splitter-pill" data-val="Nenhum" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> Nenhum</div><div class="splitter-pill" data-val="1x2" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/2</div><div class="splitter-pill" data-val="1x4" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/4</div><div class="splitter-pill" data-val="1x8" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/8</div><div class="splitter-pill selected" data-val="1x16" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/16</div></div>
+                    <div class="splitter-pills" id="splitter-pills-container"><div class="splitter-pill" data-val="Nenhum" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> Nenhum</div><div class="splitter-pill" data-val="1x2" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/2</div><div class="splitter-pill" data-val="1x4" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/4</div><div class="splitter-pill selected" data-val="1x8" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/8</div><div class="splitter-pill" data-val="1x16" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/16</div></div>
                 </div>
                 <label class="input-label mb-3">COR DE IDENTIFICAÇÃO</label>
                 <div class="color-palette" id="caixa-color-palette"></div>
@@ -691,7 +691,6 @@
                         const name1 = `${cable.capacity} FO - ${nodeA ? nodeA.name : 'Origem'} sentido ${node.name}`;
                         const name2 = `${cable.capacity} FO - ${node.name} sentido ${nodeB ? nodeB.name : 'Destino'}`;
                         
-                        // NOVO: Posicionamento automático da Sangria Face-a-Face
                         const c1Data = { projectId: cable.projectId, name: name1, capacity: cable.capacity, color: cable.color, startNode: cable.startNode, endNode: node.id, path: path1.map(p => ({lat: p[0], lng: p[1]})), diagram: { [node.id]: { x: 300, y: 300, rotation: 0, sideFlipped: false } } };
                         const c2Data = { projectId: cable.projectId, name: name2, capacity: cable.capacity, color: cable.color, startNode: node.id, endNode: cable.endNode, path: path2.map(p => ({lat: p[0], lng: p[1]})), diagram: { [node.id]: { x: 800, y: 300, rotation: 0, sideFlipped: true } } };
                         
@@ -986,14 +985,18 @@
                 const origin = window.appState.nodes.find(n => n.id === cable.startNode); 
                 let diag = cable.diagram?.[node.id] || { x: 100, y: yOffsetIn, rotation: 0, flipped: false, sideFlipped: false };
                 if(!cable.diagram || !cable.diagram[node.id]) yOffsetIn += 150;
-                window.createCableBlock(canvas, cable, `CBL-${cable.id.substring(0,4)}`, `-> ${origin ? origin.name.toUpperCase() : 'ORIGEM'}`, diag.x, diag.y, diag.rotation, diag.flipped, diag.sideFlipped); 
+                
+                // NOVO: Usa o nome da origem real e descarta o sub 'CABO FO'
+                window.createCableBlock(canvas, cable, origin ? origin.name.toUpperCase() : 'ORIGEM', '', diag.x, diag.y, diag.rotation, diag.flipped, diag.sideFlipped); 
             }); 
             
             outgoing.forEach(cable => { 
                 const dest = window.appState.nodes.find(n => n.id === cable.endNode); 
                 let diag = cable.diagram?.[node.id] || { x: 800, y: yOffsetOut, rotation: 0, flipped: false, sideFlipped: true };
                 if(!cable.diagram || !cable.diagram[node.id]) yOffsetOut += 150;
-                window.createCableBlock(canvas, cable, `CBL-${cable.id.substring(0,4)}`, `-> ${dest ? dest.name.toUpperCase() : 'DESTINO'}`, diag.x, diag.y, diag.rotation, diag.flipped, diag.sideFlipped); 
+                
+                // NOVO: Usa o nome do destino real e descarta o sub 'CABO FO'
+                window.createCableBlock(canvas, cable, dest ? dest.name.toUpperCase() : 'DESTINO', '', diag.x, diag.y, diag.rotation, diag.flipped, diag.sideFlipped); 
             }); 
             
             const mySplitters = window.appState.splitters.filter(s => s.nodeId === node.id);
@@ -1005,7 +1008,6 @@
         
         window.closeCanvasDiagram = function() { document.getElementById('diagram-view').style.display = 'none'; };
 
-        // ADICIONADO: Rotacionar em botões diretos e menu contexto
         window.rotateBlock = async function(type = window.activeContextMenuType, id = window.activeContextMenuId) {
             let el, newRot;
             if(type === 'splitter') {
@@ -1029,13 +1031,14 @@
             block.dataset.id = cable.id; block.style.left = `${startX}px`; block.style.top = `${startY}px`; block.style.transform = `rotate(${startRot}deg)`;
             block.setAttribute('oncontextmenu', `window.showContextMenu(event, 'cable', '${cable.id}')`);
             
+            // NOVO LAYOUT DO CABO - Somente o nome em negrito/grande e a capacidade
             let infoHtml = `<div class="cable-block-info" onmousedown="window.startDragBlock(event, this.parentElement)">
                 <div style="display: flex; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">
                     <i class="fa-solid fa-rotate-right cursor-pointer text-gray-400 hover:text-blue-500" onmousedown="event.stopPropagation(); window.rotateBlock('cable', '${cable.id}')" title="Rotacionar"></i>
                     <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-gray-400 hover:text-blue-500" onmousedown="event.stopPropagation(); window.activeContextMenuType='cable'; window.activeContextMenuId='${cable.id}'; window.toggleSide()" title="Inverter Lado"></i>
                     <i class="fa-solid fa-arrows-up-down cursor-pointer text-gray-400 hover:text-blue-500" onmousedown="event.stopPropagation(); window.activeContextMenuType='cable'; window.activeContextMenuId='${cable.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
                 </div>
-                <div class="cb-title">${title}</div><div class="cb-cap">${cable.capacity} FIBRAS</div><div class="cb-dest">${sub.replace('CABO 6FO','').replace('CABO 12FO','').replace('CABO 36FO','').trim()}</div>
+                <div class="cb-title">${title}</div><div class="cb-cap">${cable.capacity} FIBRAS</div>
             </div>`; 
             
             let fibersHtml = '<div class="fiber-grid">'; 
@@ -1052,8 +1055,10 @@
             const block = document.createElement('div'); block.className = `splitter-tri ${sideFlipped ? 'side-flipped' : ''}`; 
             block.dataset.id = splitter.id; block.style.left = `${startX}px`; block.style.top = `${startY}px`; block.style.transform = `rotate(${startRot}deg)`;
             block.setAttribute('oncontextmenu', `window.showContextMenu(event, 'splitter', '${splitter.id}')`);
+            
             const outs = parseInt(splitter.type.split('x')[1]);
-            const h = outs * 24; 
+            // AUMENTO NO TAMANHO DA CAIXA - Mais alto e robusto
+            const h = Math.max(outs * 30, 60); 
             
             let actionsHtml = `<div style="position: absolute; top: -30px; left: 0; display: flex; gap: 8px; background: white; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 10;">
                 <i class="fa-solid fa-rotate-right cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.rotateBlock('splitter', '${splitter.id}')" title="Rotacionar"></i>
@@ -1066,16 +1071,18 @@
                 <div id="sp-${splitter.id}-in" class="fiber-port sp-port in" style="background:#111827; color:white; width:20px; height:20px; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 2px 4px rgba(0,0,0,0.3);" onmousedown="window.startFusionDrag(event, 'sp-${splitter.id}-in')" onmouseup="window.endFusionDrag(event, 'sp-${splitter.id}-in')" title="IN">1</div>
             </div>`;
             
-            let pathD = sideFlipped ? `M 50,${h/2} L 10,10 L 10,${h-10} Z` : `M 10,${h/2} L 50,10 L 50,${h-10} Z`;
+            // NOVO: Escala Horizontal maior e PREENCHIMENTO (#e2e8f0)
+            let pathD = sideFlipped ? `M 80,${h/2} L 10,10 L 10,${h-10} Z` : `M 10,${h/2} L 80,10 L 80,${h-10} Z`;
 
-            let svgHtml = `<div class="sp-body-svg" style="position: relative; width: 60px; height: ${h}px; display: flex; align-items: center; justify-content: center; margin: 0 -10px; z-index: 1;" onmousedown="window.startDragBlock(event, this.parentElement)">
-                <svg viewBox="0 0 60 ${h}" preserveAspectRatio="none" style="position:absolute; width:100%; height:100%; top:0; left:0;">
-                    <path d="${pathD}" fill="none" stroke="#111827" stroke-width="2"/>
-                    <circle cx="${sideFlipped ? 50 : 10}" cy="${h/2}" r="3" fill="#111827" />
-                    <circle cx="${sideFlipped ? 10 : 50}" cy="10" r="3" fill="#111827" />
-                    <circle cx="${sideFlipped ? 10 : 50}" cy="${h-10}" r="3" fill="#111827" />
+            let svgHtml = `<div class="sp-body-svg" style="position: relative; width: 90px; height: ${h}px; display: flex; align-items: center; justify-content: center; margin: 0 -10px; z-index: 1;" onmousedown="window.startDragBlock(event, this.parentElement)">
+                <svg viewBox="0 0 90 ${h}" preserveAspectRatio="none" style="position:absolute; width:100%; height:100%; top:0; left:0;">
+                    <!-- SVG com FILL para parecer um objeto sólido -->
+                    <path d="${pathD}" fill="#f1f5f9" stroke="#111827" stroke-width="2"/>
+                    <circle cx="${sideFlipped ? 80 : 10}" cy="${h/2}" r="3" fill="#111827" />
+                    <circle cx="${sideFlipped ? 10 : 80}" cy="10" r="3" fill="#111827" />
+                    <circle cx="${sideFlipped ? 10 : 80}" cy="${h-10}" r="3" fill="#111827" />
                 </svg>
-                <div class="sp-label" style="z-index: 3; background: white; border: 1px solid #e2e8f0; font-size: 9px; font-weight: 800; text-align: center; padding: 2px 6px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 20px;">${splitter.type} AC APC<br><span style="color:#059669; font-size:8px;">-8.0 dBm</span></div>
+                <div class="sp-label" style="z-index: 3; background: white; border: 1px solid #e2e8f0; font-size: 10px; font-weight: 800; text-align: center; padding: 4px 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 20px;">${splitter.type} AC APC<br><span style="color:#059669; font-size:9px;">-8.0 dBm</span></div>
             </div>`;
 
             let portsHtml = `<div class="sp-out-col" style="display: flex; flex-direction: column; justify-content: space-around; height: ${h}px; z-index: 2;">`;
@@ -1143,7 +1150,6 @@
         window.startFusionDrag = function(e, portId) { 
             e.stopPropagation(); 
             
-            // PREVINE FIBRA MORTA EM PORTA OCUPADA
             const isOccupied = window.appState.fusions.some(f => f.nodeId === window.appState.selectedNodeId && (f.from === portId || f.to === portId));
             if(isOccupied) { window.showToast('Erro: Porta já conectada!', 'erro'); return; }
 
@@ -1191,9 +1197,13 @@
         
         window.endFusionDrag = async function(e, targetPortId) { 
             e.stopPropagation(); if(!window.appState.isDraggingFusion) return; 
+            
             if(window.appState.fusionStartPort !== targetPortId) { 
                 const existing = window.appState.fusions.find(f => (f.nodeId === window.appState.selectedNodeId) && (f.from === targetPortId || f.to === targetPortId || f.from === window.appState.fusionStartPort || f.to === window.appState.fusionStartPort));
-                if(existing) { window.showToast('Porta ocupada.', 'aviso'); } else { await window.saveFusionToFirebase({ nodeId: window.appState.selectedNodeId, from: window.appState.fusionStartPort, to: targetPortId }); window.showToast('Fusão salva na nuvem!', 'sucesso'); }
+                if(existing) { window.showToast('Porta ocupada.', 'aviso'); } else {
+                    await window.saveFusionToFirebase({ nodeId: window.appState.selectedNodeId, from: window.appState.fusionStartPort, to: targetPortId });
+                    window.showToast('Fusão salva na nuvem!', 'sucesso'); 
+                }
             } 
             window.appState.isDraggingFusion = false; document.getElementById('active-fusion-line').setAttribute('d', ''); 
         };
