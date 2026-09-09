@@ -46,21 +46,43 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; overflow: hidden; background-color: var(--bg-main); margin: 0; padding: 0; }
         
-        .home-sidebar { width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
-        .home-main { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-main); overflow-y: auto; }
-        .home-header { height: 90px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0; }
-        .home-content { flex-grow: 1; display: flex; flex-direction: column; position: relative; padding: 40px; }
-        #projects-grid { display: flex; flex-wrap: wrap; gap: 24px; width: 100%; justify-content: flex-start; align-items: flex-start; }
-        .project-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; width: 280px; height: 160px; padding: 24px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
+        /* NOVO: Estilos do Dashboard Escuro para Projetos */
+        .home-sidebar {
+            width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border-color); display: flex; flex-direction: column;
+        }
+        .home-main {
+            flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-main); overflow-y: auto;
+        }
+        .home-header {
+            height: 90px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0;
+        }
+        .home-content {
+            flex-grow: 1; display: flex; flex-direction: column; position: relative; padding: 40px;
+        }
+        #projects-grid {
+            display: flex; flex-wrap: wrap; gap: 24px; width: 100%; justify-content: flex-start; align-items: flex-start;
+        }
+        .project-card {
+            background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; width: 280px; height: 160px; padding: 24px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden;
+        }
         .project-card:hover { border-color: var(--brand-green); transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
         .project-card::before { content: ''; position: absolute; top: -50px; right: -50px; width: 120px; height: 120px; background-color: var(--bg-main); border-radius: 50%; z-index: 0; opacity: 0.5; }
-        #empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 60vh; border: 2px dashed var(--border-color); border-radius: 16px; background-color: var(--bg-dashed); }
+        #empty-state {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 60vh; border: 2px dashed var(--border-color); border-radius: 16px; background-color: var(--bg-dashed);
+        }
         .btn-green { background-color: var(--brand-green); color: white; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px; border: none; }
         .btn-green:hover { background-color: var(--brand-green-hover); }
         .search-bar-dash { background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; gap: 8px; color: var(--text-secondary); width: 300px; }
         .search-bar-dash input { background: transparent; border: none; outline: none; color: var(--text-primary); width: 100%; font-size: 14px; }
 
-        #regions-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: var(--bg-main); z-index: 9999; display: flex; flex-direction: row; align-items: stretch; justify-content: flex-start; }
+        /* STREAMING_CHUNK:Estilos da Tela Inicial de Regiões... */
+        #regions-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: var(--bg-main); z-index: 9999;
+            display: flex; flex-direction: row; align-items: stretch; justify-content: flex-start;
+        }
+
+        /* SIDEBAR (MENU ESQUERDO) */
         .sidebar-logo { padding: 24px; display: flex; justify-content: space-between; align-items: flex-start; }
         .sidebar-section-title { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; padding: 16px 24px 8px 24px; letter-spacing: 0.05em; }
         .sidebar-item { padding: 10px 24px; display: flex; align-items: center; gap: 12px; color: var(--text-secondary); font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
@@ -75,15 +97,19 @@
         .chat-fab { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background-color: var(--brand-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; cursor: pointer; box-shadow: 0 10px 25px rgba(0,168,89,0.4); z-index: 9999; transition: transform 0.2s; }
         .chat-fab:hover { transform: scale(1.1); }
 
+        /* STREAMING_CHUNK:Estilos do Workspace de Mapa... */
         #app-workspace { display: none; width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; }
+        
         #map-container { position: absolute; top: 0; left: 0; height: 100vh; width: 100vw; z-index: 10; }
         .leaflet-control-zoom { display: none !important; }
+        
         .mode-placing #map-container { cursor: crosshair !important; }
         .mode-drawing #map-container { cursor: crosshair !important; }
 
         .top-toolbar { position: absolute; top: 20px; left: calc(50% + 130px); transform: translateX(-50%); z-index: 1000; display: flex; gap: 12px; align-items: center; background: transparent; width: 98%; max-width: 1400px; }
         .search-bar { background: white; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; align-items: center; padding: 8px 16px; flex-grow: 1; max-width: 350px; height: 48px; }
         .search-bar input { border: none; outline: none; width: 100%; font-size: 14px; color: #374151; background: transparent; }
+        
         .tools-group { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; align-items: center; padding: 4px; height: 48px; }
         .tool-btn { background: transparent; border: none; padding: 8px 16px; font-size: 12px; font-weight: 700; color: #4b5563; cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
         .tool-btn:hover { background: #f3f4f6; }
@@ -96,6 +122,7 @@
 
         .info-card { position: absolute; top: 80px; left: 20px; width: 360px; background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); z-index: 1000; padding: 24px; display: none; border: 1px solid #f3f4f6; }
         .action-buttons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        
         .btn-primary-blue { background-color: #2563eb; color: white; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s; border: none; }
         .btn-primary-blue:hover { background-color: #1d4ed8; }
         .btn-dark { background-color: #0f172a; color: white; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s; border: none; }
@@ -107,27 +134,33 @@
         .btn-small-action.danger { color: #ef4444; }
         .btn-small-action.danger:hover { background: #fef2f2; border-color: #fca5a5; }
 
+        /* STREAMING_CHUNK:Estilizando Modais Pop-up e Novo Modal de Caixa... */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(2px); z-index: 20000; display: none; align-items: center; justify-content: center; }
         .modal-content { background: white; border-radius: 20px; width: 100%; max-width: 480px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; }
         .modal-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f3f4f6; }
         .modal-header h2 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
         .modal-body { padding: 24px; max-height: 70vh; overflow-y: auto; }
+        
         .input-label { display: block; font-size: 11px; font-weight: 700; color: #6b7280; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
         .custom-input { width: 100%; padding: 12px 16px; border: 2px solid #0ea5e9; border-radius: 8px; font-size: 14px; font-weight: 600; color: #111827; outline: none; transition: border-color 0.2s; }
         .custom-input::placeholder { color: #94a3b8; font-weight: 500; }
+        
         .structure-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
         .structure-btn { border: 1px solid #e2e8f0; background: white; border-radius: 8px; padding: 16px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font-size: 11px; font-weight: 700; color: #64748b; cursor: pointer; transition: all 0.2s; }
         .structure-btn i { font-size: 20px; color: #94a3b8; transition: color 0.2s; }
         .structure-btn:hover { border-color: #cbd5e1; background-color: #f8fafc; }
         .structure-btn.selected { border-color: #60a5fa; background-color: #eff6ff; color: #1e293b; box-shadow: 0 0 0 1px #60a5fa inset; }
         .structure-btn.selected i { color: inherit; } 
+        
         .splitter-pills { display: flex; gap: 8px; flex-wrap: wrap; }
         .splitter-pill { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 12px; font-size: 11px; font-weight: 700; color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 6px; }
         .splitter-pill.selected { border-color: #60a5fa; background-color: #eff6ff; color: #2563eb; }
+        
         .color-palette { display: flex; gap: 12px; flex-wrap: wrap; background: #f8fafc; padding: 12px; border-radius: 12px; }
         .color-btn { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; border: 2px solid transparent; }
         .color-btn:hover { transform: scale(1.1); }
         .color-btn.selected { box-shadow: 0 0 0 3px white, 0 0 0 5px #334155; }
+        
         .modal-footer { padding: 20px 24px; border-top: 1px solid #f3f4f6; display: flex; justify-content: space-between; gap: 16px; }
         .btn-cancel { flex: 1; padding: 14px; background: white; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 700; color: #475569; cursor: pointer; transition: background 0.2s; }
         .btn-cancel:hover { background: #f1f5f9; }
@@ -135,26 +168,30 @@
         .btn-submit-dark:hover { background: #1e293b; }
         .btn-submit-orange { flex: 1; padding: 12px; background: #f97316; border: none; border-radius: 8px; font-weight: 600; color: white; cursor: pointer; }
 
+        /* NOTIFICAÇÕES E MAP ICONS */
         .instruction-banner { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; background: #111827; color: white; padding: 12px 24px; border-radius: 30px; font-weight: 600; font-size: 14px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); display: none; align-items: center; gap: 10px; }
         #toast-container { position: absolute; bottom: 20px; right: 20px; z-index: 999999; display: flex; flex-direction: column; gap: 10px; }
         .toast-msg { background: #111827; color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transform: translateY(20px); transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
         .toast-msg.show { opacity: 1; transform: translateY(0); }
 
+        /* ÍCONES LEAFLET E TOOLTIP FIX */
         .map-icon-wrapper { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; border: 2px solid white; transition: transform 0.2s; }
         .map-icon-wrapper.rounded-full { border-radius: 50%; }
         .leaflet-div-icon { background: transparent; border: none; }
         .node-anchorable .map-icon-wrapper { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5); transform: scale(1.1); }
         .node-hover .map-icon-wrapper { transform: scale(1.3); border-color: #3b82f6; z-index: 1000 !important;}
+        
         .transparent-tooltip { background: transparent !important; border: none !important; box-shadow: none !important; margin: 0 !important; padding: 0 !important; }
         .transparent-tooltip::before { display: none !important; }
 
+        /* INVENTÁRIO */
         #inventory-panel { position: absolute; top: 80px; right: 20px; width: 400px; max-height: calc(100vh - 100px); background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2); z-index: 1000; display: none; flex-direction: column; border: 1px solid #e5e7eb; overflow: hidden; }
         .inv-header { padding: 16px 20px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; background-color: #f8fafc; }
         .inv-list { overflow-y: auto; padding: 10px; flex-grow: 1; }
         .inv-item { padding: 12px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; transition: background 0.2s; cursor: pointer; }
         .inv-item:hover { background-color: #f0fdf4; }
 
-        /* ================= DIAGRAMA CANVAS OSP (NOVO LAYOUT) ================= */
+        /* ================= DIAGRAMA CANVAS OSP (NOVO LAYOUT TRIANGULAR) ================= */
         #diagram-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; z-index: 3000; display: none; flex-direction: column; }
         .diagram-toolbar { background: white; height: 60px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); z-index: 20; }
         .diag-tb-group { display: flex; align-items: center; gap: 12px; }
@@ -172,7 +209,7 @@
         .fusion-line-clickable { pointer-events: visibleStroke !important; cursor: pointer; transition: stroke-width 0.2s; }
         .fusion-line-clickable:hover { stroke: #ef4444 !important; stroke-width: 6px !important; }
 
-        /* NOVO LAYOUT DO CABO (WHITE-BOX) */
+        /* CABO WHITE-BOX */
         .cable-block { position: absolute; background: white; border: 1px solid #e2e8f0; border-radius: 6px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 2; min-width: 220px; display: flex; flex-direction: row; align-items: stretch; transition: transform 0.2s ease, left 0s, top 0s; transform-origin: center center; }
         .cable-block.side-flipped { flex-direction: row-reverse; }
         .cable-block-info { padding: 16px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; cursor: grab; background: white; border-radius: 6px; }
@@ -186,19 +223,20 @@
         .fiber-port { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; cursor: crosshair; user-select: none; transition: transform 0.1s; position: relative; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
         .fiber-port:hover { transform: scale(1.3); z-index: 10; box-shadow: 0 0 0 2px white inset, 0 2px 4px rgba(0,0,0,0.3); }
 
-        /* NOVO LAYOUT DO SPLITTER */
-        .splitter-block { position: absolute; background: white; border: 1px solid #e2e8f0; border-radius: 6px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 2; display: flex; flex-direction: row; align-items: stretch; transition: transform 0.2s ease, left 0s, top 0s; transform-origin: center center; }
-        .splitter-block.side-flipped { flex-direction: row-reverse; }
-        .sp-info { padding: 12px 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: grab; background: #f8fafc; }
-        .sp-info:active { cursor: grabbing; }
-        .sp-title { font-size: 11px; font-weight: 800; color: #0f172a; border: 1px solid #cbd5e1; padding: 2px 6px; border-radius: 4px; background: white; }
-        .sp-sub { font-size: 9px; font-weight: 700; color: #059669; margin-top: 4px; }
-        
-        .sp-port-container { display: flex; flex-direction: column; justify-content: space-around; padding: 12px 8px; gap: 6px; }
-        .sp-port { width: 18px; height: 18px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; cursor: crosshair; color: white; transition: transform 0.1s; }
-        .sp-port.in { background: #0f172a; border-radius: 50%; margin: auto 8px; }
-        .sp-port.out { background: #10b981; }
-        .sp-port:hover { transform: scale(1.3); }
+        /* SPLITTER TRIANGULAR */
+        .splitter-tri { position: absolute; z-index: 2; display: flex; flex-direction: row; align-items: stretch; transition: transform 0.2s ease, left 0s, top 0s; transform-origin: center center; }
+        .splitter-tri.side-flipped { flex-direction: row-reverse; }
+        .sp-in-col { display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2; }
+        .sp-out-col { display: flex; flex-direction: column; justify-content: space-around; z-index: 2; }
+        .sp-port { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; cursor: crosshair; color: white; transition: transform 0.1s; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        .sp-port:hover { transform: scale(1.3); z-index: 10; box-shadow: 0 0 0 2px white inset, 0 2px 4px rgba(0,0,0,0.3); }
+
+        /* MENU DE CONTEXTO (CLIQUE DIREITO) */
+        #context-menu { display: none; position: fixed; background: white; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); border-radius: 8px; z-index: 999999; padding: 6px 0; min-width: 200px; }
+        .cm-item { padding: 10px 16px; font-size: 12px; font-weight: 600; color: #334155; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.2s; }
+        .cm-item:hover { background: #f1f5f9; color: #0f172a; }
+        .cm-item.danger { color: #ef4444; border-bottom: 1px solid #f1f5f9; margin-bottom: 4px; padding-bottom: 10px; }
+        .cm-item.danger:hover { background: #fef2f2; color: #dc2626; }
 
         /* 12 Cores Oficiais das Fibras */
         .fiber-bg-1 { background-color: #22c55e; color: #ffffff; } /* Verde */
@@ -213,15 +251,6 @@
         .fiber-bg-10 { background-color: #64748b; color: #ffffff; } /* Cinza */
         .fiber-bg-11 { background-color: #f97316; color: #ffffff; } /* Laranja */
         .fiber-bg-12 { background-color: #06b6d4; color: #ffffff; } /* Aqua */
-        
-        #active-fusion-line { pointer-events: none; stroke-width: 4; stroke-dasharray: 6,6; fill: none; }
-
-        /* MENU DE CONTEXTO (CLIQUE DIREITO) */
-        #context-menu { display: none; position: fixed; background: white; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); border-radius: 8px; z-index: 999999; padding: 6px 0; min-width: 200px; }
-        .cm-item { padding: 10px 16px; font-size: 12px; font-weight: 600; color: #334155; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.2s; }
-        .cm-item:hover { background: #f1f5f9; color: #0f172a; }
-        .cm-item.danger { color: #ef4444; border-bottom: 1px solid #f1f5f9; margin-bottom: 4px; padding-bottom: 10px; }
-        .cm-item.danger:hover { background: #fef2f2; color: #dc2626; }
 
         /* DATA CENTER (INSIDE PLANT) */
         #inside-plant-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #f3f4f6; z-index: 3000; display: none; overflow-y: auto; }
@@ -407,7 +436,7 @@
                 </div>
                 <div id="cto-settings" style="display:none;" class="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
                     <label class="input-label text-slate-600 mb-3">SPLITTER INTERNO (OPCIONAL)</label>
-                    <div class="splitter-pills" id="splitter-pills-container"><div class="splitter-pill" data-val="Nenhum" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> Nenhum</div><div class="splitter-pill" data-val="1x2" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/2</div><div class="splitter-pill" data-val="1x4" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/4</div><div class="splitter-pill selected" data-val="1x8" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/8</div><div class="splitter-pill" data-val="1x16" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/16</div></div>
+                    <div class="splitter-pills" id="splitter-pills-container"><div class="splitter-pill" data-val="Nenhum" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> Nenhum</div><div class="splitter-pill" data-val="1x2" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/2</div><div class="splitter-pill" data-val="1x4" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/4</div><div class="splitter-pill" data-val="1x8" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/8</div><div class="splitter-pill selected" data-val="1x16" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/16</div></div>
                 </div>
                 <label class="input-label mb-3">COR DE IDENTIFICAÇÃO</label>
                 <div class="color-palette" id="caixa-color-palette"></div>
@@ -491,7 +520,7 @@
         };
 
         const THEME_COLORS = ['#0ea5e9', '#1d4ed8', '#f97316', '#ef4444', '#22c55e', '#eab308', '#a855f7', '#ec4899', '#000000', '#737373', '#78350f'];
-        const FIBER_COLORS = ['#22c55e', '#eab308', '#cbd5e1', '#3b82f6', '#ef4444', '#a855f7', '#78350f', '#ec4899', '#111827', '#64748b', '#f97316', '#06b6d4']; // 12 Cores Oficiais
+        const FIBER_COLORS = ['#22c55e', '#eab308', '#cbd5e1', '#3b82f6', '#ef4444', '#a855f7', '#78350f', '#ec4899', '#111827', '#64748b', '#f97316', '#06b6d4'];
 
         window.getPortColor = function(portId) {
             if(portId.startsWith('port-')) { const parts = portId.split('-'); return FIBER_COLORS[parseInt(parts[parts.length-1]) % 12]; } 
@@ -512,7 +541,7 @@
             window.renderMap();
         };
 
-        // NOVO: Menu de Contexto Dinâmico
+        // Menu de Contexto Dinâmico
         window.activeContextMenuId = null;
         window.activeContextMenuType = null;
         
@@ -662,6 +691,7 @@
                         const name1 = `${cable.capacity} FO - ${nodeA ? nodeA.name : 'Origem'} sentido ${node.name}`;
                         const name2 = `${cable.capacity} FO - ${node.name} sentido ${nodeB ? nodeB.name : 'Destino'}`;
                         
+                        // NOVO: Posicionamento automático da Sangria Face-a-Face
                         const c1Data = { projectId: cable.projectId, name: name1, capacity: cable.capacity, color: cable.color, startNode: cable.startNode, endNode: node.id, path: path1.map(p => ({lat: p[0], lng: p[1]})), diagram: { [node.id]: { x: 300, y: 300, rotation: 0, sideFlipped: false } } };
                         const c2Data = { projectId: cable.projectId, name: name2, capacity: cable.capacity, color: cable.color, startNode: node.id, endNode: cable.endNode, path: path2.map(p => ({lat: p[0], lng: p[1]})), diagram: { [node.id]: { x: 800, y: 300, rotation: 0, sideFlipped: true } } };
                         
@@ -685,9 +715,49 @@
         };
 
         map.on('mousemove', function(e) { if (window.appState.mode === 'drawing_cable' && window.appState.cableStartNodeId !== null) { const endPos = window.appState.snapNodePos ? window.appState.snapNodePos : [e.latlng.lat, e.latlng.lng]; const dynamicPath = [...window.appState.cablePath, endPos]; if (!window.appState.tempPolyline) { window.appState.tempPolyline = L.polyline(dynamicPath, { color: window.appState.cableSetup.color, weight: 4, opacity: 0.8, className: 'preview-line-active' }).addTo(drawLayer); } else { window.appState.tempPolyline.setLatLngs(dynamicPath); } } });
-        map.on('click', async function(e) { if (window.appState.mode === 'placing_node') { const internalState = { hasDIO: false, splitters: [] }; if(window.appState.nodeSetup.type.includes('CTO') && window.appState.nodeSetup.splitter) internalState.splitters.push({ type: window.appState.nodeSetup.splitter, id: 'SPL001' }); const newId = await window.saveNodeToFirebase({ projectId: window.appState.currentProjectId, name: window.appState.nodeSetup.name, type: window.appState.nodeSetup.type, icon: window.appState.nodeSetup.icon, color: window.appState.nodeSetup.color, lat: e.latlng.lat, lng: e.latlng.lng, internal: internalState }); await window.checkAndSplitCable({ id: newId, lat: e.latlng.lat, lng: e.latlng.lng, name: window.appState.nodeSetup.name }); const match = window.appState.nodeSetup.name.match(/^(.*? )(\d+)(.*)$/); if (match) { window.appState.nodeSetup.name = match[1] + String(parseInt(match[2], 10) + 1).padStart(match[2].length, '0') + match[3]; } else { window.appState.nodeSetup.name += " 2"; } document.getElementById('instruction-text').innerHTML = `Clique para inserir <b>${window.appState.nodeSetup.name}</b>.`; } else if (window.appState.mode === 'drawing_cable') { if (window.appState.cableStartNodeId !== null && !window.appState.snapNodePos) { window.appState.cablePath.push([e.latlng.lat, e.latlng.lng]); if (window.appState.tempPolyline) window.appState.tempPolyline.setLatLngs(window.appState.cablePath); } } else { window.closeInfoCard(); document.getElementById('inventory-panel').style.display = 'none'; } });
+        map.on('click', async function(e) { 
+            if (window.appState.mode === 'placing_node') { 
+                const internalState = { hasDIO: false, splitters: [] }; 
+                if(window.appState.nodeSetup.type.includes('CTO') && window.appState.nodeSetup.splitter) internalState.splitters.push({ type: window.appState.nodeSetup.splitter, id: 'SPL001' }); 
+                
+                const newId = await window.saveNodeToFirebase({ projectId: window.appState.currentProjectId, name: window.appState.nodeSetup.name, type: window.appState.nodeSetup.type, icon: window.appState.nodeSetup.icon, color: window.appState.nodeSetup.color, lat: e.latlng.lat, lng: e.latlng.lng, internal: internalState }); 
+                
+                await window.checkAndSplitCable({ id: newId, lat: e.latlng.lat, lng: e.latlng.lng, name: window.appState.nodeSetup.name });
+                
+                const match = window.appState.nodeSetup.name.match(/^(.*? )(\d+)(.*)$/); 
+                if (match) { window.appState.nodeSetup.name = match[1] + String(parseInt(match[2], 10) + 1).padStart(match[2].length, '0') + match[3]; } 
+                else { window.appState.nodeSetup.name += " 2"; } 
+                
+                document.getElementById('instruction-text').innerHTML = `Clique para inserir <b>${window.appState.nodeSetup.name}</b>.`; 
+            } else if (window.appState.mode === 'drawing_cable') { 
+                if (window.appState.cableStartNodeId !== null && !window.appState.snapNodePos) { 
+                    window.appState.cablePath.push([e.latlng.lat, e.latlng.lng]); 
+                    if (window.appState.tempPolyline) window.appState.tempPolyline.setLatLngs(window.appState.cablePath); 
+                } 
+            } else { window.closeInfoCard(); document.getElementById('inventory-panel').style.display = 'none'; } 
+        });
 
-        window.handleNodeInteraction = async function(node, eventType) { if (eventType === 'click') { if (window.appState.mode === 'view') { window.openInfoCard(node); } else if (window.appState.mode === 'drawing_cable') { if (window.appState.cableStartNodeId === null) { window.appState.cableStartNodeId = node.id; window.appState.cablePath.push([node.lat, node.lng]); window.showToast(`Ancorado em ${node.name}.`); } else if (window.appState.cableStartNodeId !== node.id) { window.appState.cablePath.push([node.lat, node.lng]); const firebasePath = window.appState.cablePath.map(coord => ({ lat: coord[0], lng: coord[1] })); const nodeA = window.appState.nodes.find(n => n.id === window.appState.cableStartNodeId); const autoName = `${window.appState.cableSetup.capacity} FO - ${nodeA.name} sentido ${node.name}`; await window.saveCableToFirebase({ projectId: window.appState.currentProjectId, name: autoName, capacity: window.appState.cableSetup.capacity, color: window.appState.cableSetup.color, startNode: window.appState.cableStartNodeId, endNode: node.id, path: firebasePath }); window.showToast(`Cabo finalizado!`, "sucesso"); window.setMode('view'); } } } else if (eventType === 'mouseover' && window.appState.mode === 'drawing_cable' && window.appState.cableStartNodeId !== null) { if(node.id !== window.appState.cableStartNodeId) { window.appState.snapNodePos = [node.lat, node.lng]; } } else if (eventType === 'mouseout' && window.appState.mode === 'drawing_cable') { window.appState.snapNodePos = null; } };
+        window.handleNodeInteraction = async function(node, eventType) { 
+            if (eventType === 'click') { 
+                if (window.appState.mode === 'view') { window.openInfoCard(node); } 
+                else if (window.appState.mode === 'drawing_cable') { 
+                    if (window.appState.cableStartNodeId === null) { 
+                        window.appState.cableStartNodeId = node.id; window.appState.cablePath.push([node.lat, node.lng]); window.showToast(`Ancorado em ${node.name}.`); 
+                    } else if (window.appState.cableStartNodeId !== node.id) { 
+                        window.appState.cablePath.push([node.lat, node.lng]); 
+                        const firebasePath = window.appState.cablePath.map(coord => ({ lat: coord[0], lng: coord[1] })); 
+                        
+                        const nodeA = window.appState.nodes.find(n => n.id === window.appState.cableStartNodeId);
+                        const autoName = `${window.appState.cableSetup.capacity} FO - ${nodeA.name} sentido ${node.name}`;
+
+                        await window.saveCableToFirebase({ projectId: window.appState.currentProjectId, name: autoName, capacity: window.appState.cableSetup.capacity, color: window.appState.cableSetup.color, startNode: window.appState.cableStartNodeId, endNode: node.id, path: firebasePath }); 
+                        window.showToast(`Cabo finalizado!`, "sucesso"); window.setMode('view'); 
+                    } 
+                } 
+            } else if (eventType === 'mouseover' && window.appState.mode === 'drawing_cable' && window.appState.cableStartNodeId !== null) { 
+                if(node.id !== window.appState.cableStartNodeId) { window.appState.snapNodePos = [node.lat, node.lng]; } 
+            } else if (eventType === 'mouseout' && window.appState.mode === 'drawing_cable') { window.appState.snapNodePos = null; } 
+        };
 
         window.renderMap = function() { 
             if(!window.appState.currentProjectId) return;
@@ -842,7 +912,6 @@
             }
         };
 
-        // Ações de Contexto (Menu Direito)
         window.toggleSide = async function() {
             if(window.activeContextMenuType === 'cable') {
                 const cb = window.appState.cables.find(c => c.id === window.activeContextMenuId); if(!cb) return;
@@ -870,13 +939,9 @@
         };
 
         window.removeBlock = async function() {
-            if(window.activeContextMenuType === 'splitter') {
-                window.deleteSplitter(window.activeContextMenuId);
-            } else if (window.activeContextMenuType === 'cable') {
-                if(confirm('Isso excluirá o cabo de todo o sistema. Continuar?')) {
-                    await window.deleteCableFromFirebase(window.activeContextMenuId);
-                    window.openCanvasDiagram();
-                }
+            if(window.activeContextMenuType === 'splitter') { window.deleteSplitter(window.activeContextMenuId); } 
+            else if (window.activeContextMenuType === 'cable') {
+                if(confirm('Isso excluirá o cabo de todo o sistema. Continuar?')) { await window.deleteCableFromFirebase(window.activeContextMenuId); window.openCanvasDiagram(); }
             }
         };
 
@@ -890,7 +955,7 @@
 
         window.getPortVector = function(portId, p1X, p1Y, p2X, p2Y) {
             const portEl = document.getElementById(portId); if(!portEl) return {x:1, y:0};
-            const block = portEl.closest('.cable-block, .splitter-block'); if(!block) return {x:1, y:0};
+            const block = portEl.closest('.cable-block, .splitter-block, .splitter-tri'); if(!block) return {x:1, y:0};
             let rot = 0; const transform = block.style.transform;
             if(transform && transform.includes('rotate')) { const match = transform.match(/rotate\((-?\d+)deg\)/); if(match) rot = parseInt(match[1]); }
             const rad = rot * Math.PI / 180;
@@ -899,7 +964,7 @@
 
             if (block.classList.contains('cable-block')) {
                 baseV = isFlippedSide ? {x: -1, y: 0} : {x: 1, y: 0};
-            } else if (block.classList.contains('splitter-block')) {
+            } else if (block.classList.contains('splitter-tri') || block.classList.contains('splitter-block')) {
                 const isInPort = portEl.classList.contains('in');
                 if (isInPort) { baseV = isFlippedSide ? {x: 1, y: 0} : {x: -1, y: 0}; } 
                 else { baseV = isFlippedSide ? {x: -1, y: 0} : {x: 1, y: 0}; }
@@ -912,7 +977,7 @@
             document.getElementById('diag-toolbar-title').innerText = node.name; document.getElementById('diag-center-name').innerText = node.name; 
             const incoming = window.appState.cables.filter(c => c.endNode === node.id); const outgoing = window.appState.cables.filter(c => c.startNode === node.id); 
             const canvas = document.getElementById('diagram-canvas'); 
-            const blocks = canvas.querySelectorAll('.cable-block, .splitter-block'); blocks.forEach(b => b.remove()); 
+            const blocks = canvas.querySelectorAll('.cable-block, .splitter-block, .splitter-tri'); blocks.forEach(b => b.remove()); 
             
             document.getElementById('fusion-lines').innerHTML = '<defs id="fusion-defs"></defs><path id="active-fusion-line" d="" />'; 
             let yOffsetIn = 100; let yOffsetOut = 100; 
@@ -940,12 +1005,36 @@
         
         window.closeCanvasDiagram = function() { document.getElementById('diagram-view').style.display = 'none'; };
 
+        // ADICIONADO: Rotacionar em botões diretos e menu contexto
+        window.rotateBlock = async function(type = window.activeContextMenuType, id = window.activeContextMenuId) {
+            let el, newRot;
+            if(type === 'splitter') {
+                const sp = window.appState.splitters.find(s => s.id === id); if(!sp) return;
+                newRot = (sp.rotation || 0) + 90; if(newRot >= 360) newRot = 0;
+                el = document.querySelector(`.splitter-block[data-id="${id}"], .splitter-tri[data-id="${id}"]`); if(el) { el.style.transform = `rotate(${newRot}deg)`; }
+                await window.updateSplitterInFirebase(id, { rotation: newRot });
+            } else if(type === 'cable') {
+                const cb = window.appState.cables.find(c => c.id === id); if(!cb) return;
+                let diag = cb.diagram || {}; let currentRot = diag[window.appState.selectedNodeId]?.rotation || 0;
+                newRot = currentRot + 90; if(newRot >= 360) newRot = 0;
+                diag[window.appState.selectedNodeId] = { ...diag[window.appState.selectedNodeId], rotation: newRot };
+                el = document.querySelector(`.cable-block[data-id="${id}"]`); if(el) { el.style.transform = `rotate(${newRot}deg)`; }
+                await window.updateCableInFirebase(id, { diagram: diag });
+            }
+            setTimeout(() => window.updateAllFusionLines(), 250); 
+        };
+
         window.createCableBlock = function(canvas, cable, title, sub, startX, startY, startRot=0, isFlipped=false, sideFlipped=false) { 
             const block = document.createElement('div'); block.className = `cable-block ${sideFlipped ? 'side-flipped' : ''}`; 
             block.dataset.id = cable.id; block.style.left = `${startX}px`; block.style.top = `${startY}px`; block.style.transform = `rotate(${startRot}deg)`;
             block.setAttribute('oncontextmenu', `window.showContextMenu(event, 'cable', '${cable.id}')`);
             
             let infoHtml = `<div class="cable-block-info" onmousedown="window.startDragBlock(event, this.parentElement)">
+                <div style="display: flex; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">
+                    <i class="fa-solid fa-rotate-right cursor-pointer text-gray-400 hover:text-blue-500" onmousedown="event.stopPropagation(); window.rotateBlock('cable', '${cable.id}')" title="Rotacionar"></i>
+                    <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-gray-400 hover:text-blue-500" onmousedown="event.stopPropagation(); window.activeContextMenuType='cable'; window.activeContextMenuId='${cable.id}'; window.toggleSide()" title="Inverter Lado"></i>
+                    <i class="fa-solid fa-arrows-up-down cursor-pointer text-gray-400 hover:text-blue-500" onmousedown="event.stopPropagation(); window.activeContextMenuType='cable'; window.activeContextMenuId='${cable.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
+                </div>
                 <div class="cb-title">${title}</div><div class="cb-cap">${cable.capacity} FIBRAS</div><div class="cb-dest">${sub.replace('CABO 6FO','').replace('CABO 12FO','').replace('CABO 36FO','').trim()}</div>
             </div>`; 
             
@@ -960,21 +1049,46 @@
         };
         
         window.createSplitterBlock = function(canvas, splitter, startX, startY, startRot=0, isFlipped=false, sideFlipped=false) {
-            const block = document.createElement('div'); block.className = `splitter-block ${sideFlipped ? 'side-flipped' : ''}`; 
+            const block = document.createElement('div'); block.className = `splitter-tri ${sideFlipped ? 'side-flipped' : ''}`; 
             block.dataset.id = splitter.id; block.style.left = `${startX}px`; block.style.top = `${startY}px`; block.style.transform = `rotate(${startRot}deg)`;
             block.setAttribute('oncontextmenu', `window.showContextMenu(event, 'splitter', '${splitter.id}')`);
             const outs = parseInt(splitter.type.split('x')[1]);
+            const h = outs * 24; 
             
-            let inHtml = `<div class="sp-port-container"><div id="sp-${splitter.id}-in" class="sp-port in" onmousedown="window.startFusionDrag(event, 'sp-${splitter.id}-in')" onmouseup="window.endFusionDrag(event, 'sp-${splitter.id}-in')" title="IN">IN</div></div>`;
-            let infoHtml = `<div class="sp-info" onmousedown="window.startDragBlock(event, this.parentElement)"><div class="sp-title">${splitter.type}</div><div class="sp-sub">-8.0 dBm</div></div>`;
+            let actionsHtml = `<div style="position: absolute; top: -30px; left: 0; display: flex; gap: 8px; background: white; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 10;">
+                <i class="fa-solid fa-rotate-right cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.rotateBlock('splitter', '${splitter.id}')" title="Rotacionar"></i>
+                <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.activeContextMenuType='splitter'; window.activeContextMenuId='${splitter.id}'; window.toggleSide()" title="Inverter Lado"></i>
+                <i class="fa-solid fa-arrows-up-down cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.activeContextMenuType='splitter'; window.activeContextMenuId='${splitter.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
+                <i class="fa-solid fa-trash cursor-pointer text-red-400 hover:text-red-600 ml-2" onmousedown="event.stopPropagation(); window.deleteSplitter('${splitter.id}')" title="Excluir"></i>
+            </div>`;
+
+            let inHtml = `<div class="sp-in-col" style="display: flex; flex-direction: column; justify-content: center; z-index: 2;">
+                <div id="sp-${splitter.id}-in" class="fiber-port sp-port in" style="background:#111827; color:white; width:20px; height:20px; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 2px 4px rgba(0,0,0,0.3);" onmousedown="window.startFusionDrag(event, 'sp-${splitter.id}-in')" onmouseup="window.endFusionDrag(event, 'sp-${splitter.id}-in')" title="IN">1</div>
+            </div>`;
             
-            let portsHtml = '<div class="sp-port-container">';
+            let pathD = sideFlipped ? `M 50,${h/2} L 10,10 L 10,${h-10} Z` : `M 10,${h/2} L 50,10 L 50,${h-10} Z`;
+
+            let svgHtml = `<div class="sp-body-svg" style="position: relative; width: 60px; height: ${h}px; display: flex; align-items: center; justify-content: center; margin: 0 -10px; z-index: 1;" onmousedown="window.startDragBlock(event, this.parentElement)">
+                <svg viewBox="0 0 60 ${h}" preserveAspectRatio="none" style="position:absolute; width:100%; height:100%; top:0; left:0;">
+                    <path d="${pathD}" fill="none" stroke="#111827" stroke-width="2"/>
+                    <circle cx="${sideFlipped ? 50 : 10}" cy="${h/2}" r="3" fill="#111827" />
+                    <circle cx="${sideFlipped ? 10 : 50}" cy="10" r="3" fill="#111827" />
+                    <circle cx="${sideFlipped ? 10 : 50}" cy="${h-10}" r="3" fill="#111827" />
+                </svg>
+                <div class="sp-label" style="z-index: 3; background: white; border: 1px solid #e2e8f0; font-size: 9px; font-weight: 800; text-align: center; padding: 2px 6px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 20px;">${splitter.type} AC APC<br><span style="color:#059669; font-size:8px;">-8.0 dBm</span></div>
+            </div>`;
+
+            let portsHtml = `<div class="sp-out-col" style="display: flex; flex-direction: column; justify-content: space-around; height: ${h}px; z-index: 2;">`;
             let indexes = []; for(let i=0; i<outs; i++) indexes.push(i);
             if(isFlipped) indexes.reverse();
-            indexes.forEach(i => { portsHtml += `<div id="sp-${splitter.id}-out-${i}" class="sp-port out" onmousedown="window.startFusionDrag(event, 'sp-${splitter.id}-out-${i}')" onmouseup="window.endFusionDrag(event, 'sp-${splitter.id}-out-${i}')" title="OUT ${i+1}">${i+1}</div>`; });
+
+            indexes.forEach(i => { 
+                portsHtml += `<div id="sp-${splitter.id}-out-${i}" class="fiber-port sp-port out" style="background:#22c55e; color:white; width:18px; height:18px; border-radius:2px; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 1px 2px rgba(0,0,0,0.2);" onmousedown="window.startFusionDrag(event, 'sp-${splitter.id}-out-${i}')" onmouseup="window.endFusionDrag(event, 'sp-${splitter.id}-out-${i}')" title="OUT ${i+1}">${i+1}</div>`; 
+            });
             portsHtml += '</div>';
 
-            block.innerHTML = inHtml + infoHtml + portsHtml; canvas.appendChild(block);
+            block.innerHTML = actionsHtml + inHtml + svgHtml + portsHtml; 
+            canvas.appendChild(block);
         };
 
         window.addSplitterToDiagram = async function(type) {
@@ -1000,7 +1114,7 @@
         let draggedBlock = null; let dragOffset = {x:0, y:0};
         
         window.startDragBlock = function(e, block) { 
-            if(e.target.closest('.fiber-port, .sp-port')) return; 
+            if(e.target.closest('.fiber-port, .sp-port, .fa-trash, .fa-rotate-right, .fa-arrow-right-arrow-left, .fa-arrows-up-down')) return; 
             draggedBlock = block; const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const canvasContainer = document.getElementById('diagram-canvas').parentElement; const zoom = window.appState.diagramZoom || 1;
             dragOffset.x = (e.clientX - canvasRect.left + canvasContainer.scrollLeft) / zoom - parseInt(draggedBlock.style.left || 0); dragOffset.y = (e.clientY - canvasRect.top + canvasContainer.scrollTop) / zoom - parseInt(draggedBlock.style.top || 0); 
             document.onmousemove = window.dragBlockMove; document.onmouseup = window.dragBlockEnd; 
@@ -1016,7 +1130,7 @@
         window.dragBlockEnd = function() { 
             if(draggedBlock) {
                 const newX = parseInt(draggedBlock.style.left); const newY = parseInt(draggedBlock.style.top);
-                if(draggedBlock.classList.contains('splitter-block')) {
+                if(draggedBlock.classList.contains('splitter-tri') || draggedBlock.classList.contains('splitter-block')) {
                     const spId = draggedBlock.dataset.id; window.updateSplitterInFirebase(spId, {x: newX, y: newY});
                 } else if(draggedBlock.classList.contains('cable-block')) {
                     const cbId = draggedBlock.dataset.id; const cable = window.appState.cables.find(c => c.id === cbId);
@@ -1029,6 +1143,7 @@
         window.startFusionDrag = function(e, portId) { 
             e.stopPropagation(); 
             
+            // PREVINE FIBRA MORTA EM PORTA OCUPADA
             const isOccupied = window.appState.fusions.some(f => f.nodeId === window.appState.selectedNodeId && (f.from === portId || f.to === portId));
             if(isOccupied) { window.showToast('Erro: Porta já conectada!', 'erro'); return; }
 
@@ -1064,15 +1179,18 @@
         
         window.handleFusionDragEnd = async function(e) { 
             if(!window.appState.isDraggingFusion) return; 
+            e.stopPropagation();
             const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const canvasContainer = document.getElementById('diagram-canvas').parentElement; const zoom = window.appState.diagramZoom || 1;
             const dropX = (e.clientX - canvasRect.left + canvasContainer.scrollLeft) / zoom; const dropY = (e.clientY - canvasRect.top + canvasContainer.scrollTop) / zoom;
+            
             await window.saveFusionToFirebase({ nodeId: window.appState.selectedNodeId, from: window.appState.fusionStartPort, to: 'dead_end', deadX: dropX, deadY: dropY });
-            window.showToast('Fibra Morta criada!', 'info');
+            window.showToast('Fibra Morta separada!', 'info');
+            
             window.appState.isDraggingFusion = false; document.getElementById('active-fusion-line').setAttribute('d', ''); 
         };
         
         window.endFusionDrag = async function(e, targetPortId) { 
-            if(!window.appState.isDraggingFusion) return; e.stopPropagation(); 
+            e.stopPropagation(); if(!window.appState.isDraggingFusion) return; 
             if(window.appState.fusionStartPort !== targetPortId) { 
                 const existing = window.appState.fusions.find(f => (f.nodeId === window.appState.selectedNodeId) && (f.from === targetPortId || f.to === targetPortId || f.from === window.appState.fusionStartPort || f.to === window.appState.fusionStartPort));
                 if(existing) { window.showToast('Porta ocupada.', 'aviso'); } else { await window.saveFusionToFirebase({ nodeId: window.appState.selectedNodeId, from: window.appState.fusionStartPort, to: targetPortId }); window.showToast('Fusão salva na nuvem!', 'sucesso'); }
