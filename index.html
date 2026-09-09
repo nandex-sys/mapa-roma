@@ -191,7 +191,7 @@
         .inv-item { padding: 12px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; transition: background 0.2s; cursor: pointer; }
         .inv-item:hover { background-color: #f0fdf4; }
 
-        /* ================= DIAGRAMA CANVAS OSP (COM ZOOM INF, LIXEIRA, CORES E FLIP) ================= */
+        /* ================= DIAGRAMA CANVAS OSP ================= */
         #diagram-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; z-index: 3000; display: none; flex-direction: column; }
         .diagram-toolbar { background: white; height: 60px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); z-index: 20; }
         .diag-tb-group { display: flex; align-items: center; gap: 12px; }
@@ -434,7 +434,7 @@
     
     <div class="modal-overlay" id="modal-cabo"><div class="modal-content"><div class="modal-header"><h2 class="text-orange-500"><i class="fa-solid fa-share-nodes"></i> Lançar Cabo</h2><button class="text-gray-400 hover:text-gray-600" onclick="window.closeModal('cabo')"><i class="fa-solid fa-xmark"></i></button></div><div class="modal-body"><div class="mb-5"><label class="input-label">NOME DO CABO</label><input type="text" id="input-cabo-nome" class="custom-input" placeholder="Ex: Rota 01"></div><div class="flex gap-4 mb-6"><div class="flex-1"><label class="input-label">CAPACIDADE</label><select id="input-cabo-capacidade" class="custom-input bg-white cursor-pointer"><option value="6">6 FO</option><option value="12" selected>12 FO</option><option value="36">36 FO</option></select></div><div class="flex-1"><label class="input-label">PADRÃO</label><select class="custom-input bg-white cursor-pointer"><option>ABNT</option></select></div></div><div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100"><div class="flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-blue-500" id="preview-cable-color"></div><span class="text-sm font-semibold text-gray-700">Cor</span></div></div></div><div class="modal-footer"><button class="btn-cancel" onclick="window.closeModal('cabo')">Cancelar</button><button class="btn-submit-orange" onclick="window.startCableDrawing()">Iniciar Traçado</button></div></div></div>
 
-    <!-- ================= DIAGRAMA CANVAS OSP (COM ZOOM INF E HOVER LIXEIRA) ================= -->
+    <!-- ================= DIAGRAMA CANVAS OSP ================= -->
     <div id="diagram-view">
         <div class="diagram-toolbar">
             <div class="diag-tb-group">
@@ -498,29 +498,19 @@
         };
 
         const THEME_COLORS = ['#0ea5e9', '#1d4ed8', '#f97316', '#ef4444', '#22c55e', '#eab308', '#a855f7', '#ec4899', '#000000', '#737373', '#78350f'];
-        const FIBER_COLORS = ['#22c55e', '#eab308', '#cbd5e1', '#2563eb', '#ef4444', '#9333ea']; // Verde, Amarelo, Cinza Claro, Azul, Vermelho, Roxo
+        const FIBER_COLORS = ['#22c55e', '#eab308', '#cbd5e1', '#2563eb', '#ef4444', '#9333ea'];
 
-        // Retorna a cor exata (HEX) com base no ID da porta ou do splitter
         window.getPortColor = function(portId) {
-            if(portId.startsWith('port-')) {
-                const parts = portId.split('-');
-                const idx = parseInt(parts[parts.length-1]);
-                return FIBER_COLORS[idx % 6];
-            } else if(portId.includes('-in')) {
-                return '#111827'; // Preta/Escura para entrada do Splitter
-            } else if(portId.includes('-out-')) {
-                return '#475569'; // Cinza escuro para saídas do Splitter
-            }
+            if(portId.startsWith('port-')) { const parts = portId.split('-'); return FIBER_COLORS[parseInt(parts[parts.length-1]) % 6]; } 
+            else if(portId.includes('-in')) { return '#111827'; } 
+            else if(portId.includes('-out-')) { return '#475569'; }
             return '#0f172a';
         };
 
         window.toggleTheme = function() {
             const body = document.body; const icon = document.getElementById('theme-icon');
-            if (body.classList.contains('theme-dark')) {
-                body.classList.remove('theme-dark'); body.classList.add('theme-light'); icon.classList.remove('fa-sun'); icon.classList.add('fa-moon');
-            } else {
-                body.classList.remove('theme-light'); body.classList.add('theme-dark'); icon.classList.remove('fa-moon'); icon.classList.add('fa-sun');
-            }
+            if (body.classList.contains('theme-dark')) { body.classList.remove('theme-dark'); body.classList.add('theme-light'); icon.classList.remove('fa-sun'); icon.classList.add('fa-moon'); } 
+            else { body.classList.remove('theme-light'); body.classList.add('theme-dark'); icon.classList.remove('fa-moon'); icon.classList.add('fa-sun'); }
         };
 
         window.toggleLayerVisibility = function(type) {
@@ -612,12 +602,8 @@
         window.buscarLocalNovoProjeto = async () => {
             const query = document.getElementById('input-projeto-busca').value; if(!query) return;
             try {
-                window.showToast('Buscando via satélite...');
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
-                const data = await res.json();
-                if(data && data.length > 0) {
-                    window.tempProjectCoords = [data[0].lat, data[0].lon]; miniMap.flyTo(window.tempProjectCoords, 15); miniMapMarker.setLatLng(window.tempProjectCoords); window.showToast('Localização encontrada!', 'sucesso');
-                } else { window.showToast('Local não encontrado.', 'erro'); }
+                window.showToast('Buscando via satélite...'); const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`); const data = await res.json();
+                if(data && data.length > 0) { window.tempProjectCoords = [data[0].lat, data[0].lon]; miniMap.flyTo(window.tempProjectCoords, 15); miniMapMarker.setLatLng(window.tempProjectCoords); window.showToast('Localização encontrada!', 'sucesso'); } else { window.showToast('Local não encontrado.', 'erro'); }
             } catch(e) { console.error(e); }
         };
 
@@ -638,7 +624,6 @@
         };
 
         window.voltarParaProjetos = () => { window.appState.currentProjectId = null; document.getElementById('app-workspace').style.display = 'none'; document.getElementById('regions-screen').style.display = 'flex'; };
-
         window.searchLocation = async () => { const query = document.getElementById('search-input').value; if(!query) return; try { const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`); const data = await res.json(); if(data && data.length > 0) { map.flyTo([data[0].lat, data[0].lon], 18); } } catch(e) {} };
 
         window.setMode = function(newMode) {
@@ -692,28 +677,11 @@
                     const shape = (n.type === 'POP / DC' || n.type === 'DC') ? 'rounded-lg' : (n.type === 'CEO' ? 'rounded-full' : 'rounded');
                     const iconHtml = L.divIcon({ html: `<div class="map-icon-wrapper ${shape}" style="width: 32px; height: 32px; border-color: ${n.color}; cursor: ${isMovable ? 'grab' : 'pointer'}"><div style="background-color: ${n.color}; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px;" class="${shape}"><i class="fa-solid ${n.icon}"></i></div></div>`, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
                     const marker = L.marker([n.lat, n.lng], { icon: iconHtml, draggable: isMovable }).addTo(nodesLayer); 
-                    
-                    marker.bindTooltip(`
-                        <div style="font-weight: 800; font-size: 11px; color: var(--text-primary); text-shadow: 1px 1px 0px var(--bg-card), -1px -1px 0px var(--bg-card), 1px -1px 0px var(--bg-card), -1px 1px 0px var(--bg-card);">
-                            ${n.name}
-                        </div>
-                    `, { permanent: true, direction: 'bottom', className: 'transparent-tooltip', offset: [0, 5] }).openTooltip();
-                    
+                    marker.bindTooltip(`<div style="font-weight: 800; font-size: 11px; color: var(--text-primary); text-shadow: 1px 1px 0px var(--bg-card), -1px -1px 0px var(--bg-card), 1px -1px 0px var(--bg-card), -1px 1px 0px var(--bg-card);">${n.name}</div>`, { permanent: true, direction: 'bottom', className: 'transparent-tooltip', offset: [0, 5] }).openTooltip();
                     marker.on('click', (e) => { L.DomEvent.stopPropagation(e); window.handleNodeInteraction(n, 'click'); }); 
                     marker.on('mouseover', (e) => { window.handleNodeInteraction(n, 'mouseover'); if(window.appState.mode === 'drawing_cable') e.target.getElement().classList.add('node-hover'); }); 
                     marker.on('mouseout', (e) => { window.handleNodeInteraction(n, 'mouseout'); e.target.getElement().classList.remove('node-hover'); }); 
-                    
-                    marker.on('dragend', async (e) => {
-                        const pos = e.target.getLatLng(); await window.updateNodeInFirebase(n.id, { lat: pos.lat, lng: pos.lng });
-                        const connectedCables = currentCables.filter(c => c.startNode === n.id || c.endNode === n.id);
-                        for(let c of connectedCables) {
-                            let newPath = [...c.path];
-                            if(c.startNode === n.id) newPath[0] = [pos.lat, pos.lng];
-                            if(c.endNode === n.id) newPath[newPath.length-1] = [pos.lat, pos.lng];
-                            await window.updateCableInFirebase(c.id, { path: newPath });
-                        }
-                        window.showToast('Caixa movida!', 'sucesso');
-                    });
+                    marker.on('dragend', async (e) => { const pos = e.target.getLatLng(); await window.updateNodeInFirebase(n.id, { lat: pos.lat, lng: pos.lng }); const connectedCables = currentCables.filter(c => c.startNode === n.id || c.endNode === n.id); for(let c of connectedCables) { let newPath = [...c.path]; if(c.startNode === n.id) newPath[0] = [pos.lat, pos.lng]; if(c.endNode === n.id) newPath[newPath.length-1] = [pos.lat, pos.lng]; await window.updateCableInFirebase(c.id, { path: newPath }); } window.showToast('Caixa movida!', 'sucesso'); });
                 }
             }); 
         };
@@ -748,7 +716,28 @@
             document.getElementById('modal-caixa').style.display = 'flex';
         };
 
-        window.selectStructure = function(btn) { document.querySelectorAll('.structure-btn').forEach(b => { b.classList.remove('selected'); b.querySelector('i').style.color = '#94a3b8'; }); btn.classList.add('selected'); btn.querySelector('i').style.color = btn.getAttribute('data-color'); window.appState.nodeSetup.type = btn.getAttribute('data-type'); window.appState.nodeSetup.icon = btn.getAttribute('data-icon'); if(!window.appState.editingNodeId) document.getElementById('input-caixa-nome').value = window.appState.nodeSetup.type + ' 01'; document.getElementById('cto-settings').style.display = (window.appState.nodeSetup.type.includes('CTO')) ? 'block' : 'none'; };
+        // NOVO: Gerador Inteligente de Nomenclatura Sequencial
+        window.selectStructure = function(btn) { 
+            document.querySelectorAll('.structure-btn').forEach(b => { b.classList.remove('selected'); b.querySelector('i').style.color = '#94a3b8'; }); 
+            btn.classList.add('selected'); btn.querySelector('i').style.color = btn.getAttribute('data-color'); 
+            window.appState.nodeSetup.type = btn.getAttribute('data-type'); 
+            window.appState.nodeSetup.icon = btn.getAttribute('data-icon'); 
+            
+            if(!window.appState.editingNodeId) {
+                const type = window.appState.nodeSetup.type;
+                const sameTypeNodes = window.appState.nodes.filter(n => n.type === type);
+                let maxNum = 0;
+                sameTypeNodes.forEach(n => {
+                    const match = n.name.match(/\d+/);
+                    if(match) { const num = parseInt(match[0], 10); if(num > maxNum) maxNum = num; }
+                });
+                const nextNum = String(maxNum + 1).padStart(2, '0');
+                const prefix = type === 'POP / DC' ? 'POP' : type;
+                document.getElementById('input-caixa-nome').value = `${prefix} ${nextNum} - `; 
+            }
+            document.getElementById('cto-settings').style.display = (window.appState.nodeSetup.type.includes('CTO')) ? 'block' : 'none'; 
+        };
+
         window.selectSplitterPill = function(pill) { document.querySelectorAll('.splitter-pill').forEach(p => p.classList.remove('selected')); pill.classList.add('selected'); window.appState.nodeSetup.splitter = pill.getAttribute('data-val') === 'Nenhum' ? null : pill.getAttribute('data-val'); };
         
         window.startNodePlacement = async function() { 
@@ -794,7 +783,6 @@
             }
         };
 
-        // NOVO: Função para Flip (Inverter a ordem das fibras ou portas)
         window.flipBlock = async function(type, id) {
             if(type === 'cable') {
                 const cb = window.appState.cables.find(c => c.id === id); if(!cb) return;
@@ -815,9 +803,7 @@
             const canvas = document.getElementById('diagram-canvas'); 
             const blocks = canvas.querySelectorAll('.cable-block, .splitter-block'); blocks.forEach(b => b.remove()); 
             
-            // Re-injetando o SVG e limpando
             document.getElementById('fusion-lines').innerHTML = '<defs id="fusion-defs"></defs><path id="active-fusion-line" d="" />'; 
-            
             let yOffsetIn = 100; let yOffsetOut = 100; 
             
             incoming.forEach(cable => { 
@@ -861,7 +847,6 @@
             setTimeout(() => window.updateAllFusionLines(), 250); 
         };
 
-        // NOVO: Renderiza Cabos com Inversão (Flipped)
         window.createCableBlock = function(canvas, cable, title, sub, startX, startY, startRot=0, isFlipped=false) { 
             const block = document.createElement('div'); block.className = 'cable-block shadow-lg'; 
             block.dataset.id = cable.id; block.style.left = `${startX}px`; block.style.top = `${startY}px`; block.style.transform = `rotate(${startRot}deg)`;
@@ -878,7 +863,6 @@
             fibersHtml += '</div>'; block.innerHTML = headerHtml + fibersHtml; canvas.appendChild(block); 
         };
         
-        // NOVO: Renderiza Splitters com Inversão (Flipped)
         window.createSplitterBlock = function(canvas, splitter, startX, startY, startRot=0, isFlipped=false) {
             const block = document.createElement('div'); block.className = 'splitter-block'; 
             block.dataset.id = splitter.id; block.style.left = `${startX}px`; block.style.top = `${startY}px`; block.style.transform = `rotate(${startRot}deg)`;
@@ -889,17 +873,14 @@
             let indexes = []; for(let i=0; i<outs; i++) indexes.push(i);
             if(isFlipped) indexes.reverse();
 
-            indexes.forEach(i => {
-                portsHtml += `<div id="sp-${splitter.id}-out-${i}" class="sp-port out" onmousedown="window.startFusionDrag(event, 'sp-${splitter.id}-out-${i}')" onmouseup="window.endFusionDrag(event, 'sp-${splitter.id}-out-${i}')" title="OUT ${i+1}">${i+1}</div>`; 
-            });
+            indexes.forEach(i => { portsHtml += `<div id="sp-${splitter.id}-out-${i}" class="sp-port out" onmousedown="window.startFusionDrag(event, 'sp-${splitter.id}-out-${i}')" onmouseup="window.endFusionDrag(event, 'sp-${splitter.id}-out-${i}')" title="OUT ${i+1}">${i+1}</div>`; });
             
             block.innerHTML = `<div class="splitter-block-header" onmousedown="window.startDragBlock(event, this.parentElement)">${splitter.type} <div><i class="fa-solid fa-rotate-right cursor-pointer text-blue-200 hover:text-white" onmousedown="event.stopPropagation(); window.rotateBlock('splitter', '${splitter.id}')"></i> <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-blue-200 hover:text-white ml-1" onmousedown="event.stopPropagation(); window.flipBlock('splitter', '${splitter.id}')"></i> <i class="fa-solid fa-trash ml-1 cursor-pointer text-red-300 hover:text-red-100" onmousedown="event.stopPropagation(); window.deleteSplitter('${splitter.id}')"></i></div></div><div class="sp-port-container">${portsHtml}</div>`;
             canvas.appendChild(block);
         };
 
         window.addSplitterToDiagram = async function(type) {
-            if(!window.appState.selectedNodeId) return;
-            window.showToast(`Adicionando Splitter ${type}...`);
+            if(!window.appState.selectedNodeId) return; window.showToast(`Adicionando Splitter ${type}...`);
             await window.saveSplitterToFirebase({ nodeId: window.appState.selectedNodeId, type: type, x: 450, y: 150, rotation: 0, flipped: false });
         };
 
@@ -922,30 +903,16 @@
         
         window.startDragBlock = function(e, block) { 
             if(e.target.closest('.fiber-port, .sp-port, .fa-trash, .fa-rotate-right, .fa-arrow-right-arrow-left')) return; 
-            draggedBlock = block; 
-            const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); 
-            const canvasContainer = document.getElementById('diagram-canvas').parentElement;
-            const zoom = window.appState.diagramZoom || 1;
-            
-            dragOffset.x = (e.clientX - canvasRect.left + canvasContainer.scrollLeft) / zoom - parseInt(draggedBlock.style.left || 0); 
-            dragOffset.y = (e.clientY - canvasRect.top + canvasContainer.scrollTop) / zoom - parseInt(draggedBlock.style.top || 0); 
-            
-            document.onmousemove = window.dragBlockMove; 
-            document.onmouseup = window.dragBlockEnd; 
+            draggedBlock = block; const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const canvasContainer = document.getElementById('diagram-canvas').parentElement; const zoom = window.appState.diagramZoom || 1;
+            dragOffset.x = (e.clientX - canvasRect.left + canvasContainer.scrollLeft) / zoom - parseInt(draggedBlock.style.left || 0); dragOffset.y = (e.clientY - canvasRect.top + canvasContainer.scrollTop) / zoom - parseInt(draggedBlock.style.top || 0); 
+            document.onmousemove = window.dragBlockMove; document.onmouseup = window.dragBlockEnd; 
         };
         
         window.dragBlockMove = function(e) { 
-            if(!draggedBlock) return; 
-            const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); 
-            const canvasContainer = document.getElementById('diagram-canvas').parentElement;
-            const zoom = window.appState.diagramZoom || 1;
-            
-            let x = (e.clientX - canvasRect.left + canvasContainer.scrollLeft) / zoom - dragOffset.x; 
-            let y = (e.clientY - canvasRect.top + canvasContainer.scrollTop) / zoom - dragOffset.y; 
+            if(!draggedBlock) return; const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const canvasContainer = document.getElementById('diagram-canvas').parentElement; const zoom = window.appState.diagramZoom || 1;
+            let x = (e.clientX - canvasRect.left + canvasContainer.scrollLeft) / zoom - dragOffset.x; let y = (e.clientY - canvasRect.top + canvasContainer.scrollTop) / zoom - dragOffset.y; 
             x = Math.max(0, x); y = Math.max(0, y); 
-            
-            draggedBlock.style.left = `${x}px`; draggedBlock.style.top = `${y}px`; 
-            window.updateAllFusionLines(); 
+            draggedBlock.style.left = `${x}px`; draggedBlock.style.top = `${y}px`; window.updateAllFusionLines(); 
         };
         
         window.dragBlockEnd = function() { 
@@ -961,13 +928,16 @@
             draggedBlock = null; document.onmousemove = null; document.onmouseup = null; 
         };
         
+        // NOVO: Cálculo Dinâmico do Lado da Conexão
         window.startFusionDrag = function(e, portId) { 
             e.stopPropagation(); window.appState.isDraggingFusion = true; window.appState.fusionStartPort = portId; 
-            const port = document.getElementById(portId); const portRect = port.getBoundingClientRect(); 
-            const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const zoom = window.appState.diagramZoom || 1;
-            window.appState.fusionStartCoords = { x: (portRect.left - canvasRect.left + (portRect.width/2)) / zoom, y: (portRect.top - canvasRect.top + (portRect.height/2)) / zoom }; 
+            const port = document.getElementById(portId); const portRect = port.getBoundingClientRect(); const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const zoom = window.appState.diagramZoom || 1;
+            
+            let pX = (portRect.left - canvasRect.left + (portRect.width/2)) / zoom;
+            let pY = (portRect.top - canvasRect.top + (portRect.height/2)) / zoom;
+            
+            window.appState.fusionStartCoords = { x: pX, y: pY }; 
             const activeLine = document.getElementById('active-fusion-line');
-            // Cor Ativa no arraste
             activeLine.setAttribute('stroke', window.getPortColor(portId)); 
             activeLine.setAttribute('d', `M ${window.appState.fusionStartCoords.x} ${window.appState.fusionStartCoords.y} L ${window.appState.fusionStartCoords.x} ${window.appState.fusionStartCoords.y}`); 
         };
@@ -975,12 +945,45 @@
         window.handleFusionDragMove = function(e) { 
             if(!window.appState.isDraggingFusion) return; 
             const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const zoom = window.appState.diagramZoom || 1;
-            const p1 = window.appState.fusionStartCoords; const p2 = { x: (e.clientX - canvasRect.left) / zoom, y: (e.clientY - canvasRect.top) / zoom }; 
-            const cpOffset = Math.abs(p2.x - p1.x) / 2; const d = `M ${p1.x} ${p1.y} C ${p1.x + cpOffset} ${p1.y}, ${p2.x - cpOffset} ${p2.y}, ${p2.x} ${p2.y}`; 
+            
+            const p1El = document.getElementById(window.appState.fusionStartPort);
+            const r1 = p1El.getBoundingClientRect();
+            
+            let p1X = (r1.left - canvasRect.left + (r1.width/2)) / zoom;
+            let p1Y = (r1.top - canvasRect.top + (r1.height/2)) / zoom;
+            let p2X = (e.clientX - canvasRect.left) / zoom; 
+            let p2Y = (e.clientY - canvasRect.top) / zoom; 
+            
+            const isSp1 = p1El.classList.contains('sp-port');
+            if(isSp1) p1X = (p2X > p1X) ? ((r1.left - canvasRect.left + r1.width) / zoom) : ((r1.left - canvasRect.left) / zoom);
+            
+            // NOVO: Ajuste do Offset do Curvamento para garantir linha reta
+            const cpOffset = Math.max(120, Math.abs(p2X - p1X) / 1.5); 
+            
+            const d = `M ${p1X} ${p1Y} C ${p1X + cpOffset} ${p1Y}, ${p2X - cpOffset} ${p2Y}, ${p2X} ${p2Y}`; 
             document.getElementById('active-fusion-line').setAttribute('d', d); 
         };
         
-        window.handleFusionDragEnd = function(e) { if(!window.appState.isDraggingFusion) return; window.appState.isDraggingFusion = false; document.getElementById('active-fusion-line').setAttribute('d', ''); };
+        // NOVO: Lógica da Fibra Morta no Vazio
+        window.handleFusionDragEnd = async function(e) { 
+            if(!window.appState.isDraggingFusion) return; 
+            
+            const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); 
+            const zoom = window.appState.diagramZoom || 1;
+            const dropX = (e.clientX - canvasRect.left) / zoom;
+            const dropY = (e.clientY - canvasRect.top) / zoom;
+            
+            await window.saveFusionToFirebase({ 
+                nodeId: window.appState.selectedNodeId, 
+                from: window.appState.fusionStartPort, 
+                to: 'dead_end',
+                deadX: dropX,
+                deadY: dropY
+            });
+            window.showToast('Fibra Morta criada!', 'info');
+            
+            window.appState.isDraggingFusion = false; document.getElementById('active-fusion-line').setAttribute('d', ''); 
+        };
         
         window.endFusionDrag = async function(e, targetPortId) { 
             if(!window.appState.isDraggingFusion) return; e.stopPropagation(); 
@@ -994,7 +997,6 @@
             window.appState.isDraggingFusion = false; document.getElementById('active-fusion-line').setAttribute('d', ''); 
         };
 
-        // NOVO: Geração de Gradiente (Metade / Metade)
         window.updateAllFusionLines = function() {
             const svg = document.getElementById('fusion-lines'); 
             Array.from(svg.children).forEach(c => { if(c.id !== 'active-fusion-line' && c.tagName !== 'defs') c.remove(); }); 
@@ -1002,52 +1004,87 @@
             const zoom = window.appState.diagramZoom || 1;
             
             const defs = document.getElementById('fusion-defs');
-            if(defs) defs.innerHTML = ''; // Limpa os gradientes anteriores
+            if(defs) defs.innerHTML = ''; 
             
             window.appState.fusions.filter(f => f.nodeId === window.appState.selectedNodeId).forEach(fusion => {
-                const p1El = document.getElementById(fusion.from); const p2El = document.getElementById(fusion.to);
-                if(p1El && p2El) {
-                    const r1 = p1El.getBoundingClientRect(); const r2 = p2El.getBoundingClientRect();
-                    const p1 = { x: (r1.left - canvasRect.left + (r1.width/2)) / zoom, y: (r1.top - canvasRect.top + (r1.height/2)) / zoom }; 
-                    const p2 = { x: (r2.left - canvasRect.left + (r2.width/2)) / zoom, y: (r2.top - canvasRect.top + (r2.height/2)) / zoom };
-                    const cpOffset = Math.abs(p2.x - p1.x) / 2; 
-                    const d = `M ${p1.x} ${p1.y} C ${p1.x + cpOffset} ${p1.y}, ${p2.x - cpOffset} ${p2.y}, ${p2.x} ${p2.y}`;
-                    
-                    const color1 = window.getPortColor(fusion.from);
-                    const color2 = window.getPortColor(fusion.to);
-                    const gradId = `grad-${fusion.id}`;
+                const p1El = document.getElementById(fusion.from);
+                if(!p1El) return;
+                const r1 = p1El.getBoundingClientRect();
+                let p1X = (r1.left - canvasRect.left + (r1.width/2)) / zoom;
+                let p1Y = (r1.top - canvasRect.top + (r1.height/2)) / zoom;
 
-                    if(defs) {
-                        const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
-                        grad.setAttribute('id', gradId);
-                        grad.setAttribute('gradientUnits', 'userSpaceOnUse');
-                        grad.setAttribute('x1', p1.x); grad.setAttribute('y1', p1.y);
-                        grad.setAttribute('x2', p2.x); grad.setAttribute('y2', p2.y);
-                        grad.innerHTML = `<stop offset="50%" stop-color="${color1}"/><stop offset="50%" stop-color="${color2}"/>`;
-                        defs.appendChild(grad);
+                let p2X, p2Y;
+                let isDeadEnd = (fusion.to === 'dead_end');
+                let isSp2 = false;
+
+                if(isDeadEnd) {
+                    p2X = fusion.deadX; p2Y = fusion.deadY;
+                } else {
+                    const p2El = document.getElementById(fusion.to);
+                    if(!p2El) return;
+                    const r2 = p2El.getBoundingClientRect();
+                    p2X = (r2.left - canvasRect.left + (r2.width/2)) / zoom;
+                    p2Y = (r2.top - canvasRect.top + (r2.height/2)) / zoom;
+                    isSp2 = p2El.classList.contains('sp-port');
+                }
+
+                const isSp1 = p1El.classList.contains('sp-port');
+                
+                // Ajuste de Saída dos Splitters baseado na Posição de Destino
+                if(isSp1) p1X = (p2X > p1X) ? ((r1.left - canvasRect.left + r1.width) / zoom) : ((r1.left - canvasRect.left) / zoom);
+                if(isSp2) {
+                    const p2El = document.getElementById(fusion.to); const r2 = p2El.getBoundingClientRect();
+                    p2X = (p1X > p2X) ? ((r2.left - canvasRect.left + r2.width) / zoom) : ((r2.left - canvasRect.left) / zoom);
+                }
+                
+                // NOVO: Ajuste do Curvamento para garantir linha reta (Bézier Curve)
+                const cpOffset = Math.max(120, Math.abs(p2X - p1X) / 1.5); 
+                const d = `M ${p1X} ${p1Y} C ${p1X + cpOffset} ${p1Y}, ${p2X - cpOffset} ${p2Y}, ${p2X} ${p2Y}`;
+                
+                const color1 = window.getPortColor(fusion.from);
+                const color2 = isDeadEnd ? '#ef4444' : window.getPortColor(fusion.to);
+                const gradId = `grad-${fusion.id}`;
+
+                if(defs) {
+                    const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+                    grad.setAttribute('id', gradId); grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+                    grad.setAttribute('x1', p1X); grad.setAttribute('y1', p1Y);
+                    grad.setAttribute('x2', p2X); grad.setAttribute('y2', p2Y);
+                    grad.innerHTML = `<stop offset="50%" stop-color="${color1}"/><stop offset="50%" stop-color="${color2}"/>`;
+                    defs.appendChild(grad);
+                }
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); 
+                path.setAttribute('d', d); path.setAttribute('stroke', `url(#${gradId})`); 
+                path.setAttribute('stroke-width', '4'); path.setAttribute('fill', 'none'); path.setAttribute('stroke-linecap', 'round'); 
+                
+                path.classList.add('fusion-line-clickable');
+                path.onmousemove = function(e) {
+                    let trash = document.getElementById('floating-trash');
+                    if(!trash) {
+                        trash = document.createElement('div'); trash.id = 'floating-trash'; trash.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                        trash.style = 'position:fixed; background:#ef4444; color:white; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; cursor:pointer; z-index:99999; box-shadow:0 4px 6px rgba(0,0,0,0.3);';
+                        document.body.appendChild(trash);
                     }
+                    trash.style.display = 'flex'; trash.style.left = (e.clientX + 15) + 'px'; trash.style.top = (e.clientY - 15) + 'px';
+                    trash.onmouseleave = () => trash.style.display = 'none';
+                    trash.onclick = () => { trash.style.display = 'none'; window.deletarFusao(fusion.id); };
+                };
+                path.onmouseleave = function(e) { setTimeout(() => { const trash = document.getElementById('floating-trash'); if(trash && !trash.matches(':hover')) trash.style.display = 'none'; }, 100); };
+                
+                if(isDeadEnd) {
+                    const deadLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    deadLabel.setAttribute('x', p2X + 5); deadLabel.setAttribute('y', p2Y + 4);
+                    deadLabel.setAttribute('fill', '#ef4444'); deadLabel.setAttribute('font-size', '10px'); deadLabel.setAttribute('font-weight', 'bold');
+                    deadLabel.textContent = 'MORTA';
+                    
+                    const cross = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    cross.setAttribute('cx', p2X); cross.setAttribute('cy', p2Y); cross.setAttribute('r', '4'); cross.setAttribute('fill', '#ef4444');
 
-                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); 
-                    path.setAttribute('d', d); 
-                    path.setAttribute('stroke', `url(#${gradId})`); 
-                    path.setAttribute('stroke-width', '4'); path.setAttribute('fill', 'none'); path.setAttribute('stroke-linecap', 'round'); 
-                    
-                    path.classList.add('fusion-line-clickable');
-                    path.onmousemove = function(e) {
-                        let trash = document.getElementById('floating-trash');
-                        if(!trash) {
-                            trash = document.createElement('div'); trash.id = 'floating-trash'; trash.innerHTML = '<i class="fa-solid fa-trash"></i>';
-                            trash.style = 'position:fixed; background:#ef4444; color:white; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; cursor:pointer; z-index:99999; box-shadow:0 4px 6px rgba(0,0,0,0.3);';
-                            document.body.appendChild(trash);
-                        }
-                        trash.style.display = 'flex'; trash.style.left = (e.clientX + 15) + 'px'; trash.style.top = (e.clientY - 15) + 'px';
-                        trash.onmouseleave = () => trash.style.display = 'none';
-                        trash.onclick = () => { trash.style.display = 'none'; window.deletarFusao(fusion.id); };
-                    };
-                    path.onmouseleave = function(e) {
-                        setTimeout(() => { const trash = document.getElementById('floating-trash'); if(trash && !trash.matches(':hover')) trash.style.display = 'none'; }, 100);
-                    };
-                    
+                    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    g.appendChild(path); g.appendChild(cross); g.appendChild(deadLabel);
+                    svg.appendChild(g);
+                } else {
                     svg.appendChild(path);
                 }
             });
