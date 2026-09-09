@@ -46,7 +46,6 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; overflow: hidden; background-color: var(--bg-main); margin: 0; padding: 0; }
         
-        /* NOVO: Estilos do Dashboard Escuro para Projetos */
         .home-sidebar { width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
         .home-main { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-main); overflow-y: auto; }
         .home-header { height: 90px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0; }
@@ -61,10 +60,8 @@
         .search-bar-dash { background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; gap: 8px; color: var(--text-secondary); width: 300px; }
         .search-bar-dash input { background: transparent; border: none; outline: none; color: var(--text-primary); width: 100%; font-size: 14px; }
 
-        /* STREAMING_CHUNK:Estilos da Tela Inicial de Regiões... */
         #regions-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: var(--bg-main); z-index: 9999; display: flex; flex-direction: row; align-items: stretch; justify-content: flex-start; }
 
-        /* SIDEBAR (MENU ESQUERDO) */
         .sidebar-logo { padding: 24px; display: flex; justify-content: space-between; align-items: flex-start; }
         .sidebar-section-title { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; padding: 16px 24px 8px 24px; letter-spacing: 0.05em; }
         .sidebar-item { padding: 10px 24px; display: flex; align-items: center; gap: 12px; color: var(--text-secondary); font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
@@ -79,7 +76,6 @@
         .chat-fab { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background-color: var(--brand-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; cursor: pointer; box-shadow: 0 10px 25px rgba(0,168,89,0.4); z-index: 9999; transition: transform 0.2s; }
         .chat-fab:hover { transform: scale(1.1); }
 
-        /* STREAMING_CHUNK:Estilos do Workspace de Mapa... */
         #app-workspace { display: none; width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; }
         #map-container { position: absolute; top: 0; left: 0; height: 100vh; width: 100vw; z-index: 10; }
         .leaflet-control-zoom { display: none !important; }
@@ -560,7 +556,7 @@
             onSnapshot(getCollectionPath('projects'), (snapshot) => { window.appState.projects = []; snapshot.forEach(doc => { window.appState.projects.push({ id: doc.id, ...doc.data() }); }); if(window.renderProjectsList) window.renderProjectsList(); }, (e) => console.error(e));
             onSnapshot(getCollectionPath('nodes'), (snapshot) => { window.appState.nodes = []; snapshot.forEach(doc => { window.appState.nodes.push({ id: doc.id, ...doc.data() }); }); window.renderMap(); }, (e) => console.error(e));
             onSnapshot(getCollectionPath('cables'), (snapshot) => { window.appState.cables = []; snapshot.forEach(doc => { const data = doc.data(); if (data.path && data.path.length > 0 && typeof data.path[0] === 'object' && !Array.isArray(data.path[0])) { data.path = data.path.map(p => [p.lat, p.lng]); } window.appState.cables.push({ id: doc.id, ...data }); }); window.renderMap(); }, (e) => console.error(e));
-            onSnapshot(getCollectionPath('fusions'), (snapshot) => { window.appState.fusions = []; snapshot.forEach(doc => { window.appState.fusions.push({ id: doc.id, ...doc.data() }); }); if(document.getElementById('diagram-view').style.display === 'flex') window.updateAllFusionLines(); }, (e) => console.error(e));
+            onSnapshot(getCollectionPath('fusions'), (snapshot) => { window.appState.fusions = []; snapshot.forEach(doc => { window.appState.fusions.push({ id: doc.id, ...doc.data() }); }); if(document.getElementById('diagram-view').style.display === 'flex') { window.updateAllFusionLines(); window.calculateNetworkPower(); } }, (e) => console.error(e));
             onSnapshot(getCollectionPath('splitters'), (snapshot) => { window.appState.splitters = []; snapshot.forEach(doc => { window.appState.splitters.push({ id: doc.id, ...doc.data() }); }); if(document.getElementById('diagram-view').style.display === 'flex') window.openCanvasDiagram(); }, (e) => console.error(e));
             onSnapshot(getCollectionPath('olts'), (snapshot) => { window.appState.olts = []; snapshot.forEach(doc => { window.appState.olts.push({ id: doc.id, ...doc.data() }); }); if(document.getElementById('diagram-view').style.display === 'flex') window.openCanvasDiagram(); }, (e) => console.error(e));
             onSnapshot(getCollectionPath('dios'), (snapshot) => { window.appState.dios = []; snapshot.forEach(doc => { window.appState.dios.push({ id: doc.id, ...doc.data() }); }); if(document.getElementById('diagram-view').style.display === 'flex') window.openCanvasDiagram(); }, (e) => console.error(e));
@@ -581,10 +577,31 @@
             try { const docRef = await addDoc(getCollectionPath('cables'), cableData); return docRef.id; } 
             catch(e) { const id = 'local_c_'+Date.now(); window.appState.cables.push({id, ...cableData}); window.renderMap(); return id; } 
         };
-        window.updateCableInFirebase = async (id, cableData) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.cables.findIndex(c=>c.id===id); if(idx>-1) window.appState.cables[idx] = {...window.appState.cables[idx], ...cableData}; window.renderMap(); return; } try { await updateDoc(getDocPath('cables', id), cableData); } catch(e) { const idx = window.appState.cables.findIndex(c=>c.id===id); if(idx>-1) window.appState.cables[idx] = {...window.appState.cables[idx], ...cableData}; window.renderMap(); } };
+        
+        // CORREÇÃO: Traduz os paths corretamente para o local no fallback de erro/offline para os cabos acompanharem o drag
+        window.updateCableInFirebase = async (id, cableData) => { 
+            let localData = { ...cableData };
+            if(localData.path && localData.path.length > 0 && typeof localData.path[0] === 'object' && !Array.isArray(localData.path[0])) {
+                localData.path = localData.path.map(p => [p.lat, p.lng]);
+            }
+            if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { 
+                const idx = window.appState.cables.findIndex(c=>c.id===id); 
+                if(idx>-1) window.appState.cables[idx] = {...window.appState.cables[idx], ...localData}; 
+                window.renderMap(); 
+                return; 
+            } 
+            try { 
+                await updateDoc(getDocPath('cables', id), cableData); 
+            } catch(e) { 
+                const idx = window.appState.cables.findIndex(c=>c.id===id); 
+                if(idx>-1) window.appState.cables[idx] = {...window.appState.cables[idx], ...localData}; 
+                window.renderMap(); 
+            } 
+        };
+
         window.deleteCableFromFirebase = async (id) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { window.appState.cables = window.appState.cables.filter(c=>c.id!==id); window.renderMap(); return; } try { await deleteDoc(getDocPath('cables', id)); } catch(e) { window.appState.cables = window.appState.cables.filter(c=>c.id!==id); window.renderMap(); } };
         
-        window.saveFusionToFirebase = async (fusionData) => { if(!db || !auth || !auth.currentUser) { window.appState.fusions.push({id: 'local_'+Date.now(), ...fusionData}); window.updateAllFusionLines(); return; } try { await addDoc(getCollectionPath('fusions'), fusionData); } catch(e) { window.appState.fusions.push({id: 'local_'+Date.now(), ...fusionData}); window.updateAllFusionLines(); } };
+        window.saveFusionToFirebase = async (fusionData) => { if(!db || !auth || !auth.currentUser) { window.appState.fusions.push({id: 'local_'+Date.now(), ...fusionData}); window.updateAllFusionLines(); window.calculateNetworkPower(); return; } try { await addDoc(getCollectionPath('fusions'), fusionData); } catch(e) { window.appState.fusions.push({id: 'local_'+Date.now(), ...fusionData}); window.updateAllFusionLines(); window.calculateNetworkPower(); } };
         window.saveSplitterToFirebase = async (data) => { if(!db || !auth || !auth.currentUser) { window.appState.splitters.push({id: 'local_sp_'+Date.now(), ...data}); window.openCanvasDiagram(); return; } try { await addDoc(getCollectionPath('splitters'), data); } catch(e) { window.appState.splitters.push({id: 'local_sp_'+Date.now(), ...data}); window.openCanvasDiagram(); } };
         window.updateSplitterInFirebase = async (id, data) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.splitters.findIndex(s=>s.id===id); if(idx>-1) window.appState.splitters[idx] = {...window.appState.splitters[idx], ...data}; window.openCanvasDiagram(); return; } try { await updateDoc(getDocPath('splitters', id), data); } catch(e) { } };
 
@@ -903,6 +920,35 @@
         // ==========================================
         // 6. MOTOR DO DIAGRAMA CANVAS OSP E LUZ
         // ==========================================
+        
+        // NOVO: Função interativa da Bolinha Azul para mostrar Luz nas Fibras
+        window.togglePowerDot = function(e, portId) {
+            e.stopPropagation();
+            let existing = document.getElementById('pdot-' + portId);
+            if(existing) { existing.remove(); return; }
+            
+            let portEl = document.getElementById(portId);
+            if(!portEl) return;
+            
+            let power = window.appState.portPowers[portId];
+            let displayPower = power === undefined ? "Sem Sinal" : power.toFixed(2) + " dBm";
+
+            let dot = document.createElement('div');
+            dot.id = 'pdot-' + portId;
+            dot.className = 'absolute -top-1 -right-1 w-3 h-3 bg-blue-500 border border-white rounded-full cursor-pointer z-50';
+            dot.style.boxShadow = '0 1px 3px rgba(0,0,0,0.5)';
+            dot.title = "Ver Luz";
+            
+            dot.onmousedown = function(ev) { ev.stopPropagation(); }
+            dot.onclick = function(ev) {
+                ev.stopPropagation();
+                window.showToast("⚡ Luz: " + displayPower, power === undefined ? "erro" : "sucesso");
+                dot.remove(); 
+            };
+            
+            portEl.appendChild(dot);
+        };
+
         window.zoomDiagram = function(action) {
             if(action === 'in') window.appState.diagramZoom += 0.1;
             else if(action === 'out') window.appState.diagramZoom = Math.max(0.3, window.appState.diagramZoom - 0.1);
@@ -919,7 +965,6 @@
             }
         };
 
-        // Função de Edição da Luz na OLT
         window.promptEditOLTPower = async function(id) {
             const olt = window.appState.olts.find(o => o.id === id);
             if(!olt) return;
@@ -1098,7 +1143,7 @@
                     // Coloca a Luz no Balão que aparece ao passar o mouse
                     el.setAttribute('title', `${orig.split(' |')[0]} | Luz: ${powers[portId].toFixed(2)} dBm`);
                     
-                    // Acende o brilho da porta
+                    // Acende o brilho da porta indicando que tem luz passando ali
                     el.style.boxShadow = '0 0 4px 1px rgba(34, 197, 94, 0.7)';
                 });
             }
@@ -1161,34 +1206,6 @@
         
         window.closeCanvasDiagram = function() { document.getElementById('diagram-view').style.display = 'none'; };
 
-        window.rotateBlock = async function(type = window.activeContextMenuType, id = window.activeContextMenuId) {
-            let el, newRot;
-            if(type === 'splitter') {
-                const sp = window.appState.splitters.find(s => s.id === id); if(!sp) return;
-                newRot = (sp.rotation || 0) + 90; if(newRot >= 360) newRot = 0;
-                el = document.querySelector(`.splitter-block[data-id="${id}"], .splitter-tri[data-id="${id}"]`); if(el) { el.style.transform = `rotate(${newRot}deg)`; }
-                await window.updateSplitterInFirebase(id, { rotation: newRot });
-            } else if(type === 'cable') {
-                const cb = window.appState.cables.find(c => c.id === id); if(!cb) return;
-                let diag = cb.diagram || {}; let currentRot = diag[window.appState.selectedNodeId]?.rotation || 0;
-                newRot = currentRot + 90; if(newRot >= 360) newRot = 0;
-                diag[window.appState.selectedNodeId] = { ...diag[window.appState.selectedNodeId], rotation: newRot };
-                el = document.querySelector(`.cable-block[data-id="${id}"]`); if(el) { el.style.transform = `rotate(${newRot}deg)`; }
-                await window.updateCableInFirebase(id, { diagram: diag });
-            } else if(type === 'olt') {
-                const olt = window.appState.olts.find(s => s.id === id); if(!olt) return;
-                newRot = (olt.rotation || 0) + 90; if(newRot >= 360) newRot = 0;
-                el = document.querySelector(`.olt-block[data-id="${id}"]`); if(el) { el.style.transform = `rotate(${newRot}deg)`; }
-                await window.updateOLTInFirebase(id, { rotation: newRot });
-            } else if(type === 'dio') {
-                const dio = window.appState.dios.find(s => s.id === id); if(!dio) return;
-                newRot = (dio.rotation || 0) + 90; if(newRot >= 360) newRot = 0;
-                el = document.querySelector(`.dio-block[data-id="${id}"]`); if(el) { el.style.transform = `rotate(${newRot}deg)`; }
-                await window.updateDIOInFirebase(id, { rotation: newRot });
-            }
-            setTimeout(() => window.updateAllFusionLines(), 250); 
-        };
-
         window.createCableBlock = function(canvas, cable, title, sub, startX, startY, startRot=0, isFlipped=false, sideFlipped=false) { 
             const block = document.createElement('div'); block.className = `cable-block ${sideFlipped ? 'side-flipped' : ''}`; 
             block.dataset.id = cable.id; block.style.left = `${startX}px`; block.style.top = `${startY}px`; block.style.transform = `rotate(${startRot}deg)`;
@@ -1208,7 +1225,7 @@
             if(isFlipped) indexes.reverse();
             indexes.forEach(i => {
                 const colorIdx = i % 12; const portId = `port-${cable.id}-${i}`; 
-                fibersHtml += `<div id="${portId}" class="fiber-port fiber-bg-${colorIdx + 1}" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="Fibra ${i+1}">${i+1}</div>`; 
+                fibersHtml += `<div id="${portId}" class="fiber-port fiber-bg-${colorIdx + 1}" onclick="window.togglePowerDot(event, '${portId}')" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="Fibra ${i+1}">${i+1}</div>`; 
             });
             fibersHtml += '</div>'; block.innerHTML = infoHtml + fibersHtml; canvas.appendChild(block); 
         };
@@ -1234,7 +1251,7 @@
             if(isFlipped) indexes.reverse();
             indexes.forEach(i => {
                 const portId = `olt-${olt.id}-pon-${i}`; 
-                fibersHtml += `<div id="${portId}" class="fiber-port sp-port out" style="background:#0284c7; color:white;" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="PON ${i+1}">${i+1}</div>`; 
+                fibersHtml += `<div id="${portId}" class="fiber-port sp-port out" style="background:#0284c7; color:white;" onclick="window.togglePowerDot(event, '${portId}')" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="PON ${i+1}">${i+1}</div>`; 
             });
             fibersHtml += '</div>'; block.innerHTML = infoHtml + fibersHtml; canvas.appendChild(block); 
         };
@@ -1257,7 +1274,8 @@
             let indexes = []; for(let i=0; i<outs; i++) indexes.push(i);
             if(isFlipped) indexes.reverse();
             indexes.forEach(i => { 
-                portsInHtml += `<div id="dio-${dio.id}-in-${i}" class="fiber-port sp-port in" style="background:#111827; color:white; width:18px; height:18px; border-radius:2px; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 1px 2px rgba(0,0,0,0.2);" onmousedown="window.startFusionDrag(event, 'dio-${dio.id}-in-${i}')" onmouseup="window.endFusionDrag(event, 'dio-${dio.id}-in-${i}')" title="IN ${i+1}">${i+1}</div>`; 
+                let portId = `dio-${dio.id}-in-${i}`;
+                portsInHtml += `<div id="${portId}" class="fiber-port sp-port in" style="background:#111827; color:white; width:18px; height:18px; border-radius:2px; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 1px 2px rgba(0,0,0,0.2);" onclick="window.togglePowerDot(event, '${portId}')" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="IN ${i+1}">${i+1}</div>`; 
             });
             portsInHtml += '</div>';
 
@@ -1268,7 +1286,8 @@
 
             let portsOutHtml = `<div class="sp-out-col" style="display: flex; flex-direction: column; justify-content: space-around; height: ${h}px; z-index: 2;">`;
             indexes.forEach(i => { 
-                portsOutHtml += `<div id="dio-${dio.id}-out-${i}" class="fiber-port sp-port out" style="background:#22c55e; color:white; width:18px; height:18px; border-radius:2px; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 1px 2px rgba(0,0,0,0.2);" onmousedown="window.startFusionDrag(event, 'dio-${dio.id}-out-${i}')" onmouseup="window.endFusionDrag(event, 'dio-${dio.id}-out-${i}')" title="OUT ${i+1}">${i+1}</div>`; 
+                let portId = `dio-${dio.id}-out-${i}`;
+                portsOutHtml += `<div id="${portId}" class="fiber-port sp-port out" style="background:#22c55e; color:white; width:18px; height:18px; border-radius:2px; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 1px 2px rgba(0,0,0,0.2);" onclick="window.togglePowerDot(event, '${portId}')" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="OUT ${i+1}">${i+1}</div>`; 
             });
             portsOutHtml += '</div>';
 
@@ -1288,15 +1307,16 @@
                 <i class="fa-solid fa-rotate-right cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.rotateBlock('splitter', '${splitter.id}')" title="Rotacionar"></i>
                 <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.activeContextMenuType='splitter'; window.activeContextMenuId='${splitter.id}'; window.toggleSide()" title="Inverter Lado"></i>
                 <i class="fa-solid fa-arrows-up-down cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.activeContextMenuType='splitter'; window.activeContextMenuId='${splitter.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
+                <i class="fa-solid fa-trash cursor-pointer text-red-400 hover:text-red-600 ml-2" onmousedown="event.stopPropagation(); window.deleteSplitter('${splitter.id}')" title="Excluir"></i>
             </div>`;
 
+            let inPortId = `sp-${splitter.id}-in`;
             let inHtml = `<div class="sp-in-col" style="display: flex; flex-direction: column; justify-content: center; z-index: 2;">
-                <div id="sp-${splitter.id}-in" class="fiber-port sp-port in" style="background:#111827; color:white; width:20px; height:20px; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 2px 4px rgba(0,0,0,0.3);" onmousedown="window.startFusionDrag(event, 'sp-${splitter.id}-in')" onmouseup="window.endFusionDrag(event, 'sp-${splitter.id}-in')" title="IN">1</div>
+                <div id="${inPortId}" class="fiber-port sp-port in" style="background:#111827; color:white; width:20px; height:20px; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 2px 4px rgba(0,0,0,0.3);" onclick="window.togglePowerDot(event, '${inPortId}')" onmousedown="window.startFusionDrag(event, '${inPortId}')" onmouseup="window.endFusionDrag(event, '${inPortId}')" title="IN">1</div>
             </div>`;
             
             let pathD = sideFlipped ? `M 80,${h/2} L 10,10 L 10,${h-10} Z` : `M 10,${h/2} L 80,10 L 80,${h-10} Z`;
 
-            // NOVO: Adicionado ID sp-lbl-{id} na etiqueta para atualizar via JS
             let svgHtml = `<div class="sp-body-svg" style="position: relative; width: 90px; height: ${h}px; display: flex; align-items: center; justify-content: center; margin: 0 -10px; z-index: 1;" onmousedown="window.startDragBlock(event, this.parentElement)">
                 <svg viewBox="0 0 90 ${h}" preserveAspectRatio="none" style="position:absolute; width:100%; height:100%; top:0; left:0;">
                     <path d="${pathD}" fill="#f1f5f9" stroke="#111827" stroke-width="2"/>
@@ -1312,7 +1332,8 @@
             if(isFlipped) indexes.reverse();
 
             indexes.forEach(i => { 
-                portsHtml += `<div id="sp-${splitter.id}-out-${i}" class="fiber-port sp-port out" style="background:#22c55e; color:white; width:18px; height:18px; border-radius:2px; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 1px 2px rgba(0,0,0,0.2);" onmousedown="window.startFusionDrag(event, 'sp-${splitter.id}-out-${i}')" onmouseup="window.endFusionDrag(event, 'sp-${splitter.id}-out-${i}')" title="OUT ${i+1}">${i+1}</div>`; 
+                let outPortId = `sp-${splitter.id}-out-${i}`;
+                portsHtml += `<div id="${outPortId}" class="fiber-port sp-port out" style="background:#22c55e; color:white; width:18px; height:18px; border-radius:2px; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 1px 2px rgba(0,0,0,0.2);" onclick="window.togglePowerDot(event, '${outPortId}')" onmousedown="window.startFusionDrag(event, '${outPortId}')" onmouseup="window.endFusionDrag(event, '${outPortId}')" title="OUT ${i+1}">${i+1}</div>`; 
             });
             portsHtml += '</div>';
 
@@ -1323,7 +1344,7 @@
         let draggedBlock = null; let dragOffset = {x:0, y:0};
         
         window.startDragBlock = function(e, block) { 
-            if(e.target.closest('.fiber-port, .sp-port, .fa-trash, .fa-pen, .fa-rotate-right, .fa-arrow-right-arrow-left, .fa-arrows-up-down')) return; 
+            if(e.target.closest('.fiber-port, .sp-port, .fa-trash, .fa-pen, .fa-rotate-right, .fa-arrow-right-arrow-left, .fa-arrows-up-down, .absolute')) return; 
             draggedBlock = block; const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const canvasContainer = document.getElementById('diagram-canvas').parentElement; const zoom = window.appState.diagramZoom || 1;
             dragOffset.x = (e.clientX - canvasRect.left + canvasContainer.scrollLeft) / zoom - parseInt(draggedBlock.style.left || 0); dragOffset.y = (e.clientY - canvasRect.top + canvasContainer.scrollTop) / zoom - parseInt(draggedBlock.style.top || 0); 
             document.onmousemove = window.dragBlockMove; document.onmouseup = window.dragBlockEnd; 
