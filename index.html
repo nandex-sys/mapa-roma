@@ -205,6 +205,26 @@
         .cm-item:hover { background: #f1f5f9; color: #0f172a; }
         .cm-item.danger { color: #ef4444; border-bottom: 1px solid #f1f5f9; margin-bottom: 4px; padding-bottom: 10px; }
         .cm-item.danger:hover { background: #fef2f2; color: #dc2626; }
+        
+        /* ADIÇÃO: BOLINHA DE LUZ E MODAL */
+        #fixed-power-btn {
+            position: fixed; top: 100px; right: 30px; width: 60px; height: 60px; background: #3b82f6; 
+            border-radius: 50%; color: white; display: none; align-items: center; justify-content: center; 
+            font-size: 24px; cursor: pointer; box-shadow: 0 10px 25px rgba(59,130,246,0.5); z-index: 10000;
+            transition: transform 0.2s, background 0.2s;
+            animation: pulse-blue 2s infinite;
+        }
+        #fixed-power-btn:hover { transform: scale(1.1); background: #2563eb; }
+        @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
+        
+        #power-modal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.6); 
+            backdrop-filter: blur(4px); z-index: 20001; display: none; align-items: center; justify-content: center;
+        }
+        .power-modal-content {
+            background: white; border-radius: 24px; width: 320px; padding: 32px; text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative;
+        }
 
         /* 12 Cores Oficiais das Fibras */
         .fiber-bg-1 { background-color: #22c55e; color: #ffffff; } /* Verde */
@@ -444,7 +464,6 @@
                 <button class="diag-btn font-bold text-blue-800" id="btn-add-dio" style="display:none;" onclick="window.promptAddDIO()"><i class="fa-solid fa-server"></i> DIO</button>
                 <button class="diag-btn font-bold text-blue-800" id="btn-add-olt" style="display:none;" onclick="window.promptAddOLT()"><i class="fa-solid fa-network-wired"></i> OLT</button>
                 
-                <button class="diag-btn"><i class="fa-solid fa-bolt text-purple-500"></i> Potência</button>
                 <button class="diag-btn font-bold text-blue-600" onclick="window.addSplitterToDiagram('1x2')"><i class="fa-solid fa-sitemap"></i> 1x2</button>
                 <button class="diag-btn font-bold text-blue-600" onclick="window.addSplitterToDiagram('1x4')"><i class="fa-solid fa-sitemap"></i> 1x4</button>
                 <button class="diag-btn font-bold text-blue-600" onclick="window.addSplitterToDiagram('1x8')"><i class="fa-solid fa-sitemap"></i> 1x8</button>
@@ -581,8 +600,8 @@
         // CORREÇÃO: Traduz os paths corretamente para o local no fallback de erro/offline para os cabos acompanharem o drag
         window.updateCableInFirebase = async (id, cableData) => { 
             let localData = { ...cableData };
-            if(localData.path && localData.path.length > 0 && typeof localData.path[0] === 'object' && !Array.isArray(localData.path[0])) {
-                localData.path = localData.path.map(p => [p.lat, p.lng]);
+            if(localData.path && localData.path.length > 0) {
+                localData.path = localData.path.map(p => Array.isArray(p) ? p : [p.lat, p.lng]);
             }
             if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { 
                 const idx = window.appState.cables.findIndex(c=>c.id===id); 
@@ -786,13 +805,13 @@
                         for(let i=1; i < c.path.length-1; i++) {
                             const iconMid = L.divIcon({ html: `<div style="width:12px; height:12px; background:white; border:3px solid ${c.color}; border-radius:50%; box-shadow:0 0 4px rgba(0,0,0,0.5);"></div>`, className: '', iconSize: [12,12], iconAnchor: [6,6] });
                             const mkr = L.marker([c.path[i][0], c.path[i][1]], {icon: iconMid, draggable: true}).addTo(cablesLayer);
-                            mkr.on('dragend', async (e) => { const pos = e.target.getLatLng(); let newPath = [...c.path]; newPath[i] = [pos.lat, pos.lng]; await window.updateCableInFirebase(c.id, {path: newPath.map(p => ({lat: p[0], lng: p[1]}))}); window.showToast('Rota atualizada.', 'sucesso'); });
+                            mkr.on('dragend', async (e) => { const pos = e.target.getLatLng(); let newPath = [...c.path]; newPath[i] = [pos.lat, pos.lng]; await window.updateCableInFirebase(c.id, {path: newPath.map(p => Array.isArray(p) ? {lat: p[0], lng: p[1]} : {lat: p.lat, lng: p.lng})}); window.showToast('Rota atualizada.', 'sucesso'); });
                         }
                         for(let i=0; i < c.path.length-1; i++) {
                             const p1 = c.path[i], p2 = c.path[i+1]; const mLat = (p1[0] + p2[0])/2, mLng = (p1[1] + p2[1])/2;
                             const iconGhost = L.divIcon({ html: `<div style="width:12px; height:12px; background:${c.color}; opacity:0.5; border-radius:50%;"></div>`, className: '', iconSize: [12,12], iconAnchor: [6,6] });
                             const ghost = L.marker([mLat, mLng], {icon: iconGhost, draggable: true}).addTo(cablesLayer);
-                            ghost.on('dragend', async (e) => { const pos = e.target.getLatLng(); let newPath = [...c.path]; newPath.splice(i+1, 0, [pos.lat, pos.lng]); await window.updateCableInFirebase(c.id, {path: newPath.map(p => ({lat: p[0], lng: p[1]}))}); window.showToast('Ponto criado.', 'sucesso'); });
+                            ghost.on('dragend', async (e) => { const pos = e.target.getLatLng(); let newPath = [...c.path]; newPath.splice(i+1, 0, [pos.lat, pos.lng]); await window.updateCableInFirebase(c.id, {path: newPath.map(p => Array.isArray(p) ? {lat: p[0], lng: p[1]} : {lat: p.lat, lng: p.lng})}); window.showToast('Ponto criado.', 'sucesso'); });
                         }
                     }
                 }); 
@@ -819,7 +838,8 @@
                             let newPath = [...c.path]; 
                             if(c.startNode === n.id) newPath[0] = [pos.lat, pos.lng]; 
                             if(c.endNode === n.id) newPath[newPath.length-1] = [pos.lat, pos.lng]; 
-                            await window.updateCableInFirebase(c.id, { path: newPath.map(p => ({lat: p[0], lng: p[1]})) }); 
+                            // FORTE CORREÇÃO NO MAP - Garante que objetos no Array não voltem como indefinidos no Firebase
+                            await window.updateCableInFirebase(c.id, { path: newPath.map(p => Array.isArray(p) ? {lat: p[0], lng: p[1]} : {lat: p.lat, lng: p.lng}) }); 
                         } 
                         window.showToast('Caixa movida e Rotas Salvas!', 'sucesso'); 
                         await window.checkAndSplitCable({ id: n.id, lat: pos.lat, lng: pos.lng, name: n.name }); 
@@ -921,32 +941,50 @@
         // 6. MOTOR DO DIAGRAMA CANVAS OSP E LUZ
         // ==========================================
         
-        // NOVO: Função interativa da Bolinha Azul para mostrar Luz nas Fibras
-        window.togglePowerDot = function(e, portId) {
-            e.stopPropagation();
-            let existing = document.getElementById('pdot-' + portId);
-            if(existing) { existing.remove(); return; }
-            
-            let portEl = document.getElementById(portId);
-            if(!portEl) return;
-            
-            let power = window.appState.portPowers[portId];
-            let displayPower = power === undefined ? "Sem Sinal" : power.toFixed(2) + " dBm";
+        // NOVO: Botão Flutuante (Bolinha Azul) para Luz nas Fibras
+        window.activePowerPort = null;
 
-            let dot = document.createElement('div');
-            dot.id = 'pdot-' + portId;
-            dot.className = 'absolute -top-1 -right-1 w-3 h-3 bg-blue-500 border border-white rounded-full cursor-pointer z-50';
-            dot.style.boxShadow = '0 1px 3px rgba(0,0,0,0.5)';
-            dot.title = "Ver Luz";
+        window.showPowerCornerBtn = function(e, portId) {
+            e.stopPropagation();
+            window.activePowerPort = portId;
+            let btn = document.getElementById('fixed-power-btn');
+            if(!btn) {
+                btn = document.createElement('div');
+                btn.id = 'fixed-power-btn';
+                btn.innerHTML = '<i class="fa-solid fa-bolt"></i>';
+                btn.onclick = window.openPowerModal;
+                document.body.appendChild(btn);
+            }
+            btn.style.display = 'flex';
+        };
+
+        window.openPowerModal = function() {
+            if(!window.activePowerPort) return;
+            let power = window.appState.portPowers[window.activePowerPort];
+            let displayPower = power === undefined ? "Sem Sinal" : power.toFixed(2) + " dBm";
+            let colorClass = power === undefined ? "text-red-500" : "text-green-500";
+            let iconClass = power === undefined ? "fa-circle-xmark" : "fa-check-circle";
+
+            let modal = document.getElementById('power-modal');
+            if(!modal) {
+                modal = document.createElement('div');
+                modal.id = 'power-modal';
+                document.body.appendChild(modal);
+            }
             
-            dot.onmousedown = function(ev) { ev.stopPropagation(); }
-            dot.onclick = function(ev) {
-                ev.stopPropagation();
-                window.showToast("⚡ Luz: " + displayPower, power === undefined ? "erro" : "sucesso");
-                dot.remove(); 
-            };
-            
-            portEl.appendChild(dot);
+            modal.innerHTML = `
+                <div class="power-modal-content">
+                    <button class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-slate-200" onclick="document.getElementById('power-modal').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+                    <div class="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-4 border-4 border-slate-100 shadow-inner">
+                        <i class="fa-solid fa-lightbulb text-3xl text-blue-500"></i>
+                    </div>
+                    <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Status da Porta</h3>
+                    <h2 class="text-4xl font-black text-gray-800 mb-2 font-mono">${displayPower}</h2>
+                    <div class="flex items-center justify-center gap-2 text-sm font-bold ${colorClass} bg-slate-50 border border-slate-100 py-3 rounded-xl mt-4"><i class="fa-solid ${iconClass}"></i> ${power === undefined ? 'Fibra Apagada / Rompida' : 'Sinal Ativo e Estável'}</div>
+                </div>
+            `;
+            modal.style.display = 'flex';
+            document.getElementById('fixed-power-btn').style.display = 'none'; // Esconde a bolinha
         };
 
         window.zoomDiagram = function(action) {
@@ -1140,7 +1178,7 @@
                     let orig = el.getAttribute('data-orig-title') || el.getAttribute('title') || '';
                     if(!el.hasAttribute('data-orig-title')) el.setAttribute('data-orig-title', orig);
                     
-                    // Coloca a Luz no Balão que aparece ao passar o mouse
+                    // Coloca a Luz no Balão do mouse para leitura rapida (se necessário)
                     el.setAttribute('title', `${orig.split(' |')[0]} | Luz: ${powers[portId].toFixed(2)} dBm`);
                     
                     // Acende o brilho da porta indicando que tem luz passando ali
@@ -1225,7 +1263,7 @@
             if(isFlipped) indexes.reverse();
             indexes.forEach(i => {
                 const colorIdx = i % 12; const portId = `port-${cable.id}-${i}`; 
-                fibersHtml += `<div id="${portId}" class="fiber-port fiber-bg-${colorIdx + 1}" onclick="window.togglePowerDot(event, '${portId}')" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="Fibra ${i+1}">${i+1}</div>`; 
+                fibersHtml += `<div id="${portId}" class="fiber-port fiber-bg-${colorIdx + 1}" onclick="window.showPowerCornerBtn(event, '${portId}')" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="Fibra ${i+1}">${i+1}</div>`; 
             });
             fibersHtml += '</div>'; block.innerHTML = infoHtml + fibersHtml; canvas.appendChild(block); 
         };
@@ -1251,7 +1289,7 @@
             if(isFlipped) indexes.reverse();
             indexes.forEach(i => {
                 const portId = `olt-${olt.id}-pon-${i}`; 
-                fibersHtml += `<div id="${portId}" class="fiber-port sp-port out" style="background:#0284c7; color:white;" onclick="window.togglePowerDot(event, '${portId}')" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="PON ${i+1}">${i+1}</div>`; 
+                fibersHtml += `<div id="${portId}" class="fiber-port sp-port out" style="background:#0284c7; color:white;" onclick="window.showPowerCornerBtn(event, '${portId}')" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="PON ${i+1}">${i+1}</div>`; 
             });
             fibersHtml += '</div>'; block.innerHTML = infoHtml + fibersHtml; canvas.appendChild(block); 
         };
@@ -1275,7 +1313,7 @@
             if(isFlipped) indexes.reverse();
             indexes.forEach(i => { 
                 let portId = `dio-${dio.id}-in-${i}`;
-                portsInHtml += `<div id="${portId}" class="fiber-port sp-port in" style="background:#111827; color:white; width:18px; height:18px; border-radius:2px; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 1px 2px rgba(0,0,0,0.2);" onclick="window.togglePowerDot(event, '${portId}')" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="IN ${i+1}">${i+1}</div>`; 
+                portsInHtml += `<div id="${portId}" class="fiber-port sp-port in" style="background:#111827; color:white; width:18px; height:18px; border-radius:2px; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 1px 2px rgba(0,0,0,0.2);" onclick="window.showPowerCornerBtn(event, '${portId}')" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="IN ${i+1}">${i+1}</div>`; 
             });
             portsInHtml += '</div>';
 
@@ -1287,7 +1325,7 @@
             let portsOutHtml = `<div class="sp-out-col" style="display: flex; flex-direction: column; justify-content: space-around; height: ${h}px; z-index: 2;">`;
             indexes.forEach(i => { 
                 let portId = `dio-${dio.id}-out-${i}`;
-                portsOutHtml += `<div id="${portId}" class="fiber-port sp-port out" style="background:#22c55e; color:white; width:18px; height:18px; border-radius:2px; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 1px 2px rgba(0,0,0,0.2);" onclick="window.togglePowerDot(event, '${portId}')" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="OUT ${i+1}">${i+1}</div>`; 
+                portsOutHtml += `<div id="${portId}" class="fiber-port sp-port out" style="background:#22c55e; color:white; width:18px; height:18px; border-radius:2px; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 1px 2px rgba(0,0,0,0.2);" onclick="window.showPowerCornerBtn(event, '${portId}')" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="OUT ${i+1}">${i+1}</div>`; 
             });
             portsOutHtml += '</div>';
 
@@ -1312,7 +1350,7 @@
 
             let inPortId = `sp-${splitter.id}-in`;
             let inHtml = `<div class="sp-in-col" style="display: flex; flex-direction: column; justify-content: center; z-index: 2;">
-                <div id="${inPortId}" class="fiber-port sp-port in" style="background:#111827; color:white; width:20px; height:20px; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 2px 4px rgba(0,0,0,0.3);" onclick="window.togglePowerDot(event, '${inPortId}')" onmousedown="window.startFusionDrag(event, '${inPortId}')" onmouseup="window.endFusionDrag(event, '${inPortId}')" title="IN">1</div>
+                <div id="${inPortId}" class="fiber-port sp-port in" style="background:#111827; color:white; width:20px; height:20px; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 2px 4px rgba(0,0,0,0.3);" onclick="window.showPowerCornerBtn(event, '${inPortId}')" onmousedown="window.startFusionDrag(event, '${inPortId}')" onmouseup="window.endFusionDrag(event, '${inPortId}')" title="IN">1</div>
             </div>`;
             
             let pathD = sideFlipped ? `M 80,${h/2} L 10,10 L 10,${h-10} Z` : `M 10,${h/2} L 80,10 L 80,${h-10} Z`;
@@ -1333,7 +1371,7 @@
 
             indexes.forEach(i => { 
                 let outPortId = `sp-${splitter.id}-out-${i}`;
-                portsHtml += `<div id="${outPortId}" class="fiber-port sp-port out" style="background:#22c55e; color:white; width:18px; height:18px; border-radius:2px; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 1px 2px rgba(0,0,0,0.2);" onclick="window.togglePowerDot(event, '${outPortId}')" onmousedown="window.startFusionDrag(event, '${outPortId}')" onmouseup="window.endFusionDrag(event, '${outPortId}')" title="OUT ${i+1}">${i+1}</div>`; 
+                portsHtml += `<div id="${outPortId}" class="fiber-port sp-port out" style="background:#22c55e; color:white; width:18px; height:18px; border-radius:2px; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 1px 2px rgba(0,0,0,0.2);" onclick="window.showPowerCornerBtn(event, '${outPortId}')" onmousedown="window.startFusionDrag(event, '${outPortId}')" onmouseup="window.endFusionDrag(event, '${outPortId}')" title="OUT ${i+1}">${i+1}</div>`; 
             });
             portsHtml += '</div>';
 
