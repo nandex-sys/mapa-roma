@@ -47,40 +47,22 @@
         body { font-family: 'Inter', sans-serif; overflow: hidden; background-color: var(--bg-main); margin: 0; padding: 0; }
         
         /* NOVO: Estilos do Dashboard Escuro para Projetos */
-        .home-sidebar {
-            width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border-color); display: flex; flex-direction: column;
-        }
-        .home-main {
-            flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-main); overflow-y: auto;
-        }
-        .home-header {
-            height: 90px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0;
-        }
-        .home-content {
-            flex-grow: 1; display: flex; flex-direction: column; position: relative; padding: 40px;
-        }
-        #projects-grid {
-            display: flex; flex-wrap: wrap; gap: 24px; width: 100%; justify-content: flex-start; align-items: flex-start;
-        }
-        .project-card {
-            background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; width: 280px; height: 160px; padding: 24px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden;
-        }
+        .home-sidebar { width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
+        .home-main { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-main); overflow-y: auto; }
+        .home-header { height: 90px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0; }
+        .home-content { flex-grow: 1; display: flex; flex-direction: column; position: relative; padding: 40px; }
+        #projects-grid { display: flex; flex-wrap: wrap; gap: 24px; width: 100%; justify-content: flex-start; align-items: flex-start; }
+        .project-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; width: 280px; height: 160px; padding: 24px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
         .project-card:hover { border-color: var(--brand-green); transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
         .project-card::before { content: ''; position: absolute; top: -50px; right: -50px; width: 120px; height: 120px; background-color: var(--bg-main); border-radius: 50%; z-index: 0; opacity: 0.5; }
-        #empty-state {
-            display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 60vh; border: 2px dashed var(--border-color); border-radius: 16px; background-color: var(--bg-dashed);
-        }
+        #empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 60vh; border: 2px dashed var(--border-color); border-radius: 16px; background-color: var(--bg-dashed); }
         .btn-green { background-color: var(--brand-green); color: white; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px; border: none; }
         .btn-green:hover { background-color: var(--brand-green-hover); }
         .search-bar-dash { background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; gap: 8px; color: var(--text-secondary); width: 300px; }
         .search-bar-dash input { background: transparent; border: none; outline: none; color: var(--text-primary); width: 100%; font-size: 14px; }
 
         /* STREAMING_CHUNK:Estilos da Tela Inicial de Regiões... */
-        #regions-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: var(--bg-main); z-index: 9999;
-            display: flex; flex-direction: row; align-items: stretch; justify-content: flex-start;
-        }
+        #regions-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: var(--bg-main); z-index: 9999; display: flex; flex-direction: row; align-items: stretch; justify-content: flex-start; }
 
         /* SIDEBAR (MENU ESQUERDO) */
         .sidebar-logo { padding: 24px; display: flex; justify-content: space-between; align-items: flex-start; }
@@ -99,17 +81,14 @@
 
         /* STREAMING_CHUNK:Estilos do Workspace de Mapa... */
         #app-workspace { display: none; width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; }
-        
         #map-container { position: absolute; top: 0; left: 0; height: 100vh; width: 100vw; z-index: 10; }
         .leaflet-control-zoom { display: none !important; }
-        
         .mode-placing #map-container { cursor: crosshair !important; }
         .mode-drawing #map-container { cursor: crosshair !important; }
 
         .top-toolbar { position: absolute; top: 20px; left: calc(50% + 130px); transform: translateX(-50%); z-index: 1000; display: flex; gap: 12px; align-items: center; background: transparent; width: 98%; max-width: 1400px; }
         .search-bar { background: white; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; align-items: center; padding: 8px 16px; flex-grow: 1; max-width: 350px; height: 48px; }
         .search-bar input { border: none; outline: none; width: 100%; font-size: 14px; color: #374151; background: transparent; }
-        
         .tools-group { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; align-items: center; padding: 4px; height: 48px; }
         .tool-btn { background: transparent; border: none; padding: 8px 16px; font-size: 12px; font-weight: 700; color: #4b5563; cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
         .tool-btn:hover { background: #f3f4f6; }
@@ -122,7 +101,6 @@
 
         .info-card { position: absolute; top: 80px; left: 20px; width: 360px; background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); z-index: 1000; padding: 24px; display: none; border: 1px solid #f3f4f6; }
         .action-buttons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        
         .btn-primary-blue { background-color: #2563eb; color: white; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s; border: none; }
         .btn-primary-blue:hover { background-color: #1d4ed8; }
         .btn-dark { background-color: #0f172a; color: white; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s; border: none; }
@@ -134,33 +112,27 @@
         .btn-small-action.danger { color: #ef4444; }
         .btn-small-action.danger:hover { background: #fef2f2; border-color: #fca5a5; }
 
-        /* STREAMING_CHUNK:Estilizando Modais Pop-up e Novo Modal de Caixa... */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(2px); z-index: 20000; display: none; align-items: center; justify-content: center; }
         .modal-content { background: white; border-radius: 20px; width: 100%; max-width: 480px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; }
         .modal-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f3f4f6; }
         .modal-header h2 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
         .modal-body { padding: 24px; max-height: 70vh; overflow-y: auto; }
-        
         .input-label { display: block; font-size: 11px; font-weight: 700; color: #6b7280; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
         .custom-input { width: 100%; padding: 12px 16px; border: 2px solid #0ea5e9; border-radius: 8px; font-size: 14px; font-weight: 600; color: #111827; outline: none; transition: border-color 0.2s; }
         .custom-input::placeholder { color: #94a3b8; font-weight: 500; }
-        
         .structure-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
         .structure-btn { border: 1px solid #e2e8f0; background: white; border-radius: 8px; padding: 16px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font-size: 11px; font-weight: 700; color: #64748b; cursor: pointer; transition: all 0.2s; }
         .structure-btn i { font-size: 20px; color: #94a3b8; transition: color 0.2s; }
         .structure-btn:hover { border-color: #cbd5e1; background-color: #f8fafc; }
         .structure-btn.selected { border-color: #60a5fa; background-color: #eff6ff; color: #1e293b; box-shadow: 0 0 0 1px #60a5fa inset; }
         .structure-btn.selected i { color: inherit; } 
-        
         .splitter-pills { display: flex; gap: 8px; flex-wrap: wrap; }
         .splitter-pill { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 12px; font-size: 11px; font-weight: 700; color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 6px; }
         .splitter-pill.selected { border-color: #60a5fa; background-color: #eff6ff; color: #2563eb; }
-        
         .color-palette { display: flex; gap: 12px; flex-wrap: wrap; background: #f8fafc; padding: 12px; border-radius: 12px; }
         .color-btn { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; border: 2px solid transparent; }
         .color-btn:hover { transform: scale(1.1); }
         .color-btn.selected { box-shadow: 0 0 0 3px white, 0 0 0 5px #334155; }
-        
         .modal-footer { padding: 20px 24px; border-top: 1px solid #f3f4f6; display: flex; justify-content: space-between; gap: 16px; }
         .btn-cancel { flex: 1; padding: 14px; background: white; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 700; color: #475569; cursor: pointer; transition: background 0.2s; }
         .btn-cancel:hover { background: #f1f5f9; }
@@ -168,30 +140,26 @@
         .btn-submit-dark:hover { background: #1e293b; }
         .btn-submit-orange { flex: 1; padding: 12px; background: #f97316; border: none; border-radius: 8px; font-weight: 600; color: white; cursor: pointer; }
 
-        /* NOTIFICAÇÕES E MAP ICONS */
         .instruction-banner { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; background: #111827; color: white; padding: 12px 24px; border-radius: 30px; font-weight: 600; font-size: 14px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); display: none; align-items: center; gap: 10px; }
         #toast-container { position: absolute; bottom: 20px; right: 20px; z-index: 999999; display: flex; flex-direction: column; gap: 10px; }
         .toast-msg { background: #111827; color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transform: translateY(20px); transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
         .toast-msg.show { opacity: 1; transform: translateY(0); }
 
-        /* ÍCONES LEAFLET E TOOLTIP FIX */
         .map-icon-wrapper { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; border: 2px solid white; transition: transform 0.2s; }
         .map-icon-wrapper.rounded-full { border-radius: 50%; }
         .leaflet-div-icon { background: transparent; border: none; }
         .node-anchorable .map-icon-wrapper { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5); transform: scale(1.1); }
         .node-hover .map-icon-wrapper { transform: scale(1.3); border-color: #3b82f6; z-index: 1000 !important;}
-        
         .transparent-tooltip { background: transparent !important; border: none !important; box-shadow: none !important; margin: 0 !important; padding: 0 !important; }
         .transparent-tooltip::before { display: none !important; }
 
-        /* INVENTÁRIO */
         #inventory-panel { position: absolute; top: 80px; right: 20px; width: 400px; max-height: calc(100vh - 100px); background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2); z-index: 1000; display: none; flex-direction: column; border: 1px solid #e5e7eb; overflow: hidden; }
         .inv-header { padding: 16px 20px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; background-color: #f8fafc; }
         .inv-list { overflow-y: auto; padding: 10px; flex-grow: 1; }
         .inv-item { padding: 12px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; transition: background 0.2s; cursor: pointer; }
         .inv-item:hover { background-color: #f0fdf4; }
 
-        /* ================= DIAGRAMA CANVAS OSP (NOVO LAYOUT TRIANGULAR) ================= */
+        /* ================= DIAGRAMA CANVAS OSP ================= */
         #diagram-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; z-index: 3000; display: none; flex-direction: column; }
         .diagram-toolbar { background: white; height: 60px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); z-index: 20; }
         .diag-tb-group { display: flex; align-items: center; gap: 12px; }
@@ -220,18 +188,22 @@
         
         .fiber-grid { display: flex; flex-direction: column; justify-content: space-around; padding: 12px 8px; gap: 6px; background: #f8fafc; border-left: 1px solid #e2e8f0; border-radius: 0 6px 6px 0; }
         .side-flipped .fiber-grid { border-left: none; border-right: 1px solid #e2e8f0; border-radius: 6px 0 0 6px; }
-        .fiber-port { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; cursor: crosshair; user-select: none; transition: transform 0.1s; position: relative; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-        .fiber-port:hover { transform: scale(1.3); z-index: 10; box-shadow: 0 0 0 2px white inset, 0 2px 4px rgba(0,0,0,0.3); }
+        .fiber-port { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; cursor: crosshair; user-select: none; transition: transform 0.1s, box-shadow 0.2s; position: relative; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        .fiber-port:hover { transform: scale(1.3); z-index: 10; box-shadow: 0 0 0 2px white inset, 0 2px 4px rgba(0,0,0,0.3) !important; }
 
         /* SPLITTER TRIANGULAR */
         .splitter-tri { position: absolute; z-index: 2; display: flex; flex-direction: row; align-items: stretch; transition: transform 0.2s ease, left 0s, top 0s; transform-origin: center center; }
         .splitter-tri.side-flipped { flex-direction: row-reverse; }
         .sp-in-col { display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2; }
         .sp-out-col { display: flex; flex-direction: column; justify-content: space-around; z-index: 2; }
-        .sp-port { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; cursor: crosshair; color: white; transition: transform 0.1s; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-        .sp-port:hover { transform: scale(1.3); z-index: 10; box-shadow: 0 0 0 2px white inset, 0 2px 4px rgba(0,0,0,0.3); }
+        .sp-port { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; cursor: crosshair; color: white; transition: transform 0.1s, box-shadow 0.2s; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        .sp-port:hover { transform: scale(1.3); z-index: 10; box-shadow: 0 0 0 2px white inset, 0 2px 4px rgba(0,0,0,0.3) !important; }
 
-        /* MENU DE CONTEXTO (CLIQUE DIREITO) */
+        /* OLT E DIO NO CANVAS */
+        .olt-block { border: 2px solid #0284c7; }
+        .dio-block .sp-body-svg div { background: #94a3b8 !important; border-top: 2px solid #334155 !important; border-bottom: 2px solid #334155 !important; }
+
+        /* MENU DE CONTEXTO */
         #context-menu { display: none; position: fixed; background: white; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); border-radius: 8px; z-index: 999999; padding: 6px 0; min-width: 200px; }
         .cm-item { padding: 10px 16px; font-size: 12px; font-weight: 600; color: #334155; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.2s; }
         .cm-item:hover { background: #f1f5f9; color: #0f172a; }
@@ -472,6 +444,10 @@
             </div>
             
             <div class="diag-tb-group">
+                <!-- NOVOS BOTÕES: OLT e DIO -->
+                <button class="diag-btn font-bold text-blue-800" id="btn-add-dio" style="display:none;" onclick="window.promptAddDIO()"><i class="fa-solid fa-server"></i> DIO</button>
+                <button class="diag-btn font-bold text-blue-800" id="btn-add-olt" style="display:none;" onclick="window.promptAddOLT()"><i class="fa-solid fa-network-wired"></i> OLT</button>
+                
                 <button class="diag-btn"><i class="fa-solid fa-bolt text-purple-500"></i> Potência</button>
                 <button class="diag-btn font-bold text-blue-600" onclick="window.addSplitterToDiagram('1x2')"><i class="fa-solid fa-sitemap"></i> 1x2</button>
                 <button class="diag-btn font-bold text-blue-600" onclick="window.addSplitterToDiagram('1x4')"><i class="fa-solid fa-sitemap"></i> 1x4</button>
@@ -508,7 +484,8 @@
         // 1. ESTADO GLOBAL
         // ==========================================
         window.appState = {
-            currentProjectId: null, projects: [], mode: 'view', nodes: [], cables: [], fusions: [], splitters: [], 
+            currentProjectId: null, projects: [], mode: 'view', nodes: [], cables: [], fusions: [], splitters: [], olts: [], dios: [], 
+            portPowers: {}, // NOVO: Armazena o calculo da luz por porta
             selectedNodeId: null, editingNodeId: null,
             nodeSetup: { name: 'CEO 01', type: 'CEO', icon: 'fa-layer-group', color: '#f97316', splitter: null },
             cableSetup: { name: '', capacity: 12, color: '#3b82f6' },
@@ -526,6 +503,9 @@
             if(portId.startsWith('port-')) { const parts = portId.split('-'); return FIBER_COLORS[parseInt(parts[parts.length-1]) % 12]; } 
             else if(portId.includes('-in')) { return '#111827'; } 
             else if(portId.includes('-out-')) { return '#10b981'; }
+            else if(portId.includes('olt-')) { return '#0284c7'; } 
+            else if(portId.includes('dio-') && portId.includes('-in-')) { return '#111827'; }
+            else if(portId.includes('dio-') && portId.includes('-out-')) { return '#22c55e'; }
             return '#0f172a';
         };
 
@@ -541,7 +521,6 @@
             window.renderMap();
         };
 
-        // Menu de Contexto Dinâmico
         window.activeContextMenuId = null;
         window.activeContextMenuType = null;
         
@@ -583,6 +562,8 @@
             onSnapshot(getCollectionPath('cables'), (snapshot) => { window.appState.cables = []; snapshot.forEach(doc => { const data = doc.data(); if (data.path && data.path.length > 0 && typeof data.path[0] === 'object' && !Array.isArray(data.path[0])) { data.path = data.path.map(p => [p.lat, p.lng]); } window.appState.cables.push({ id: doc.id, ...data }); }); window.renderMap(); }, (e) => console.error(e));
             onSnapshot(getCollectionPath('fusions'), (snapshot) => { window.appState.fusions = []; snapshot.forEach(doc => { window.appState.fusions.push({ id: doc.id, ...doc.data() }); }); if(document.getElementById('diagram-view').style.display === 'flex') window.updateAllFusionLines(); }, (e) => console.error(e));
             onSnapshot(getCollectionPath('splitters'), (snapshot) => { window.appState.splitters = []; snapshot.forEach(doc => { window.appState.splitters.push({ id: doc.id, ...doc.data() }); }); if(document.getElementById('diagram-view').style.display === 'flex') window.openCanvasDiagram(); }, (e) => console.error(e));
+            onSnapshot(getCollectionPath('olts'), (snapshot) => { window.appState.olts = []; snapshot.forEach(doc => { window.appState.olts.push({ id: doc.id, ...doc.data() }); }); if(document.getElementById('diagram-view').style.display === 'flex') window.openCanvasDiagram(); }, (e) => console.error(e));
+            onSnapshot(getCollectionPath('dios'), (snapshot) => { window.appState.dios = []; snapshot.forEach(doc => { window.appState.dios.push({ id: doc.id, ...doc.data() }); }); if(document.getElementById('diagram-view').style.display === 'flex') window.openCanvasDiagram(); }, (e) => console.error(e));
         }
 
         function fallbackToLocal() { document.getElementById('sync-status').innerText = 'MODO LOCAL (OFFLINE)'; document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-red-500'; window.appState.nodes = [ { id: 'n1', name: 'POP Central', type: 'POP / DC', icon: 'fa-server', color: '#111827', lat: -2.24455, lng: -49.50444, internal: {hasDIO:false, splitters:[]} }, { id: 'n2', name: 'CEO 01', type: 'CEO', icon: 'fa-layer-group', color: '#f97316', lat: -2.24500, lng: -49.50500, internal: {hasDIO:false, splitters:[]} }, { id: 'n3', name: 'CTO 01', type: 'CTO', icon: 'fa-box', color: '#f59e0b', lat: -2.24600, lng: -49.50600, internal: {hasDIO:false, splitters:[{type:'1x16'}]} } ]; window.appState.cables = [ { id: 'c1', name: 'Cabo Tronco', capacity: 12, color: '#f97316', startNode: 'n1', endNode: 'n2', path: [[-2.24455, -49.50444], [-2.24480, -49.50480], [-2.24500, -49.50500]]} ]; window.renderMap(); }
@@ -606,6 +587,26 @@
         window.saveFusionToFirebase = async (fusionData) => { if(!db || !auth || !auth.currentUser) { window.appState.fusions.push({id: 'local_'+Date.now(), ...fusionData}); window.updateAllFusionLines(); return; } try { await addDoc(getCollectionPath('fusions'), fusionData); } catch(e) { window.appState.fusions.push({id: 'local_'+Date.now(), ...fusionData}); window.updateAllFusionLines(); } };
         window.saveSplitterToFirebase = async (data) => { if(!db || !auth || !auth.currentUser) { window.appState.splitters.push({id: 'local_sp_'+Date.now(), ...data}); window.openCanvasDiagram(); return; } try { await addDoc(getCollectionPath('splitters'), data); } catch(e) { window.appState.splitters.push({id: 'local_sp_'+Date.now(), ...data}); window.openCanvasDiagram(); } };
         window.updateSplitterInFirebase = async (id, data) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.splitters.findIndex(s=>s.id===id); if(idx>-1) window.appState.splitters[idx] = {...window.appState.splitters[idx], ...data}; window.openCanvasDiagram(); return; } try { await updateDoc(getDocPath('splitters', id), data); } catch(e) { } };
+
+        window.saveOLTToFirebase = async (data) => { if(!db || !auth || !auth.currentUser) { window.appState.olts.push({id: 'local_olt_'+Date.now(), ...data}); window.openCanvasDiagram(); return; } try { await addDoc(getCollectionPath('olts'), data); } catch(e) {} };
+        window.updateOLTInFirebase = async (id, data) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.olts.findIndex(s=>s.id===id); if(idx>-1) window.appState.olts[idx] = {...window.appState.olts[idx], ...data}; window.openCanvasDiagram(); return; } try { await updateDoc(getDocPath('olts', id), data); } catch(e) { } };
+        window.deleteOLT = async function(id) {
+            if(confirm("Remover OLT? As fusões conectadas serão perdidas.")) {
+                if(db && auth && auth.currentUser && !id.startsWith('local_')) { await deleteDoc(getDocPath('olts', id)); const fusions = window.appState.fusions.filter(f => f.from.includes(id) || f.to.includes(id)); for(let f of fusions) await deleteDoc(getDocPath('fusions', f.id)); }
+                else { window.appState.olts = window.appState.olts.filter(s => s.id !== id); window.appState.fusions = window.appState.fusions.filter(f => !f.from.includes(id) && !f.to.includes(id)); window.openCanvasDiagram(); }
+                window.showToast('OLT removida.');
+            }
+        };
+
+        window.saveDIOToFirebase = async (data) => { if(!db || !auth || !auth.currentUser) { window.appState.dios.push({id: 'local_dio_'+Date.now(), ...data}); window.openCanvasDiagram(); return; } try { await addDoc(getCollectionPath('dios'), data); } catch(e) {} };
+        window.updateDIOInFirebase = async (id, data) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.dios.findIndex(s=>s.id===id); if(idx>-1) window.appState.dios[idx] = {...window.appState.dios[idx], ...data}; window.openCanvasDiagram(); return; } try { await updateDoc(getDocPath('dios', id), data); } catch(e) { } };
+        window.deleteDIO = async function(id) {
+            if(confirm("Remover DIO? As fusões conectadas serão perdidas.")) {
+                if(db && auth && auth.currentUser && !id.startsWith('local_')) { await deleteDoc(getDocPath('dios', id)); const fusions = window.appState.fusions.filter(f => f.from.includes(id) || f.to.includes(id)); for(let f of fusions) await deleteDoc(getDocPath('fusions', f.id)); }
+                else { window.appState.dios = window.appState.dios.filter(s => s.id !== id); window.appState.fusions = window.appState.fusions.filter(f => !f.from.includes(id) && !f.to.includes(id)); window.openCanvasDiagram(); }
+                window.showToast('DIO removido.');
+            }
+        };
 
         window.renderProjectsList = function() {
             const grid = document.getElementById('projects-grid'); const empty = document.getElementById('empty-state'); if(!grid || !empty) return;
@@ -671,7 +672,7 @@
         window.voltarParaProjetos = () => { window.appState.currentProjectId = null; document.getElementById('app-workspace').style.display = 'none'; document.getElementById('regions-screen').style.display = 'flex'; };
         window.searchLocation = async () => { const query = document.getElementById('search-input').value; if(!query) return; try { const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`); const data = await res.json(); if(data && data.length > 0) { map.flyTo([data[0].lat, data[0].lon], 18); } } catch(e) {} };
 
-        // Sangria
+        // Sangria Face a Face
         window.checkAndSplitCable = async function(node) {
             const currentCables = window.appState.cables.filter(c => c.projectId === window.appState.currentProjectId);
             const pt = map.project(L.latLng(node.lat, node.lng));
@@ -718,15 +719,11 @@
             if (window.appState.mode === 'placing_node') { 
                 const internalState = { hasDIO: false, splitters: [] }; 
                 if(window.appState.nodeSetup.type.includes('CTO') && window.appState.nodeSetup.splitter) internalState.splitters.push({ type: window.appState.nodeSetup.splitter, id: 'SPL001' }); 
-                
                 const newId = await window.saveNodeToFirebase({ projectId: window.appState.currentProjectId, name: window.appState.nodeSetup.name, type: window.appState.nodeSetup.type, icon: window.appState.nodeSetup.icon, color: window.appState.nodeSetup.color, lat: e.latlng.lat, lng: e.latlng.lng, internal: internalState }); 
-                
                 await window.checkAndSplitCable({ id: newId, lat: e.latlng.lat, lng: e.latlng.lng, name: window.appState.nodeSetup.name });
-                
                 const match = window.appState.nodeSetup.name.match(/^(.*? )(\d+)(.*)$/); 
                 if (match) { window.appState.nodeSetup.name = match[1] + String(parseInt(match[2], 10) + 1).padStart(match[2].length, '0') + match[3]; } 
                 else { window.appState.nodeSetup.name += " 2"; } 
-                
                 document.getElementById('instruction-text').innerHTML = `Clique para inserir <b>${window.appState.nodeSetup.name}</b>.`; 
             } else if (window.appState.mode === 'drawing_cable') { 
                 if (window.appState.cableStartNodeId !== null && !window.appState.snapNodePos) { 
@@ -745,10 +742,8 @@
                     } else if (window.appState.cableStartNodeId !== node.id) { 
                         window.appState.cablePath.push([node.lat, node.lng]); 
                         const firebasePath = window.appState.cablePath.map(coord => ({ lat: coord[0], lng: coord[1] })); 
-                        
                         const nodeA = window.appState.nodes.find(n => n.id === window.appState.cableStartNodeId);
                         const autoName = `${window.appState.cableSetup.capacity} FO - ${nodeA.name} sentido ${node.name}`;
-
                         await window.saveCableToFirebase({ projectId: window.appState.currentProjectId, name: autoName, capacity: window.appState.cableSetup.capacity, color: window.appState.cableSetup.color, startNode: window.appState.cableStartNodeId, endNode: node.id, path: firebasePath }); 
                         window.showToast(`Cabo finalizado!`, "sucesso"); window.setMode('view'); 
                     } 
@@ -774,13 +769,13 @@
                         for(let i=1; i < c.path.length-1; i++) {
                             const iconMid = L.divIcon({ html: `<div style="width:12px; height:12px; background:white; border:3px solid ${c.color}; border-radius:50%; box-shadow:0 0 4px rgba(0,0,0,0.5);"></div>`, className: '', iconSize: [12,12], iconAnchor: [6,6] });
                             const mkr = L.marker([c.path[i][0], c.path[i][1]], {icon: iconMid, draggable: true}).addTo(cablesLayer);
-                            mkr.on('dragend', async (e) => { const pos = e.target.getLatLng(); let newPath = [...c.path]; newPath[i] = [pos.lat, pos.lng]; await window.updateCableInFirebase(c.id, {path: newPath}); window.showToast('Rota atualizada.', 'sucesso'); });
+                            mkr.on('dragend', async (e) => { const pos = e.target.getLatLng(); let newPath = [...c.path]; newPath[i] = [pos.lat, pos.lng]; await window.updateCableInFirebase(c.id, {path: newPath.map(p => ({lat: p[0], lng: p[1]}))}); window.showToast('Rota atualizada.', 'sucesso'); });
                         }
                         for(let i=0; i < c.path.length-1; i++) {
                             const p1 = c.path[i], p2 = c.path[i+1]; const mLat = (p1[0] + p2[0])/2, mLng = (p1[1] + p2[1])/2;
                             const iconGhost = L.divIcon({ html: `<div style="width:12px; height:12px; background:${c.color}; opacity:0.5; border-radius:50%;"></div>`, className: '', iconSize: [12,12], iconAnchor: [6,6] });
                             const ghost = L.marker([mLat, mLng], {icon: iconGhost, draggable: true}).addTo(cablesLayer);
-                            ghost.on('dragend', async (e) => { const pos = e.target.getLatLng(); let newPath = [...c.path]; newPath.splice(i+1, 0, [pos.lat, pos.lng]); await window.updateCableInFirebase(c.id, {path: newPath}); window.showToast('Ponto criado.', 'sucesso'); });
+                            ghost.on('dragend', async (e) => { const pos = e.target.getLatLng(); let newPath = [...c.path]; newPath.splice(i+1, 0, [pos.lat, pos.lng]); await window.updateCableInFirebase(c.id, {path: newPath.map(p => ({lat: p[0], lng: p[1]}))}); window.showToast('Ponto criado.', 'sucesso'); });
                         }
                     }
                 }); 
@@ -799,7 +794,19 @@
                     marker.on('click', (e) => { L.DomEvent.stopPropagation(e); window.handleNodeInteraction(n, 'click'); }); 
                     marker.on('mouseover', (e) => { window.handleNodeInteraction(n, 'mouseover'); if(window.appState.mode === 'drawing_cable') e.target.getElement().classList.add('node-hover'); }); 
                     marker.on('mouseout', (e) => { window.handleNodeInteraction(n, 'mouseout'); e.target.getElement().classList.remove('node-hover'); }); 
-                    marker.on('dragend', async (e) => { const pos = e.target.getLatLng(); await window.updateNodeInFirebase(n.id, { lat: pos.lat, lng: pos.lng }); const connectedCables = currentCables.filter(c => c.startNode === n.id || c.endNode === n.id); for(let c of connectedCables) { let newPath = [...c.path]; if(c.startNode === n.id) newPath[0] = [pos.lat, pos.lng]; if(c.endNode === n.id) newPath[newPath.length-1] = [pos.lat, pos.lng]; await window.updateCableInFirebase(c.id, { path: newPath }); } window.showToast('Caixa movida!', 'sucesso'); await window.checkAndSplitCable({ id: n.id, lat: pos.lat, lng: pos.lng, name: n.name }); });
+                    
+                    marker.on('dragend', async (e) => { 
+                        const pos = e.target.getLatLng(); await window.updateNodeInFirebase(n.id, { lat: pos.lat, lng: pos.lng }); 
+                        const connectedCables = currentCables.filter(c => c.startNode === n.id || c.endNode === n.id); 
+                        for(let c of connectedCables) { 
+                            let newPath = [...c.path]; 
+                            if(c.startNode === n.id) newPath[0] = [pos.lat, pos.lng]; 
+                            if(c.endNode === n.id) newPath[newPath.length-1] = [pos.lat, pos.lng]; 
+                            await window.updateCableInFirebase(c.id, { path: newPath.map(p => ({lat: p[0], lng: p[1]})) }); 
+                        } 
+                        window.showToast('Caixa movida e Rotas Salvas!', 'sucesso'); 
+                        await window.checkAndSplitCable({ id: n.id, lat: pos.lat, lng: pos.lng, name: n.name }); 
+                    });
                 }
             }); 
         };
@@ -894,7 +901,7 @@
         window.showToast = function(msg, type='info') { const c = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast-msg show'; t.innerHTML = `<i class="fa-solid fa-info-circle text-blue-400"></i> <span>${msg}</span>`; c.appendChild(t); setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 300); }, 3000); };
 
         // ==========================================
-        // 6. MOTOR DO DIAGRAMA CANVAS OSP
+        // 6. MOTOR DO DIAGRAMA CANVAS OSP E LUZ
         // ==========================================
         window.zoomDiagram = function(action) {
             if(action === 'in') window.appState.diagramZoom += 0.1;
@@ -908,6 +915,19 @@
                 if(db && auth && auth.currentUser && !id.startsWith('local_')) { await deleteDoc(getDocPath('fusions', id)); } 
                 else { window.appState.fusions = window.appState.fusions.filter(f => f.id !== id); window.updateAllFusionLines(); }
                 window.showToast('Conexão excluída.', 'sucesso');
+                window.calculateNetworkPower();
+            }
+        };
+
+        // Função de Edição da Luz na OLT
+        window.promptEditOLTPower = async function(id) {
+            const olt = window.appState.olts.find(o => o.id === id);
+            if(!olt) return;
+            let tx = prompt("Nova potência TX da OLT (ex: +2.5 ou +9):", olt.tx);
+            if(tx !== null) {
+                await window.updateOLTInFirebase(id, { tx: tx });
+                window.showToast("Potência atualizada!");
+                window.calculateNetworkPower();
             }
         };
 
@@ -920,6 +940,12 @@
             } else if(window.activeContextMenuType === 'splitter') {
                 const sp = window.appState.splitters.find(s => s.id === window.activeContextMenuId); if(!sp) return;
                 await window.updateSplitterInFirebase(window.activeContextMenuId, { sideFlipped: !sp.sideFlipped });
+            } else if(window.activeContextMenuType === 'olt') {
+                const olt = window.appState.olts.find(s => s.id === window.activeContextMenuId); if(!olt) return;
+                await window.updateOLTInFirebase(window.activeContextMenuId, { sideFlipped: !olt.sideFlipped });
+            } else if(window.activeContextMenuType === 'dio') {
+                const dio = window.appState.dios.find(s => s.id === window.activeContextMenuId); if(!dio) return;
+                await window.updateDIOInFirebase(window.activeContextMenuId, { sideFlipped: !dio.sideFlipped });
             }
             window.openCanvasDiagram();
         };
@@ -933,6 +959,12 @@
             } else if(window.activeContextMenuType === 'splitter') {
                 const sp = window.appState.splitters.find(s => s.id === window.activeContextMenuId); if(!sp) return;
                 await window.updateSplitterInFirebase(window.activeContextMenuId, { flipped: !sp.flipped });
+            } else if(window.activeContextMenuType === 'olt') {
+                const olt = window.appState.olts.find(s => s.id === window.activeContextMenuId); if(!olt) return;
+                await window.updateOLTInFirebase(window.activeContextMenuId, { flipped: !olt.flipped });
+            } else if(window.activeContextMenuType === 'dio') {
+                const dio = window.appState.dios.find(s => s.id === window.activeContextMenuId); if(!dio) return;
+                await window.updateDIOInFirebase(window.activeContextMenuId, { flipped: !dio.flipped });
             }
             window.openCanvasDiagram();
         };
@@ -941,6 +973,10 @@
             if(window.activeContextMenuType === 'splitter') { window.deleteSplitter(window.activeContextMenuId); } 
             else if (window.activeContextMenuType === 'cable') {
                 if(confirm('Isso excluirá o cabo de todo o sistema. Continuar?')) { await window.deleteCableFromFirebase(window.activeContextMenuId); window.openCanvasDiagram(); }
+            } else if (window.activeContextMenuType === 'olt') {
+                window.deleteOLT(window.activeContextMenuId);
+            } else if (window.activeContextMenuType === 'dio') {
+                window.deleteDIO(window.activeContextMenuId);
             }
         };
 
@@ -952,18 +988,29 @@
             else { window.showToast("Destino não encontrado.", "erro"); }
         };
 
+        window.promptAddOLT = async function() {
+            let pons = prompt("Quantas portas PON na OLT? (Ex: 4, 8, 16)"); if(!pons) return;
+            let tx = prompt("Qual a potência TX da PON? (Ex: +2.5 ou +9)"); if(!tx) tx = '+2.5';
+            await window.saveOLTToFirebase({ nodeId: window.appState.selectedNodeId, pons: parseInt(pons), tx: tx, x: 200, y: 200, rotation: 0, flipped: false, sideFlipped: false });
+        };
+        
+        window.promptAddDIO = async function() {
+            let ports = prompt("Quantas portas no DIO? (Ex: 12, 24, 36)"); if(!ports) return;
+            await window.saveDIOToFirebase({ nodeId: window.appState.selectedNodeId, ports: parseInt(ports), x: 300, y: 200, rotation: 0, flipped: false, sideFlipped: false });
+        };
+
         window.getPortVector = function(portId, p1X, p1Y, p2X, p2Y) {
             const portEl = document.getElementById(portId); if(!portEl) return {x:1, y:0};
-            const block = portEl.closest('.cable-block, .splitter-block, .splitter-tri'); if(!block) return {x:1, y:0};
+            const block = portEl.closest('.cable-block, .splitter-block, .splitter-tri, .olt-block, .dio-block'); if(!block) return {x:1, y:0};
             let rot = 0; const transform = block.style.transform;
             if(transform && transform.includes('rotate')) { const match = transform.match(/rotate\((-?\d+)deg\)/); if(match) rot = parseInt(match[1]); }
             const rad = rot * Math.PI / 180;
             const isFlippedSide = block.classList.contains('side-flipped');
             let baseV = {x: 1, y: 0}; 
 
-            if (block.classList.contains('cable-block')) {
+            if (block.classList.contains('cable-block') || block.classList.contains('olt-block')) {
                 baseV = isFlippedSide ? {x: -1, y: 0} : {x: 1, y: 0};
-            } else if (block.classList.contains('splitter-tri') || block.classList.contains('splitter-block')) {
+            } else if (block.classList.contains('splitter-tri') || block.classList.contains('splitter-block') || block.classList.contains('dio-block')) {
                 const isInPort = portEl.classList.contains('in');
                 if (isInPort) { baseV = isFlippedSide ? {x: 1, y: 0} : {x: -1, y: 0}; } 
                 else { baseV = isFlippedSide ? {x: -1, y: 0} : {x: 1, y: 0}; }
@@ -971,12 +1018,113 @@
             return { x: baseV.x * Math.cos(rad) - baseV.y * Math.sin(rad), y: baseV.x * Math.sin(rad) + baseV.y * Math.cos(rad) };
         };
 
+        // MATEMÁTICA E PROPAGAÇÃO DE LUZ
+        window.calculateNetworkPower = function() {
+            let powers = {};
+            
+            // 1. Iniciando o fluxo na OLT (Gênese da Luz)
+            window.appState.olts.forEach(olt => {
+                let tx = parseFloat(olt.tx) || 0;
+                for(let i=0; i<olt.pons; i++) {
+                    powers[`olt-${olt.id}-pon-${i}`] = tx;
+                }
+            });
+
+            // 2. Busca em Largura (BFS) para propagar pelas Fusões
+            const splitterLoss = { '1x2': 3.7, '1x4': 7.3, '1x8': 10.5, '1x16': 13.8 };
+            let queue = Object.keys(powers);
+
+            while(queue.length > 0) {
+                let curr = queue.shift();
+                let pwr = powers[curr];
+
+                // Atravessar Fusões
+                window.appState.fusions.forEach(f => {
+                    if(f.from === curr || f.to === curr) {
+                        let next = f.from === curr ? f.to : f.from;
+                        if(next === 'dead_end') return;
+                        if(powers[next] === undefined || powers[next] < pwr) { 
+                            powers[next] = pwr;
+                            queue.push(next);
+                        }
+                    }
+                });
+
+                // Atravessar DIO (Ponte 1 para 1)
+                if(curr.startsWith('dio-')) {
+                    let parts = curr.split('-'); 
+                    let other = `dio-${parts[1]}-${parts[2]==='in'?'out':'in'}-${parts[3]}`;
+                    if(powers[other] === undefined) {
+                        powers[other] = pwr;
+                        queue.push(other);
+                    }
+                }
+
+                // Atravessar Splitter (Matemática da Perda)
+                if(curr.startsWith('sp-') && curr.includes('-in')) {
+                    let spId = curr.split('-')[1];
+                    let sp = window.appState.splitters.find(s => s.id === spId);
+                    if(sp) {
+                        let loss = splitterLoss[sp.type] || 3.7;
+                        let outPwr = pwr - loss;
+                        
+                        // Atualiza a etiqueta do Splitter VISUALMENTE
+                        let lbl = document.getElementById(`sp-lbl-${spId}`);
+                        if(lbl) {
+                            lbl.innerHTML = `${sp.type} APC<br><span style="color:#059669; font-size:9px;">IN: ${pwr.toFixed(1)} | OUT: ${outPwr.toFixed(1)}</span>`;
+                        }
+
+                        let outs = parseInt(sp.type.split('x')[1]);
+                        for(let i=0; i<outs; i++) {
+                            let outPort = `sp-${spId}-out-${i}`;
+                            if(powers[outPort] === undefined) {
+                                powers[outPort] = outPwr;
+                                queue.push(outPort);
+                            }
+                        }
+                    }
+                }
+            }
+
+            window.appState.portPowers = powers;
+
+            // 3. Efeito Visual: Tooltip (Balão) nas portas e Brilho verde
+            for(let portId in powers) {
+                let els = document.querySelectorAll('#' + portId);
+                els.forEach(el => {
+                    let orig = el.getAttribute('data-orig-title') || el.getAttribute('title') || '';
+                    if(!el.hasAttribute('data-orig-title')) el.setAttribute('data-orig-title', orig);
+                    
+                    // Coloca a Luz no Balão que aparece ao passar o mouse
+                    el.setAttribute('title', `${orig.split(' |')[0]} | Luz: ${powers[portId].toFixed(2)} dBm`);
+                    
+                    // Acende o brilho da porta
+                    el.style.boxShadow = '0 0 4px 1px rgba(34, 197, 94, 0.7)';
+                });
+            }
+            
+            // 4. Marca Splitters apagados (Sem luz chegando na porta IN)
+            window.appState.splitters.forEach(sp => {
+                let inPort = `sp-${sp.id}-in`;
+                if(powers[inPort] === undefined) {
+                    let lbl = document.getElementById(`sp-lbl-${sp.id}`);
+                    if(lbl) lbl.innerHTML = `${sp.type} APC<br><span style="color:#ef4444; font-size:9px;">Sem Sinal</span>`;
+                }
+            });
+        };
+
         window.openCanvasDiagram = function() { 
             const node = window.appState.nodes.find(n => n.id === window.appState.selectedNodeId); if(!node) return; 
             document.getElementById('diag-toolbar-title').innerText = node.name; document.getElementById('diag-center-name').innerText = node.name; 
+            
+            // Botões OLT/DIO Visíveis apenas em POP/DC
+            const isDC = (node.type === 'POP / DC' || node.type === 'DC');
+            document.getElementById('btn-add-olt').style.display = isDC ? 'flex' : 'none';
+            document.getElementById('btn-add-dio').style.display = isDC ? 'flex' : 'none';
+
             const incoming = window.appState.cables.filter(c => c.endNode === node.id); const outgoing = window.appState.cables.filter(c => c.startNode === node.id); 
             const canvas = document.getElementById('diagram-canvas'); 
-            const blocks = canvas.querySelectorAll('.cable-block, .splitter-block, .splitter-tri'); blocks.forEach(b => b.remove()); 
+            const blocks = canvas.querySelectorAll('.cable-block, .splitter-block, .splitter-tri, .olt-block, .dio-block'); blocks.forEach(b => b.remove()); 
             
             document.getElementById('fusion-lines').innerHTML = '<defs id="fusion-defs"></defs><path id="active-fusion-line" d="" />'; 
             let yOffsetIn = 100; let yOffsetOut = 100; 
@@ -985,8 +1133,6 @@
                 const origin = window.appState.nodes.find(n => n.id === cable.startNode); 
                 let diag = cable.diagram?.[node.id] || { x: 100, y: yOffsetIn, rotation: 0, flipped: false, sideFlipped: false };
                 if(!cable.diagram || !cable.diagram[node.id]) yOffsetIn += 150;
-                
-                // NOVO: Usa o nome da origem real e descarta o sub 'CABO FO'
                 window.createCableBlock(canvas, cable, origin ? origin.name.toUpperCase() : 'ORIGEM', '', diag.x, diag.y, diag.rotation, diag.flipped, diag.sideFlipped); 
             }); 
             
@@ -994,15 +1140,22 @@
                 const dest = window.appState.nodes.find(n => n.id === cable.endNode); 
                 let diag = cable.diagram?.[node.id] || { x: 800, y: yOffsetOut, rotation: 0, flipped: false, sideFlipped: true };
                 if(!cable.diagram || !cable.diagram[node.id]) yOffsetOut += 150;
-                
-                // NOVO: Usa o nome do destino real e descarta o sub 'CABO FO'
                 window.createCableBlock(canvas, cable, dest ? dest.name.toUpperCase() : 'DESTINO', '', diag.x, diag.y, diag.rotation, diag.flipped, diag.sideFlipped); 
             }); 
             
             const mySplitters = window.appState.splitters.filter(s => s.nodeId === node.id);
             mySplitters.forEach((sp, index) => { window.createSplitterBlock(canvas, sp, sp.x || 450, sp.y || (100 + index * 100), sp.rotation || 0, sp.flipped || false, sp.sideFlipped || false); });
 
-            setTimeout(() => window.updateAllFusionLines(), 100); 
+            const myOLTs = window.appState.olts.filter(o => o.nodeId === node.id);
+            myOLTs.forEach((olt, index) => { window.createOLTBlock(canvas, olt, olt.x || 150, olt.y || (100 + index * 100), olt.rotation || 0, olt.flipped || false, olt.sideFlipped || false); });
+
+            const myDIOs = window.appState.dios.filter(d => d.nodeId === node.id);
+            myDIOs.forEach((dio, index) => { window.createDIOBlock(canvas, dio, dio.x || 350, dio.y || (100 + index * 100), dio.rotation || 0, dio.flipped || false, dio.sideFlipped || false); });
+
+            setTimeout(() => { 
+                window.updateAllFusionLines(); 
+                window.calculateNetworkPower(); // Aciona a Luz após carregar!
+            }, 100); 
             document.getElementById('diagram-view').style.display = 'flex'; 
         };
         
@@ -1022,6 +1175,16 @@
                 diag[window.appState.selectedNodeId] = { ...diag[window.appState.selectedNodeId], rotation: newRot };
                 el = document.querySelector(`.cable-block[data-id="${id}"]`); if(el) { el.style.transform = `rotate(${newRot}deg)`; }
                 await window.updateCableInFirebase(id, { diagram: diag });
+            } else if(type === 'olt') {
+                const olt = window.appState.olts.find(s => s.id === id); if(!olt) return;
+                newRot = (olt.rotation || 0) + 90; if(newRot >= 360) newRot = 0;
+                el = document.querySelector(`.olt-block[data-id="${id}"]`); if(el) { el.style.transform = `rotate(${newRot}deg)`; }
+                await window.updateOLTInFirebase(id, { rotation: newRot });
+            } else if(type === 'dio') {
+                const dio = window.appState.dios.find(s => s.id === id); if(!dio) return;
+                newRot = (dio.rotation || 0) + 90; if(newRot >= 360) newRot = 0;
+                el = document.querySelector(`.dio-block[data-id="${id}"]`); if(el) { el.style.transform = `rotate(${newRot}deg)`; }
+                await window.updateDIOInFirebase(id, { rotation: newRot });
             }
             setTimeout(() => window.updateAllFusionLines(), 250); 
         };
@@ -1031,7 +1194,6 @@
             block.dataset.id = cable.id; block.style.left = `${startX}px`; block.style.top = `${startY}px`; block.style.transform = `rotate(${startRot}deg)`;
             block.setAttribute('oncontextmenu', `window.showContextMenu(event, 'cable', '${cable.id}')`);
             
-            // NOVO LAYOUT DO CABO - Somente o nome em negrito/grande e a capacidade
             let infoHtml = `<div class="cable-block-info" onmousedown="window.startDragBlock(event, this.parentElement)">
                 <div style="display: flex; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">
                     <i class="fa-solid fa-rotate-right cursor-pointer text-gray-400 hover:text-blue-500" onmousedown="event.stopPropagation(); window.rotateBlock('cable', '${cable.id}')" title="Rotacionar"></i>
@@ -1050,6 +1212,69 @@
             });
             fibersHtml += '</div>'; block.innerHTML = infoHtml + fibersHtml; canvas.appendChild(block); 
         };
+
+        window.createOLTBlock = function(canvas, olt, startX, startY, startRot=0, isFlipped=false, sideFlipped=false) {
+            const block = document.createElement('div'); block.className = `olt-block cable-block ${sideFlipped ? 'side-flipped' : ''}`; 
+            block.dataset.id = olt.id; block.style.left = `${startX}px`; block.style.top = `${startY}px`; block.style.transform = `rotate(${startRot}deg)`;
+            block.setAttribute('oncontextmenu', `window.showContextMenu(event, 'olt', '${olt.id}')`);
+            
+            let infoHtml = `<div class="cable-block-info" style="background: #e0f2fe; border-left: 4px solid #0284c7;" onmousedown="window.startDragBlock(event, this.parentElement)">
+                <div style="display: flex; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid #bae6fd; padding-bottom: 4px;">
+                    <i class="fa-solid fa-rotate-right cursor-pointer text-slate-500 hover:text-blue-700" onmousedown="event.stopPropagation(); window.rotateBlock('olt', '${olt.id}')" title="Rotacionar"></i>
+                    <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-slate-500 hover:text-blue-700" onmousedown="event.stopPropagation(); window.activeContextMenuType='olt'; window.activeContextMenuId='${olt.id}'; window.toggleSide()" title="Inverter Lado"></i>
+                    <i class="fa-solid fa-arrows-up-down cursor-pointer text-slate-500 hover:text-blue-700" onmousedown="event.stopPropagation(); window.activeContextMenuType='olt'; window.activeContextMenuId='${olt.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
+                    <i class="fa-solid fa-pen cursor-pointer text-slate-500 hover:text-blue-700" onmousedown="event.stopPropagation(); window.promptEditOLTPower('${olt.id}')" title="Editar Potência"></i>
+                    <i class="fa-solid fa-trash cursor-pointer text-red-400 hover:text-red-600 ml-2" onmousedown="event.stopPropagation(); window.deleteOLT('${olt.id}')" title="Excluir"></i>
+                </div>
+                <div class="cb-title">OLT</div><div class="cb-cap">${olt.pons} PORTAS PON</div><div class="cb-dest" style="color: #0284c7;">TX: ${olt.tx} dBm</div>
+            </div>`; 
+            
+            let fibersHtml = '<div class="fiber-grid" style="background: #f0f9ff; border-color: #bae6fd;">'; 
+            let indexes = []; for(let i=0; i<olt.pons; i++) indexes.push(i);
+            if(isFlipped) indexes.reverse();
+            indexes.forEach(i => {
+                const portId = `olt-${olt.id}-pon-${i}`; 
+                fibersHtml += `<div id="${portId}" class="fiber-port sp-port out" style="background:#0284c7; color:white;" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="PON ${i+1}">${i+1}</div>`; 
+            });
+            fibersHtml += '</div>'; block.innerHTML = infoHtml + fibersHtml; canvas.appendChild(block); 
+        };
+        
+        window.createDIOBlock = function(canvas, dio, startX, startY, startRot=0, isFlipped=false, sideFlipped=false) {
+            const block = document.createElement('div'); block.className = `dio-block splitter-tri ${sideFlipped ? 'side-flipped' : ''}`; 
+            block.dataset.id = dio.id; block.style.left = `${startX}px`; block.style.top = `${startY}px`; block.style.transform = `rotate(${startRot}deg)`;
+            block.setAttribute('oncontextmenu', `window.showContextMenu(event, 'dio', '${dio.id}')`);
+            const outs = dio.ports;
+            const h = Math.max(outs * 24, 60); 
+            
+            let actionsHtml = `<div style="position: absolute; top: -30px; left: 0; display: flex; gap: 8px; background: white; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 10;">
+                <i class="fa-solid fa-rotate-right cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.rotateBlock('dio', '${dio.id}')" title="Rotacionar"></i>
+                <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.activeContextMenuType='dio'; window.activeContextMenuId='${dio.id}'; window.toggleSide()" title="Inverter Lado"></i>
+                <i class="fa-solid fa-arrows-up-down cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.activeContextMenuType='dio'; window.activeContextMenuId='${dio.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
+                <i class="fa-solid fa-trash cursor-pointer text-red-400 hover:text-red-600 ml-2" onmousedown="event.stopPropagation(); window.deleteDIO('${dio.id}')" title="Excluir"></i>
+            </div>`;
+
+            let portsInHtml = `<div class="sp-in-col" style="display: flex; flex-direction: column; justify-content: space-around; height: ${h}px; z-index: 2;">`;
+            let indexes = []; for(let i=0; i<outs; i++) indexes.push(i);
+            if(isFlipped) indexes.reverse();
+            indexes.forEach(i => { 
+                portsInHtml += `<div id="dio-${dio.id}-in-${i}" class="fiber-port sp-port in" style="background:#111827; color:white; width:18px; height:18px; border-radius:2px; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 1px 2px rgba(0,0,0,0.2);" onmousedown="window.startFusionDrag(event, 'dio-${dio.id}-in-${i}')" onmouseup="window.endFusionDrag(event, 'dio-${dio.id}-in-${i}')" title="IN ${i+1}">${i+1}</div>`; 
+            });
+            portsInHtml += '</div>';
+
+            let svgHtml = `<div class="sp-body-svg" style="position: relative; width: 80px; height: ${h}px; display: flex; align-items: center; justify-content: center; margin: 0 -10px; z-index: 1;" onmousedown="window.startDragBlock(event, this.parentElement)">
+                <div style="width: 100%; height: 100%; background: #e2e8f0; border-top: 2px solid #111827; border-bottom: 2px solid #111827;"></div>
+                <div class="sp-label" style="position:absolute; z-index: 3; background: white; border: 1px solid #e2e8f0; font-size: 10px; font-weight: 800; text-align: center; padding: 4px 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">DIO<br><span style="color:#64748b; font-size:9px;">${outs} PORTAS</span></div>
+            </div>`;
+
+            let portsOutHtml = `<div class="sp-out-col" style="display: flex; flex-direction: column; justify-content: space-around; height: ${h}px; z-index: 2;">`;
+            indexes.forEach(i => { 
+                portsOutHtml += `<div id="dio-${dio.id}-out-${i}" class="fiber-port sp-port out" style="background:#22c55e; color:white; width:18px; height:18px; border-radius:2px; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 1px 2px rgba(0,0,0,0.2);" onmousedown="window.startFusionDrag(event, 'dio-${dio.id}-out-${i}')" onmouseup="window.endFusionDrag(event, 'dio-${dio.id}-out-${i}')" title="OUT ${i+1}">${i+1}</div>`; 
+            });
+            portsOutHtml += '</div>';
+
+            block.innerHTML = actionsHtml + portsInHtml + svgHtml + portsOutHtml; 
+            canvas.appendChild(block);
+        };
         
         window.createSplitterBlock = function(canvas, splitter, startX, startY, startRot=0, isFlipped=false, sideFlipped=false) {
             const block = document.createElement('div'); block.className = `splitter-tri ${sideFlipped ? 'side-flipped' : ''}`; 
@@ -1057,32 +1282,29 @@
             block.setAttribute('oncontextmenu', `window.showContextMenu(event, 'splitter', '${splitter.id}')`);
             
             const outs = parseInt(splitter.type.split('x')[1]);
-            // AUMENTO NO TAMANHO DA CAIXA - Mais alto e robusto
             const h = Math.max(outs * 30, 60); 
             
             let actionsHtml = `<div style="position: absolute; top: -30px; left: 0; display: flex; gap: 8px; background: white; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 10;">
                 <i class="fa-solid fa-rotate-right cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.rotateBlock('splitter', '${splitter.id}')" title="Rotacionar"></i>
                 <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.activeContextMenuType='splitter'; window.activeContextMenuId='${splitter.id}'; window.toggleSide()" title="Inverter Lado"></i>
                 <i class="fa-solid fa-arrows-up-down cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.activeContextMenuType='splitter'; window.activeContextMenuId='${splitter.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
-                <i class="fa-solid fa-trash cursor-pointer text-red-400 hover:text-red-600 ml-2" onmousedown="event.stopPropagation(); window.deleteSplitter('${splitter.id}')" title="Excluir"></i>
             </div>`;
 
             let inHtml = `<div class="sp-in-col" style="display: flex; flex-direction: column; justify-content: center; z-index: 2;">
                 <div id="sp-${splitter.id}-in" class="fiber-port sp-port in" style="background:#111827; color:white; width:20px; height:20px; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 2px 4px rgba(0,0,0,0.3);" onmousedown="window.startFusionDrag(event, 'sp-${splitter.id}-in')" onmouseup="window.endFusionDrag(event, 'sp-${splitter.id}-in')" title="IN">1</div>
             </div>`;
             
-            // NOVO: Escala Horizontal maior e PREENCHIMENTO (#e2e8f0)
             let pathD = sideFlipped ? `M 80,${h/2} L 10,10 L 10,${h-10} Z` : `M 10,${h/2} L 80,10 L 80,${h-10} Z`;
 
+            // NOVO: Adicionado ID sp-lbl-{id} na etiqueta para atualizar via JS
             let svgHtml = `<div class="sp-body-svg" style="position: relative; width: 90px; height: ${h}px; display: flex; align-items: center; justify-content: center; margin: 0 -10px; z-index: 1;" onmousedown="window.startDragBlock(event, this.parentElement)">
                 <svg viewBox="0 0 90 ${h}" preserveAspectRatio="none" style="position:absolute; width:100%; height:100%; top:0; left:0;">
-                    <!-- SVG com FILL para parecer um objeto sólido -->
                     <path d="${pathD}" fill="#f1f5f9" stroke="#111827" stroke-width="2"/>
                     <circle cx="${sideFlipped ? 80 : 10}" cy="${h/2}" r="3" fill="#111827" />
                     <circle cx="${sideFlipped ? 10 : 80}" cy="10" r="3" fill="#111827" />
                     <circle cx="${sideFlipped ? 10 : 80}" cy="${h-10}" r="3" fill="#111827" />
                 </svg>
-                <div class="sp-label" style="z-index: 3; background: white; border: 1px solid #e2e8f0; font-size: 10px; font-weight: 800; text-align: center; padding: 4px 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 20px;">${splitter.type} AC APC<br><span style="color:#059669; font-size:9px;">-8.0 dBm</span></div>
+                <div id="sp-lbl-${splitter.id}" class="sp-label" style="z-index: 3; background: white; border: 1px solid #e2e8f0; font-size: 10px; font-weight: 800; text-align: center; padding: 4px 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 20px;">${splitter.type} APC<br><span style="color:#ef4444; font-size:9px;">Sem Sinal</span></div>
             </div>`;
 
             let portsHtml = `<div class="sp-out-col" style="display: flex; flex-direction: column; justify-content: space-around; height: ${h}px; z-index: 2;">`;
@@ -1098,30 +1320,10 @@
             canvas.appendChild(block);
         };
 
-        window.addSplitterToDiagram = async function(type) {
-            if(!window.appState.selectedNodeId) return; window.showToast(`Adicionando Splitter ${type}...`);
-            await window.saveSplitterToFirebase({ nodeId: window.appState.selectedNodeId, type: type, x: 450, y: 150, rotation: 0, flipped: false, sideFlipped: false });
-        };
-
-        window.deleteSplitter = async function(id) {
-            if(confirm("Remover este splitter? As fusões conectadas a ele serão perdidas.")) {
-                if(db && auth && auth.currentUser && !id.startsWith('local_')) {
-                    await deleteDoc(getDocPath('splitters', id));
-                    const connectedFusions = window.appState.fusions.filter(f => f.from.includes(id) || f.to.includes(id));
-                    for(let f of connectedFusions) { await deleteDoc(getDocPath('fusions', f.id)); }
-                } else {
-                    window.appState.splitters = window.appState.splitters.filter(s => s.id !== id);
-                    window.appState.fusions = window.appState.fusions.filter(f => !f.from.includes(id) && !f.to.includes(id));
-                    window.openCanvasDiagram();
-                }
-                window.showToast('Splitter removido.');
-            }
-        };
-
         let draggedBlock = null; let dragOffset = {x:0, y:0};
         
         window.startDragBlock = function(e, block) { 
-            if(e.target.closest('.fiber-port, .sp-port, .fa-trash, .fa-rotate-right, .fa-arrow-right-arrow-left, .fa-arrows-up-down')) return; 
+            if(e.target.closest('.fiber-port, .sp-port, .fa-trash, .fa-pen, .fa-rotate-right, .fa-arrow-right-arrow-left, .fa-arrows-up-down')) return; 
             draggedBlock = block; const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const canvasContainer = document.getElementById('diagram-canvas').parentElement; const zoom = window.appState.diagramZoom || 1;
             dragOffset.x = (e.clientX - canvasRect.left + canvasContainer.scrollLeft) / zoom - parseInt(draggedBlock.style.left || 0); dragOffset.y = (e.clientY - canvasRect.top + canvasContainer.scrollTop) / zoom - parseInt(draggedBlock.style.top || 0); 
             document.onmousemove = window.dragBlockMove; document.onmouseup = window.dragBlockEnd; 
@@ -1138,10 +1340,14 @@
             if(draggedBlock) {
                 const newX = parseInt(draggedBlock.style.left); const newY = parseInt(draggedBlock.style.top);
                 if(draggedBlock.classList.contains('splitter-tri') || draggedBlock.classList.contains('splitter-block')) {
-                    const spId = draggedBlock.dataset.id; window.updateSplitterInFirebase(spId, {x: newX, y: newY});
+                    if (draggedBlock.classList.contains('dio-block')) window.updateDIOInFirebase(draggedBlock.dataset.id, {x: newX, y: newY});
+                    else window.updateSplitterInFirebase(draggedBlock.dataset.id, {x: newX, y: newY});
                 } else if(draggedBlock.classList.contains('cable-block')) {
-                    const cbId = draggedBlock.dataset.id; const cable = window.appState.cables.find(c => c.id === cbId);
-                    if(cable) { let diag = cable.diagram || {}; diag[window.appState.selectedNodeId] = { ...diag[window.appState.selectedNodeId], x: newX, y: newY }; window.updateCableInFirebase(cbId, { diagram: diag }); }
+                    if (draggedBlock.classList.contains('olt-block')) window.updateOLTInFirebase(draggedBlock.dataset.id, {x: newX, y: newY});
+                    else {
+                        const cbId = draggedBlock.dataset.id; const cable = window.appState.cables.find(c => c.id === cbId);
+                        if(cable) { let diag = cable.diagram || {}; diag[window.appState.selectedNodeId] = { ...diag[window.appState.selectedNodeId], x: newX, y: newY }; window.updateCableInFirebase(cbId, { diagram: diag }); }
+                    }
                 }
             }
             draggedBlock = null; document.onmousemove = null; document.onmouseup = null; 
@@ -1206,6 +1412,7 @@
                 }
             } 
             window.appState.isDraggingFusion = false; document.getElementById('active-fusion-line').setAttribute('d', ''); 
+            window.calculateNetworkPower(); // Recalcula Luz ao completar fusão
         };
 
         window.updateAllFusionLines = function() {
