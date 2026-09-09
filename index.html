@@ -181,9 +181,6 @@
         .node-anchorable .map-icon-wrapper { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5); transform: scale(1.1); }
         .node-hover .map-icon-wrapper { transform: scale(1.3); border-color: #3b82f6; z-index: 1000 !important;}
         
-        .preview-line-active { stroke-dasharray: 10, 10; animation: dash 1s linear infinite; }
-        @keyframes dash { to { stroke-dashoffset: -20; } }
-
         .transparent-tooltip { background: transparent !important; border: none !important; box-shadow: none !important; margin: 0 !important; padding: 0 !important; }
         .transparent-tooltip::before { display: none !important; }
 
@@ -194,7 +191,7 @@
         .inv-item { padding: 12px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; transition: background 0.2s; cursor: pointer; }
         .inv-item:hover { background-color: #f0fdf4; }
 
-        /* ================= DIAGRAMA CANVAS OSP (COM ZOOM E ESPAÇO INFINITO) ================= */
+        /* ================= DIAGRAMA CANVAS OSP (COM ZOOM INF, LIXEIRA, CORES E FLIP) ================= */
         #diagram-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; z-index: 3000; display: none; flex-direction: column; }
         .diagram-toolbar { background: white; height: 60px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); z-index: 20; }
         .diag-tb-group { display: flex; align-items: center; gap: 12px; }
@@ -207,11 +204,9 @@
         .diag-active-tab button { color: #60a5fa; cursor: pointer; background: transparent; border: none; outline: none; transition: color 0.2s; }
         .diag-active-tab button:hover { color: #2563eb; }
         
-        /* NOVO: CSS do Canvas com Zoom e Scroll */
-        .diagram-canvas-area { flex-grow: 1; position: relative; overflow: auto !important; background-color: #f8fafc; }
+        .diagram-canvas-area { flex-grow: 1; position: relative; overflow: auto !important; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px); background-size: 24px 24px; }
         
-        /* NOVO CSS: As linhas da fusão agora ficam vermelhas no Hover pra poder clicar e deletar */
-        .fusion-line-clickable { pointer-events: visibleStroke !important; cursor: pointer; transition: stroke 0.2s, stroke-width 0.2s; }
+        .fusion-line-clickable { pointer-events: visibleStroke !important; cursor: pointer; transition: stroke-width 0.2s; }
         .fusion-line-clickable:hover { stroke: #ef4444 !important; stroke-width: 6px !important; }
 
         .cable-block { position: absolute; background: white; border: 2px solid #111827; border-radius: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 2; width: max-content; transition: transform 0.2s ease, left 0s, top 0s; transform-origin: center center; }
@@ -234,8 +229,15 @@
         .sp-port:hover { background: #334155; }
         .sp-port:last-child { border-bottom: none; border-radius: 0 0 7px 7px; }
 
-        .fiber-bg-0 { background-color: #22c55e; color: #000; } .fiber-bg-1 { background-color: #eab308; color: #000; } .fiber-bg-2 { background-color: #f8fafc; color: #000; } .fiber-bg-3 { background-color: #2563eb; color: #fff; } .fiber-bg-4 { background-color: #ef4444; color: #fff; } .fiber-bg-5 { background-color: #9333ea; color: #fff; } 
-        #active-fusion-line { pointer-events: none; stroke: #3b82f6; stroke-width: 3; stroke-dasharray: 6,6; fill: none; }
+        /* Cores Padrão das Fibras */
+        .fiber-bg-0 { background-color: #22c55e; color: #000; } /* Verde */
+        .fiber-bg-1 { background-color: #eab308; color: #000; } /* Amarelo */
+        .fiber-bg-2 { background-color: #cbd5e1; color: #000; } /* Branco/Cinza claro (Ajustado para ver no canvas) */
+        .fiber-bg-3 { background-color: #2563eb; color: #fff; } /* Azul */
+        .fiber-bg-4 { background-color: #ef4444; color: #fff; } /* Vermelho */
+        .fiber-bg-5 { background-color: #9333ea; color: #fff; } /* Roxo */
+        
+        #active-fusion-line { pointer-events: none; stroke-width: 4; stroke-dasharray: 6,6; fill: none; }
 
         /* DATA CENTER (INSIDE PLANT) */
         #inside-plant-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #f3f4f6; z-index: 3000; display: none; overflow-y: auto; }
@@ -261,10 +263,7 @@
 </head>
 <body class="theme-light">
 
-    <!-- ================= TELA INICIAL (DASHBOARD FIEL AO PRINT) ================= -->
     <div id="regions-screen">
-        
-        <!-- BARRA LATERAL (SIDEBAR) -->
         <div class="home-sidebar">
             <div class="sidebar-logo">
                 <div class="flex items-center gap-3">
@@ -276,54 +275,26 @@
                 </div>
                 <button class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-bars-staggered"></i></button>
             </div>
-
             <div class="flex-grow overflow-y-auto">
                 <div class="sidebar-section-title">Geral</div>
-                <div class="sidebar-item active">
-                    <i class="fa-regular fa-folder-open text-lg"></i> Meus Projetos
-                </div>
-                <div class="sidebar-item" onclick="window.showToast('Dashboard Indisponível.')">
-                    <i class="fa-solid fa-border-all text-lg"></i> Dashboard
-                </div>
-                <div class="sidebar-item" onclick="window.showToast('Módulo Indisponível.')">
-                    <i class="fa-solid fa-location-dot text-lg"></i> Viabilidade
-                </div>
-
+                <div class="sidebar-item active"><i class="fa-regular fa-folder-open text-lg"></i> Meus Projetos</div>
+                <div class="sidebar-item" onclick="window.showToast('Dashboard Indisponível.')"><i class="fa-solid fa-border-all text-lg"></i> Dashboard</div>
+                <div class="sidebar-item" onclick="window.showToast('Módulo Indisponível.')"><i class="fa-solid fa-location-dot text-lg"></i> Viabilidade</div>
                 <div class="sidebar-section-title mt-4">Gerenciamento</div>
-                <div class="sidebar-item flex justify-between" onclick="window.showToast('Módulo Indisponível.')">
-                    <div class="flex items-center gap-3"><i class="fa-regular fa-rectangle-list text-lg"></i> Cadastros</div>
-                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                </div>
-                <div class="sidebar-item" onclick="window.showToast('Módulo Indisponível.')">
-                    <i class="fa-solid fa-user-group text-lg"></i> Usuários
-                </div>
-                <div class="sidebar-item" onclick="window.showToast('Módulo Indisponível.')">
-                    <i class="fa-solid fa-puzzle-piece text-lg"></i> Integrações
-                </div>
-                <div class="sidebar-item" onclick="window.showToast('Módulo Indisponível.')">
-                    <i class="fa-regular fa-building text-lg"></i> Organização
-                </div>
-                <div class="sidebar-item" onclick="window.showToast('Módulo Indisponível.')">
-                    <i class="fa-solid fa-gear text-lg"></i> Configurações
-                </div>
-
+                <div class="sidebar-item flex justify-between" onclick="window.showToast('Módulo Indisponível.')"><div class="flex items-center gap-3"><i class="fa-regular fa-rectangle-list text-lg"></i> Cadastros</div><i class="fa-solid fa-chevron-right text-[10px]"></i></div>
+                <div class="sidebar-item" onclick="window.showToast('Módulo Indisponível.')"><i class="fa-solid fa-user-group text-lg"></i> Usuários</div>
+                <div class="sidebar-item" onclick="window.showToast('Módulo Indisponível.')"><i class="fa-solid fa-puzzle-piece text-lg"></i> Integrações</div>
+                <div class="sidebar-item" onclick="window.showToast('Módulo Indisponível.')"><i class="fa-regular fa-building text-lg"></i> Organização</div>
+                <div class="sidebar-item" onclick="window.showToast('Módulo Indisponível.')"><i class="fa-solid fa-gear text-lg"></i> Configurações</div>
                 <div class="sidebar-section-title mt-4">Sistema</div>
-                <div class="sidebar-item" onclick="window.showToast('Módulo Indisponível.')">
-                    <i class="fa-regular fa-circle-question text-lg"></i> Ajuda
-                </div>
+                <div class="sidebar-item" onclick="window.showToast('Módulo Indisponível.')"><i class="fa-regular fa-circle-question text-lg"></i> Ajuda</div>
             </div>
-
             <div class="user-profile-box">
                 <div class="flex items-center gap-3">
                     <div style="width:36px; height:36px; background-color:#d1fae5; color:#059669; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px;">AG</div>
-                    <div class="leading-tight">
-                        <div class="font-bold text-xs" style="color: var(--text-primary);">AGNALDO</div>
-                        <div class="text-[9px]" style="color: var(--text-muted);">Admin</div>
-                    </div>
+                    <div class="leading-tight"><div class="font-bold text-xs" style="color: var(--text-primary);">AGNALDO</div><div class="text-[9px]" style="color: var(--text-muted);">Admin</div></div>
                 </div>
-                <button class="btn-upgrade" onclick="window.showToast('Página de Pagamento não configurada.')">
-                    <i class="fa-solid fa-bolt text-yellow-400"></i> Fazer Upgrade
-                </button>
+                <button class="btn-upgrade" onclick="window.showToast('Página de Pagamento não configurada.')"><i class="fa-solid fa-bolt text-yellow-400"></i> Fazer Upgrade</button>
                 <div class="sidebar-footer-icons">
                     <div class="sf-icon" onclick="window.showToast('Site Indisponível.')"><i class="fa-solid fa-globe"></i></div>
                     <div class="sf-icon" onclick="window.toggleTheme()"><i id="theme-icon" class="fa-regular fa-moon"></i></div>
@@ -333,79 +304,36 @@
             </div>
         </div>
         
-        <!-- AREA PRINCIPAL (DIREITA) -->
         <div class="home-main">
             <div class="home-header">
-                <div class="flex items-start gap-3">
-                    <i class="fa-regular fa-folder-open text-3xl" style="color: var(--brand-green);"></i>
-                    <div>
-                        <h1 class="text-2xl font-bold mb-1" style="color: var(--text-primary);">Meus Projetos</h1>
-                        <p class="text-xs font-medium" style="color: var(--text-secondary);">Gerencie e organize suas redes FTTH.</p>
-                    </div>
-                </div>
-                
+                <div class="flex items-start gap-3"><i class="fa-regular fa-folder-open text-3xl" style="color: var(--brand-green);"></i><div><h1 class="text-2xl font-bold mb-1" style="color: var(--text-primary);">Meus Projetos</h1><p class="text-xs font-medium" style="color: var(--text-secondary);">Gerencie e organize suas redes FTTH.</p></div></div>
                 <div class="top-action-bar">
-                    <div class="search-bar-dash">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" placeholder="Buscar...">
-                    </div>
-                    <div class="view-toggles">
-                        <button class="view-toggle-btn active"><i class="fa-solid fa-border-all"></i></button>
-                        <button class="view-toggle-btn"><i class="fa-solid fa-list-ul"></i></button>
-                    </div>
-                    <button class="btn-green-dash" onclick="window.abrirModalNovoProjeto()">
-                        <i class="fa-solid fa-plus"></i> Criar Novo Projeto
-                    </button>
+                    <div class="search-bar-dash"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Buscar..."></div>
+                    <div class="view-toggles"><button class="view-toggle-btn active"><i class="fa-solid fa-border-all"></i></button><button class="view-toggle-btn"><i class="fa-solid fa-list-ul"></i></button></div>
+                    <button class="btn-green-dash" onclick="window.abrirModalNovoProjeto()"><i class="fa-solid fa-plus"></i> Criar Novo Projeto</button>
                 </div>
             </div>
             
             <div class="home-content">
                 <div id="projects-grid"></div>
-
-                <div id="empty-state">
-                    <i class="fa-regular fa-folder-open text-4xl mb-4" style="color: var(--text-muted);"></i>
-                    <h2 class="text-lg font-bold mb-1" style="color: var(--text-primary);">Você ainda não tem projetos</h2>
-                    <p class="text-sm font-medium mb-6" style="color: var(--text-secondary);">Crie seu primeiro projeto FTTH pra começar a mapear sua rede.</p>
-                    <button class="btn-green-dash" onclick="window.abrirModalNovoProjeto()">
-                        <i class="fa-solid fa-plus"></i> Criar primeiro projeto
-                    </button>
-                </div>
-                
-                <div class="absolute bottom-8 left-10 flex items-center gap-2" style="background: var(--bg-card); padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                    <div class="w-2 h-2 rounded-full bg-yellow-500" id="sync-dot"></div>
-                    <span class="text-[10px] font-bold tracking-wider" style="color: var(--text-secondary);" id="sync-status">CONECTANDO...</span>
-                </div>
+                <div id="empty-state"><i class="fa-regular fa-folder-open text-4xl mb-4" style="color: var(--text-muted);"></i><h2 class="text-lg font-bold mb-1" style="color: var(--text-primary);">Você ainda não tem projetos</h2><p class="text-sm font-medium mb-6" style="color: var(--text-secondary);">Crie seu primeiro projeto FTTH pra começar a mapear sua rede.</p><button class="btn-green-dash" onclick="window.abrirModalNovoProjeto()"><i class="fa-solid fa-plus"></i> Criar primeiro projeto</button></div>
+                <div class="absolute bottom-8 left-10 flex items-center gap-2" style="background: var(--bg-card); padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px rgba(0,0,0,0.05);"><div class="w-2 h-2 rounded-full bg-yellow-500" id="sync-dot"></div><span class="text-[10px] font-bold tracking-wider" style="color: var(--text-secondary);" id="sync-status">CONECTANDO...</span></div>
             </div>
         </div>
-        
-        <!-- FAB CHAT (CANTO INFERIOR DIREITO) -->
-        <div class="chat-fab" onclick="window.showToast('Suporte Online em Breve!')">
-            <i class="fa-regular fa-comment-dots"></i>
-        </div>
+        <div class="chat-fab" onclick="window.showToast('Suporte Online em Breve!')"><i class="fa-regular fa-comment-dots"></i></div>
     </div>
 
     <!-- MODAL: CRIAR NOVO PROJETO -->
     <div class="modal-overlay" id="modal-novo-projeto" style="z-index: 100000;">
         <div class="modal-content" style="background:#1e293b; color:white; border:1px solid #334155;">
-            <div class="modal-header" style="border-bottom-color:#334155;">
-                <h2 style="color:white;"><i class="fa-solid fa-map-location-dot text-blue-500 mr-2"></i> Criar Novo Projeto</h2>
-                <button class="text-slate-400 hover:text-white" onclick="document.getElementById('modal-novo-projeto').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
-            </div>
+            <div class="modal-header" style="border-bottom-color:#334155;"><h2 style="color:white;"><i class="fa-solid fa-map-location-dot text-blue-500 mr-2"></i> Criar Novo Projeto</h2><button class="text-slate-400 hover:text-white" onclick="document.getElementById('modal-novo-projeto').style.display='none'"><i class="fa-solid fa-xmark"></i></button></div>
             <div class="modal-body">
-                <label class="input-label" style="color:#94a3b8;">NOME DO PROJETO</label>
-                <input type="text" id="input-projeto-nome" class="custom-input mb-6" style="background:#0f172a; border-color:#475569; color:white;" placeholder="Ex: Projeto Roma Cametá">
-                
+                <label class="input-label" style="color:#94a3b8;">NOME DO PROJETO</label><input type="text" id="input-projeto-nome" class="custom-input mb-6" style="background:#0f172a; border-color:#475569; color:white;" placeholder="Ex: Projeto Roma Cametá">
                 <label class="input-label" style="color:#94a3b8;">PESQUISAR CIDADE INICIAL</label>
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="input-projeto-busca" class="custom-input flex-grow" style="background:#0f172a; border-color:#475569; color:white;" placeholder="Ex: Cametá, Pará" onkeypress="if(event.key==='Enter') window.buscarLocalNovoProjeto()">
-                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-5 rounded-lg font-bold" onclick="window.buscarLocalNovoProjeto()"><i class="fa-solid fa-magnifying-glass"></i></button>
-                </div>
+                <div class="flex gap-2 mb-4"><input type="text" id="input-projeto-busca" class="custom-input flex-grow" style="background:#0f172a; border-color:#475569; color:white;" placeholder="Ex: Cametá, Pará" onkeypress="if(event.key==='Enter') window.buscarLocalNovoProjeto()"><button class="bg-blue-600 hover:bg-blue-700 text-white px-5 rounded-lg font-bold" onclick="window.buscarLocalNovoProjeto()"><i class="fa-solid fa-magnifying-glass"></i></button></div>
                 <div id="mini-map-container" style="height: 200px; width: 100%; border-radius: 8px; border: 1px solid #334155; background: #0f172a; z-index: 10;"></div>
             </div>
-            <div class="modal-footer" style="border-top-color:#334155; background:#1e293b;">
-                <button class="btn-cancel" style="background:#334155; border:none; color:white;" onclick="document.getElementById('modal-novo-projeto').style.display='none'">Cancelar</button>
-                <button class="btn-green-dash" style="flex:1; justify-content:center;" onclick="window.salvarNovoProjeto()"><i class="fa-solid fa-check"></i> Salvar Projeto</button>
-            </div>
+            <div class="modal-footer" style="border-top-color:#334155; background:#1e293b;"><button class="btn-cancel" style="background:#334155; border:none; color:white;" onclick="document.getElementById('modal-novo-projeto').style.display='none'">Cancelar</button><button class="btn-green-dash" style="flex:1; justify-content:center;" onclick="window.salvarNovoProjeto()"><i class="fa-solid fa-check"></i> Salvar Projeto</button></div>
         </div>
     </div>
 
@@ -414,10 +342,7 @@
         <div class="workspace-sidebar">
             <div class="p-4 border-b flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition" style="border-color: var(--border-color);" onclick="window.voltarParaProjetos()">
                 <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white" style="background-color: var(--brand-green);"><i class="fa-solid fa-map"></i></div>
-                <div class="leading-tight">
-                    <div class="text-[10px] font-bold" style="color: var(--text-muted);">PROJETO ABERTO</div>
-                    <div class="text-sm font-bold truncate w-32" style="color: var(--text-primary);" id="current-project-name">Roma</div>
-                </div>
+                <div class="leading-tight"><div class="text-[10px] font-bold" style="color: var(--text-muted);">PROJETO ABERTO</div><div class="text-sm font-bold truncate w-32" style="color: var(--text-primary);" id="current-project-name">Roma</div></div>
             </div>
             <div class="flex-grow overflow-y-auto p-4">
                 <div class="text-[10px] font-bold uppercase tracking-wider mb-2" style="color: var(--text-muted);">Geral</div>
@@ -479,7 +404,6 @@
         </div>
     </div>
 
-    <!-- Modais de Caixa e Cabo -->
     <div class="modal-overlay" id="modal-caixa">
         <div class="modal-content">
             <div class="modal-header"><h2 class="text-slate-800 text-xl" id="modal-caixa-title"><i class="fa-solid fa-location-dot text-cyan-500 mr-1"></i> Nova Caixa/Prédio</h2><button class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition" onclick="window.closeModal('caixa')"><i class="fa-solid fa-xmark"></i></button></div>
@@ -535,7 +459,6 @@
             </div>
         </div>
 
-        <!-- NOVO: Wrapper com overflow para rolagem infinita e zoom -->
         <div class="diagram-canvas-area" style="overflow: auto !important; position: relative; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px); background-size: 24px 24px;">
             <div id="diagram-canvas" style="width: 4000px; height: 4000px; position: absolute; top:0; left:0; transform-origin: top left; transition: transform 0.2s ease;" onmousemove="window.handleFusionDragMove(event)" onmouseup="window.handleFusionDragEnd(event)" onmouseleave="window.handleFusionDragEnd(event)">
                 <svg id="fusion-lines" style="width: 100%; height: 100%; pointer-events: none; overflow: visible;">
@@ -571,10 +494,25 @@
             isDraggingFusion: false, fusionStartPort: null, fusionStartCoords: {x:0, y:0},
             mapLayerType: 'street',
             visibleLayers: { 'CTO': true, 'CEO': true, 'POP / DC': true, 'CABOS': true, 'Prédio': true, 'Poste': true, 'Cliente': true, 'CTO AP': true, 'Problema': true, 'Reserva': true },
-            diagramZoom: 1 // NOVO: Controle de Zoom
+            diagramZoom: 1 
         };
 
         const THEME_COLORS = ['#0ea5e9', '#1d4ed8', '#f97316', '#ef4444', '#22c55e', '#eab308', '#a855f7', '#ec4899', '#000000', '#737373', '#78350f'];
+        const FIBER_COLORS = ['#22c55e', '#eab308', '#cbd5e1', '#2563eb', '#ef4444', '#9333ea']; // Verde, Amarelo, Cinza Claro, Azul, Vermelho, Roxo
+
+        // Retorna a cor exata (HEX) com base no ID da porta ou do splitter
+        window.getPortColor = function(portId) {
+            if(portId.startsWith('port-')) {
+                const parts = portId.split('-');
+                const idx = parseInt(parts[parts.length-1]);
+                return FIBER_COLORS[idx % 6];
+            } else if(portId.includes('-in')) {
+                return '#111827'; // Preta/Escura para entrada do Splitter
+            } else if(portId.includes('-out-')) {
+                return '#475569'; // Cinza escuro para saídas do Splitter
+            }
+            return '#0f172a';
+        };
 
         window.toggleTheme = function() {
             const body = document.body; const icon = document.getElementById('theme-icon');
@@ -591,9 +529,6 @@
             window.renderMap();
         };
 
-        // ==========================================
-        // 2. INICIALIZAÇÃO LEAFLET
-        // ==========================================
         const map = L.map('map-container', { zoomControl: false, doubleClickZoom: false }).setView([-2.24455, -49.50444], 16);
         window.streetLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { maxZoom: 22, maxNativeZoom: 19 });
         window.satLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 22, maxNativeZoom: 19 });
@@ -606,9 +541,6 @@
             if(window.appState.mapLayerType === 'street') { map.removeLayer(window.streetLayer); window.satLayer.addTo(map); window.appState.mapLayerType = 'satellite'; window.showToast('Visão de Satélite ativada.', 'sucesso'); } else { map.removeLayer(window.satLayer); window.streetLayer.addTo(map); window.appState.mapLayerType = 'street'; window.showToast('Visão de Rua ativada.', 'sucesso'); }
         };
 
-        // ==========================================
-        // 3. FIREBASE SETUP
-        // ==========================================
         let app, db, auth;
         const firebaseConfig = { apiKey: "AIzaSyCWMuCACgriWGTrkxALGzF9j5Z7EvL7Lcg", authDomain: "roma-telecom.firebaseapp.com", projectId: "roma-telecom", storageBucket: "roma-telecom.firebasestorage.app", messagingSenderId: "339457858705", appId: "1:339457858705:web:fee9c572cfbb374aca3330" };
 
@@ -640,9 +572,6 @@
         window.saveSplitterToFirebase = async (data) => { if(!db || !auth || !auth.currentUser) { window.appState.splitters.push({id: 'local_sp_'+Date.now(), ...data}); window.openCanvasDiagram(); return; } try { await addDoc(getCollectionPath('splitters'), data); } catch(e) { window.appState.splitters.push({id: 'local_sp_'+Date.now(), ...data}); window.openCanvasDiagram(); } };
         window.updateSplitterInFirebase = async (id, data) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.splitters.findIndex(s=>s.id===id); if(idx>-1) window.appState.splitters[idx] = {...window.appState.splitters[idx], ...data}; window.openCanvasDiagram(); return; } try { await updateDoc(getDocPath('splitters', id), data); } catch(e) { } };
 
-        // ==========================================
-        // LÓGICAS DE PROJETOS E TELA INICIAL
-        // ==========================================
         window.renderProjectsList = function() {
             const grid = document.getElementById('projects-grid'); const empty = document.getElementById('empty-state'); if(!grid || !empty) return;
             if(window.appState.projects.length === 0) { grid.style.display = 'none'; empty.style.display = 'flex'; } else {
@@ -650,14 +579,8 @@
                 grid.innerHTML = window.appState.projects.map(p => `
                     <div class="project-card" onclick="window.abrirProjeto('${p.id}', ${p.lat}, ${p.lng})">
                         <button class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition" style="z-index: 20;" onclick="window.deletarProjeto('${p.id}', event)" title="Deletar Projeto"><i class="fa-solid fa-trash"></i></button>
-                        <div class="relative z-10">
-                            <i class="fa-solid fa-map-location-dot text-3xl mb-3" style="color: var(--brand-green);"></i>
-                            <h3 class="proj-title leading-tight">${p.name}</h3>
-                        </div>
-                        <div class="relative z-10 mt-4 flex items-center justify-between border-t pt-3" style="border-color: var(--border-color);">
-                            <span class="proj-sub font-bold">ABRIR ENGENHARIA</span>
-                            <i class="fa-solid fa-arrow-right" style="color: var(--text-muted);"></i>
-                        </div>
+                        <div class="relative z-10"><i class="fa-solid fa-map-location-dot text-3xl mb-3" style="color: var(--brand-green);"></i><h3 class="proj-title leading-tight">${p.name}</h3></div>
+                        <div class="relative z-10 mt-4 flex items-center justify-between border-t pt-3" style="border-color: var(--border-color);"><span class="proj-sub font-bold">ABRIR ENGENHARIA</span><i class="fa-solid fa-arrow-right" style="color: var(--text-muted);"></i></div>
                     </div>
                 `).join('');
             }
@@ -693,46 +616,31 @@
                 const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
                 const data = await res.json();
                 if(data && data.length > 0) {
-                    window.tempProjectCoords = [data[0].lat, data[0].lon];
-                    miniMap.flyTo(window.tempProjectCoords, 15); miniMapMarker.setLatLng(window.tempProjectCoords);
-                    window.showToast('Localização encontrada!', 'sucesso');
+                    window.tempProjectCoords = [data[0].lat, data[0].lon]; miniMap.flyTo(window.tempProjectCoords, 15); miniMapMarker.setLatLng(window.tempProjectCoords); window.showToast('Localização encontrada!', 'sucesso');
                 } else { window.showToast('Local não encontrado.', 'erro'); }
             } catch(e) { console.error(e); }
         };
 
         window.salvarNovoProjeto = async () => {
-            const nome = document.getElementById('input-projeto-nome').value || 'Projeto Roma';
-            document.getElementById('modal-novo-projeto').style.display = 'none';
-            window.showToast('Criando banco de dados do projeto...');
+            const nome = document.getElementById('input-projeto-nome').value || 'Projeto Roma'; document.getElementById('modal-novo-projeto').style.display = 'none'; window.showToast('Criando banco de dados do projeto...');
             if(db && auth && auth.currentUser) {
                 const docRef = await addDoc(getCollectionPath('projects'), { name: nome, lat: window.tempProjectCoords[0], lng: window.tempProjectCoords[1], createdAt: Date.now() });
                 window.abrirProjeto(docRef.id, window.tempProjectCoords[0], window.tempProjectCoords[1]);
             } else {
-                window.showToast('Modo Local: Projeto não salvo na nuvem.', 'erro');
-                window.appState.currentProjectId = 'local_proj';
-                window.abrirProjeto('local_proj', window.tempProjectCoords[0], window.tempProjectCoords[1]);
+                window.showToast('Modo Local: Projeto não salvo na nuvem.', 'erro'); window.appState.currentProjectId = 'local_proj'; window.abrirProjeto('local_proj', window.tempProjectCoords[0], window.tempProjectCoords[1]);
             }
         };
 
         window.abrirProjeto = (id, lat, lng) => {
-            window.appState.currentProjectId = id;
-            const proj = window.appState.projects.find(p => p.id === id);
-            if(proj) document.getElementById('current-project-name').innerText = proj.name;
-            document.getElementById('regions-screen').style.display = 'none';
-            document.getElementById('app-workspace').style.display = 'flex';
+            window.appState.currentProjectId = id; const proj = window.appState.projects.find(p => p.id === id); if(proj) document.getElementById('current-project-name').innerText = proj.name;
+            document.getElementById('regions-screen').style.display = 'none'; document.getElementById('app-workspace').style.display = 'flex';
             setTimeout(() => { map.invalidateSize(); map.flyTo([lat, lng], 15); window.renderMap(); window.showToast('Projeto Carregado.', 'sucesso'); }, 300);
         };
 
         window.voltarParaProjetos = () => { window.appState.currentProjectId = null; document.getElementById('app-workspace').style.display = 'none'; document.getElementById('regions-screen').style.display = 'flex'; };
 
-        window.searchLocation = async () => {
-            const query = document.getElementById('search-input').value; if(!query) return;
-            try { const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`); const data = await res.json(); if(data && data.length > 0) { map.flyTo([data[0].lat, data[0].lon], 18); } } catch(e) {}
-        };
+        window.searchLocation = async () => { const query = document.getElementById('search-input').value; if(!query) return; try { const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`); const data = await res.json(); if(data && data.length > 0) { map.flyTo([data[0].lat, data[0].lon], 18); } } catch(e) {} };
 
-        // ==========================================
-        // MAPA INTERACTIONS
-        // ==========================================
         window.setMode = function(newMode) {
             window.appState.mode = newMode; document.body.className = document.body.className.replace(/mode-\w+/g, ''); document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
             const banner = document.getElementById('instruction-banner'); drawLayer.clearLayers(); window.appState.cablePath = []; window.appState.cableStartNodeId = null; window.appState.tempPolyline = null;
@@ -750,7 +658,6 @@
         window.renderMap = function() { 
             if(!window.appState.currentProjectId) return;
             nodesLayer.clearLayers(); cablesLayer.clearLayers(); 
-            
             const currentCables = window.appState.currentProjectId ? window.appState.cables.filter(c => c.projectId === window.appState.currentProjectId || !c.projectId) : window.appState.cables;
             const currentNodes = window.appState.currentProjectId ? window.appState.nodes.filter(n => n.projectId === window.appState.currentProjectId || !n.projectId) : window.appState.nodes;
             const isMovable = window.appState.mode === 'move';
@@ -760,7 +667,6 @@
                     const linhaCabo = L.polyline(c.path, { color: c.color, weight: 5, opacity: 0.9 }).addTo(cablesLayer);
                     linhaCabo.bindTooltip(`<b>${c.name}</b>`, {sticky: true});
                     linhaCabo.on('click', () => { if (window.appState.mode === 'view' && confirm(`Excluir o cabo "${c.name}"?`)) { window.deleteCableFromFirebase(c.id); window.showToast('Excluído.', 'sucesso'); } });
-
                     if (isMovable) {
                         for(let i=1; i < c.path.length-1; i++) {
                             const iconMid = L.divIcon({ html: `<div style="width:12px; height:12px; background:white; border:3px solid ${c.color}; border-radius:50%; box-shadow:0 0 4px rgba(0,0,0,0.5);"></div>`, className: '', iconSize: [12,12], iconAnchor: [6,6] });
@@ -798,8 +704,7 @@
                     marker.on('mouseout', (e) => { window.handleNodeInteraction(n, 'mouseout'); e.target.getElement().classList.remove('node-hover'); }); 
                     
                     marker.on('dragend', async (e) => {
-                        const pos = e.target.getLatLng();
-                        await window.updateNodeInFirebase(n.id, { lat: pos.lat, lng: pos.lng });
+                        const pos = e.target.getLatLng(); await window.updateNodeInFirebase(n.id, { lat: pos.lat, lng: pos.lng });
                         const connectedCables = currentCables.filter(c => c.startNode === n.id || c.endNode === n.id);
                         for(let c of connectedCables) {
                             let newPath = [...c.path];
@@ -813,7 +718,6 @@
             }); 
         };
 
-        // UI Helpers Modais
         window.openModal = function(type) { 
             window.setMode('view'); 
             if(type === 'caixa') { 
@@ -873,7 +777,7 @@
         window.showToast = function(msg, type='info') { const c = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast-msg show'; t.innerHTML = `<i class="fa-solid fa-info-circle text-blue-400"></i> <span>${msg}</span>`; c.appendChild(t); setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 300); }, 3000); };
 
         // ==========================================
-        // 6. MOTOR DO DIAGRAMA CANVAS OSP (COM ZOOM INF E HOVER LIXEIRA)
+        // 6. MOTOR DO DIAGRAMA CANVAS OSP
         // ==========================================
         window.zoomDiagram = function(action) {
             if(action === 'in') window.appState.diagramZoom += 0.1;
@@ -884,14 +788,24 @@
 
         window.deletarFusao = async function(id) {
             if(confirm('Deseja excluir esta conexão?')) {
-                if(db && auth && auth.currentUser && !id.startsWith('local_')) {
-                    await deleteDoc(getDocPath('fusions', id));
-                } else {
-                    window.appState.fusions = window.appState.fusions.filter(f => f.id !== id);
-                    window.updateAllFusionLines();
-                }
+                if(db && auth && auth.currentUser && !id.startsWith('local_')) { await deleteDoc(getDocPath('fusions', id)); } 
+                else { window.appState.fusions = window.appState.fusions.filter(f => f.id !== id); window.updateAllFusionLines(); }
                 window.showToast('Conexão excluída.', 'sucesso');
             }
+        };
+
+        // NOVO: Função para Flip (Inverter a ordem das fibras ou portas)
+        window.flipBlock = async function(type, id) {
+            if(type === 'cable') {
+                const cb = window.appState.cables.find(c => c.id === id); if(!cb) return;
+                let diag = cb.diagram || {}; let currentFlipped = diag[window.appState.selectedNodeId]?.flipped || false;
+                diag[window.appState.selectedNodeId] = { ...diag[window.appState.selectedNodeId], flipped: !currentFlipped };
+                await window.updateCableInFirebase(id, { diagram: diag });
+            } else if(type === 'splitter') {
+                const sp = window.appState.splitters.find(s => s.id === id); if(!sp) return;
+                await window.updateSplitterInFirebase(id, { flipped: !sp.flipped });
+            }
+            window.openCanvasDiagram();
         };
 
         window.openCanvasDiagram = function() { 
@@ -900,30 +814,31 @@
             const incoming = window.appState.cables.filter(c => c.endNode === node.id); const outgoing = window.appState.cables.filter(c => c.startNode === node.id); 
             const canvas = document.getElementById('diagram-canvas'); 
             const blocks = canvas.querySelectorAll('.cable-block, .splitter-block'); blocks.forEach(b => b.remove()); 
-            document.getElementById('fusion-lines').innerHTML = '<path id="active-fusion-line" d="" />'; 
+            
+            // Re-injetando o SVG e limpando
+            document.getElementById('fusion-lines').innerHTML = '<defs id="fusion-defs"></defs><path id="active-fusion-line" d="" />'; 
             
             let yOffsetIn = 100; let yOffsetOut = 100; 
             
             incoming.forEach(cable => { 
                 const origin = window.appState.nodes.find(n => n.id === cable.startNode); 
-                let diag = cable.diagram?.[node.id] || { x: 100, y: yOffsetIn, rotation: 0 };
+                let diag = cable.diagram?.[node.id] || { x: 100, y: yOffsetIn, rotation: 0, flipped: false };
                 if(!cable.diagram || !cable.diagram[node.id]) yOffsetIn += 100;
-                window.createCableBlock(canvas, cable, `ST ${origin ? origin.name.toUpperCase() : 'ORIGEM'}`, `CABO ${cable.capacity}FO`, diag.x, diag.y, diag.rotation); 
+                window.createCableBlock(canvas, cable, `ST ${origin ? origin.name.toUpperCase() : 'ORIGEM'}`, `CABO ${cable.capacity}FO`, diag.x, diag.y, diag.rotation, diag.flipped); 
             }); 
             
             outgoing.forEach(cable => { 
                 const dest = window.appState.nodes.find(n => n.id === cable.endNode); 
-                let diag = cable.diagram?.[node.id] || { x: 800, y: yOffsetOut, rotation: 0 };
+                let diag = cable.diagram?.[node.id] || { x: 800, y: yOffsetOut, rotation: 0, flipped: false };
                 if(!cable.diagram || !cable.diagram[node.id]) yOffsetOut += 100;
-                window.createCableBlock(canvas, cable, `ST ${dest ? dest.name.toUpperCase() : 'DESTINO'}`, `CABO ${cable.capacity}FO`, diag.x, diag.y, diag.rotation); 
+                window.createCableBlock(canvas, cable, `ST ${dest ? dest.name.toUpperCase() : 'DESTINO'}`, `CABO ${cable.capacity}FO`, diag.x, diag.y, diag.rotation, diag.flipped); 
             }); 
             
             const mySplitters = window.appState.splitters.filter(s => s.nodeId === node.id);
-            mySplitters.forEach((sp, index) => { window.createSplitterBlock(canvas, sp, sp.x || 450, sp.y || (100 + index * 100), sp.rotation || 0); });
+            mySplitters.forEach((sp, index) => { window.createSplitterBlock(canvas, sp, sp.x || 450, sp.y || (100 + index * 100), sp.rotation || 0, sp.flipped || false); });
 
             setTimeout(() => window.updateAllFusionLines(), 100); 
             document.getElementById('diagram-view').style.display = 'flex'; 
-            window.zoomDiagram('reset');
         };
         
         window.closeCanvasDiagram = function() { document.getElementById('diagram-view').style.display = 'none'; };
@@ -933,47 +848,59 @@
             if(type === 'splitter') {
                 const sp = window.appState.splitters.find(s => s.id === id); if(!sp) return;
                 newRot = (sp.rotation || 0) + 90; if(newRot >= 360) newRot = 0;
-                el = document.querySelector(`.splitter-block[data-id="${id}"]`);
-                if(el) { el.style.transform = `rotate(${newRot}deg)`; }
+                el = document.querySelector(`.splitter-block[data-id="${id}"]`); if(el) { el.style.transform = `rotate(${newRot}deg)`; }
                 await window.updateSplitterInFirebase(id, { rotation: newRot });
             } else if(type === 'cable') {
                 const cb = window.appState.cables.find(c => c.id === id); if(!cb) return;
                 let diag = cb.diagram || {}; let currentRot = diag[window.appState.selectedNodeId]?.rotation || 0;
                 newRot = currentRot + 90; if(newRot >= 360) newRot = 0;
                 diag[window.appState.selectedNodeId] = { ...diag[window.appState.selectedNodeId], rotation: newRot };
-                el = document.querySelector(`.cable-block[data-id="${id}"]`);
-                if(el) { el.style.transform = `rotate(${newRot}deg)`; }
+                el = document.querySelector(`.cable-block[data-id="${id}"]`); if(el) { el.style.transform = `rotate(${newRot}deg)`; }
                 await window.updateCableInFirebase(id, { diagram: diag });
             }
             setTimeout(() => window.updateAllFusionLines(), 250); 
         };
 
-        window.createCableBlock = function(canvas, cable, title, sub, startX, startY, startRot=0) { 
+        // NOVO: Renderiza Cabos com Inversão (Flipped)
+        window.createCableBlock = function(canvas, cable, title, sub, startX, startY, startRot=0, isFlipped=false) { 
             const block = document.createElement('div'); block.className = 'cable-block shadow-lg'; 
-            block.dataset.id = cable.id;
-            block.style.left = `${startX}px`; block.style.top = `${startY}px`; 
-            block.style.transform = `rotate(${startRot}deg)`;
-            let headerHtml = `<div class="cable-block-header" onmousedown="window.startDragBlock(event, this.parentElement)"><div class="flex gap-2 text-gray-400 text-xs"><i class="fa-solid fa-rotate-right hover:text-gray-800 cursor-pointer" onmousedown="event.stopPropagation(); window.rotateBlock('cable', '${cable.id}')"></i><i class="fa-solid fa-arrow-right-arrow-left hover:text-gray-800 cursor-pointer"></i></div><div class="text-right flex-grow"><div class="cable-block-title">${title}</div><div class="cable-block-sub">${sub}</div></div></div>`; 
+            block.dataset.id = cable.id; block.style.left = `${startX}px`; block.style.top = `${startY}px`; block.style.transform = `rotate(${startRot}deg)`;
+            let headerHtml = `<div class="cable-block-header" onmousedown="window.startDragBlock(event, this.parentElement)"><div class="flex gap-2 text-gray-400 text-xs"><i class="fa-solid fa-rotate-right hover:text-gray-800 cursor-pointer" onmousedown="event.stopPropagation(); window.rotateBlock('cable', '${cable.id}')"></i><i class="fa-solid fa-arrow-right-arrow-left hover:text-gray-800 cursor-pointer" onmousedown="event.stopPropagation(); window.flipBlock('cable', '${cable.id}')"></i></div><div class="text-right flex-grow"><div class="cable-block-title">${title}</div><div class="cable-block-sub">${sub}</div></div></div>`; 
+            
             let fibersHtml = '<div class="fiber-grid">'; 
-            for(let i=0; i<cable.capacity; i++) { const colorIdx = i % 6; const portId = `port-${cable.id}-${i}`; fibersHtml += `<div id="${portId}" class="fiber-port fiber-bg-${colorIdx}" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="Fibra ${i+1}">Fo${(i+1).toString().padStart(2,'0')}</div>`; } 
+            let indexes = []; for(let i=0; i<cable.capacity; i++) indexes.push(i);
+            if(isFlipped) indexes.reverse();
+            
+            indexes.forEach(i => {
+                const colorIdx = i % 6; const portId = `port-${cable.id}-${i}`; 
+                fibersHtml += `<div id="${portId}" class="fiber-port fiber-bg-${colorIdx}" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="Fibra ${i+1}">Fo${(i+1).toString().padStart(2,'0')}</div>`; 
+            });
             fibersHtml += '</div>'; block.innerHTML = headerHtml + fibersHtml; canvas.appendChild(block); 
         };
         
-        window.createSplitterBlock = function(canvas, splitter, startX, startY, startRot=0) {
+        // NOVO: Renderiza Splitters com Inversão (Flipped)
+        window.createSplitterBlock = function(canvas, splitter, startX, startY, startRot=0, isFlipped=false) {
             const block = document.createElement('div'); block.className = 'splitter-block'; 
-            block.dataset.id = splitter.id; block.style.left = `${startX}px`; block.style.top = `${startY}px`; 
-            block.style.transform = `rotate(${startRot}deg)`;
+            block.dataset.id = splitter.id; block.style.left = `${startX}px`; block.style.top = `${startY}px`; block.style.transform = `rotate(${startRot}deg)`;
             const outs = parseInt(splitter.type.split('x')[1]);
+            
             let portsHtml = `<div id="sp-${splitter.id}-in" class="sp-port in" onmousedown="window.startFusionDrag(event, 'sp-${splitter.id}-in')" onmouseup="window.endFusionDrag(event, 'sp-${splitter.id}-in')" title="IN">IN</div>`;
-            for(let i=0; i<outs; i++){ portsHtml += `<div id="sp-${splitter.id}-out-${i}" class="sp-port out" onmousedown="window.startFusionDrag(event, 'sp-${splitter.id}-out-${i}')" onmouseup="window.endFusionDrag(event, 'sp-${splitter.id}-out-${i}')" title="OUT ${i+1}">${i+1}</div>`; }
-            block.innerHTML = `<div class="splitter-block-header" onmousedown="window.startDragBlock(event, this.parentElement)">${splitter.type} <div><i class="fa-solid fa-rotate-right cursor-pointer text-blue-200 hover:text-white" onmousedown="event.stopPropagation(); window.rotateBlock('splitter', '${splitter.id}')"></i> <i class="fa-solid fa-trash ml-2 cursor-pointer text-red-300 hover:text-red-100" onmousedown="event.stopPropagation(); window.deleteSplitter('${splitter.id}')"></i></div></div><div class="sp-port-container">${portsHtml}</div>`;
+            
+            let indexes = []; for(let i=0; i<outs; i++) indexes.push(i);
+            if(isFlipped) indexes.reverse();
+
+            indexes.forEach(i => {
+                portsHtml += `<div id="sp-${splitter.id}-out-${i}" class="sp-port out" onmousedown="window.startFusionDrag(event, 'sp-${splitter.id}-out-${i}')" onmouseup="window.endFusionDrag(event, 'sp-${splitter.id}-out-${i}')" title="OUT ${i+1}">${i+1}</div>`; 
+            });
+            
+            block.innerHTML = `<div class="splitter-block-header" onmousedown="window.startDragBlock(event, this.parentElement)">${splitter.type} <div><i class="fa-solid fa-rotate-right cursor-pointer text-blue-200 hover:text-white" onmousedown="event.stopPropagation(); window.rotateBlock('splitter', '${splitter.id}')"></i> <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-blue-200 hover:text-white ml-1" onmousedown="event.stopPropagation(); window.flipBlock('splitter', '${splitter.id}')"></i> <i class="fa-solid fa-trash ml-1 cursor-pointer text-red-300 hover:text-red-100" onmousedown="event.stopPropagation(); window.deleteSplitter('${splitter.id}')"></i></div></div><div class="sp-port-container">${portsHtml}</div>`;
             canvas.appendChild(block);
         };
 
         window.addSplitterToDiagram = async function(type) {
             if(!window.appState.selectedNodeId) return;
             window.showToast(`Adicionando Splitter ${type}...`);
-            await window.saveSplitterToFirebase({ nodeId: window.appState.selectedNodeId, type: type, x: 450, y: 150, rotation: 0 });
+            await window.saveSplitterToFirebase({ nodeId: window.appState.selectedNodeId, type: type, x: 450, y: 150, rotation: 0, flipped: false });
         };
 
         window.deleteSplitter = async function(id) {
@@ -994,13 +921,12 @@
         let draggedBlock = null; let dragOffset = {x:0, y:0};
         
         window.startDragBlock = function(e, block) { 
-            if(e.target.closest('.fiber-port, .sp-port, .fa-trash, .fa-rotate-right')) return; 
+            if(e.target.closest('.fiber-port, .sp-port, .fa-trash, .fa-rotate-right, .fa-arrow-right-arrow-left')) return; 
             draggedBlock = block; 
             const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); 
             const canvasContainer = document.getElementById('diagram-canvas').parentElement;
             const zoom = window.appState.diagramZoom || 1;
             
-            // Calculo da posição real do mouse dentro do canvas expandido com Zoom
             dragOffset.x = (e.clientX - canvasRect.left + canvasContainer.scrollLeft) / zoom - parseInt(draggedBlock.style.left || 0); 
             dragOffset.y = (e.clientY - canvasRect.top + canvasContainer.scrollTop) / zoom - parseInt(draggedBlock.style.top || 0); 
             
@@ -1016,13 +942,9 @@
             
             let x = (e.clientX - canvasRect.left + canvasContainer.scrollLeft) / zoom - dragOffset.x; 
             let y = (e.clientY - canvasRect.top + canvasContainer.scrollTop) / zoom - dragOffset.y; 
+            x = Math.max(0, x); y = Math.max(0, y); 
             
-            // Removida a trava de limites para que ele possa ir para o lado infinito
-            x = Math.max(0, x); 
-            y = Math.max(0, y); 
-            
-            draggedBlock.style.left = `${x}px`; 
-            draggedBlock.style.top = `${y}px`; 
+            draggedBlock.style.left = `${x}px`; draggedBlock.style.top = `${y}px`; 
             window.updateAllFusionLines(); 
         };
         
@@ -1030,16 +952,10 @@
             if(draggedBlock) {
                 const newX = parseInt(draggedBlock.style.left); const newY = parseInt(draggedBlock.style.top);
                 if(draggedBlock.classList.contains('splitter-block')) {
-                    const spId = draggedBlock.dataset.id;
-                    window.updateSplitterInFirebase(spId, {x: newX, y: newY});
+                    const spId = draggedBlock.dataset.id; window.updateSplitterInFirebase(spId, {x: newX, y: newY});
                 } else if(draggedBlock.classList.contains('cable-block')) {
-                    const cbId = draggedBlock.dataset.id;
-                    const cable = window.appState.cables.find(c => c.id === cbId);
-                    if(cable) {
-                        let diag = cable.diagram || {};
-                        diag[window.appState.selectedNodeId] = { ...diag[window.appState.selectedNodeId], x: newX, y: newY };
-                        window.updateCableInFirebase(cbId, { diagram: diag });
-                    }
+                    const cbId = draggedBlock.dataset.id; const cable = window.appState.cables.find(c => c.id === cbId);
+                    if(cable) { let diag = cable.diagram || {}; diag[window.appState.selectedNodeId] = { ...diag[window.appState.selectedNodeId], x: newX, y: newY }; window.updateCableInFirebase(cbId, { diagram: diag }); }
                 }
             }
             draggedBlock = null; document.onmousemove = null; document.onmouseup = null; 
@@ -1048,24 +964,19 @@
         window.startFusionDrag = function(e, portId) { 
             e.stopPropagation(); window.appState.isDraggingFusion = true; window.appState.fusionStartPort = portId; 
             const port = document.getElementById(portId); const portRect = port.getBoundingClientRect(); 
-            const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); 
-            const zoom = window.appState.diagramZoom || 1;
-            window.appState.fusionStartCoords = { 
-                x: (portRect.left - canvasRect.left + (portRect.width/2)) / zoom, 
-                y: (portRect.top - canvasRect.top + (portRect.height/2)) / zoom 
-            }; 
-            const activeLine = document.getElementById('active-fusion-line'); 
+            const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const zoom = window.appState.diagramZoom || 1;
+            window.appState.fusionStartCoords = { x: (portRect.left - canvasRect.left + (portRect.width/2)) / zoom, y: (portRect.top - canvasRect.top + (portRect.height/2)) / zoom }; 
+            const activeLine = document.getElementById('active-fusion-line');
+            // Cor Ativa no arraste
+            activeLine.setAttribute('stroke', window.getPortColor(portId)); 
             activeLine.setAttribute('d', `M ${window.appState.fusionStartCoords.x} ${window.appState.fusionStartCoords.y} L ${window.appState.fusionStartCoords.x} ${window.appState.fusionStartCoords.y}`); 
         };
         
         window.handleFusionDragMove = function(e) { 
             if(!window.appState.isDraggingFusion) return; 
-            const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); 
-            const zoom = window.appState.diagramZoom || 1;
-            const p1 = window.appState.fusionStartCoords; 
-            const p2 = { x: (e.clientX - canvasRect.left) / zoom, y: (e.clientY - canvasRect.top) / zoom }; 
-            const cpOffset = Math.abs(p2.x - p1.x) / 2; 
-            const d = `M ${p1.x} ${p1.y} C ${p1.x + cpOffset} ${p1.y}, ${p2.x - cpOffset} ${p2.y}, ${p2.x} ${p2.y}`; 
+            const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const zoom = window.appState.diagramZoom || 1;
+            const p1 = window.appState.fusionStartCoords; const p2 = { x: (e.clientX - canvasRect.left) / zoom, y: (e.clientY - canvasRect.top) / zoom }; 
+            const cpOffset = Math.abs(p2.x - p1.x) / 2; const d = `M ${p1.x} ${p1.y} C ${p1.x + cpOffset} ${p1.y}, ${p2.x - cpOffset} ${p2.y}, ${p2.x} ${p2.y}`; 
             document.getElementById('active-fusion-line').setAttribute('d', d); 
         };
         
@@ -1083,11 +994,15 @@
             window.appState.isDraggingFusion = false; document.getElementById('active-fusion-line').setAttribute('d', ''); 
         };
 
+        // NOVO: Geração de Gradiente (Metade / Metade)
         window.updateAllFusionLines = function() {
             const svg = document.getElementById('fusion-lines'); 
-            Array.from(svg.children).forEach(c => { if(c.id !== 'active-fusion-line') c.remove(); }); 
+            Array.from(svg.children).forEach(c => { if(c.id !== 'active-fusion-line' && c.tagName !== 'defs') c.remove(); }); 
             const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); 
             const zoom = window.appState.diagramZoom || 1;
+            
+            const defs = document.getElementById('fusion-defs');
+            if(defs) defs.innerHTML = ''; // Limpa os gradientes anteriores
             
             window.appState.fusions.filter(f => f.nodeId === window.appState.selectedNodeId).forEach(fusion => {
                 const p1El = document.getElementById(fusion.from); const p2El = document.getElementById(fusion.to);
@@ -1097,10 +1012,26 @@
                     const p2 = { x: (r2.left - canvasRect.left + (r2.width/2)) / zoom, y: (r2.top - canvasRect.top + (r2.height/2)) / zoom };
                     const cpOffset = Math.abs(p2.x - p1.x) / 2; 
                     const d = `M ${p1.x} ${p1.y} C ${p1.x + cpOffset} ${p1.y}, ${p2.x - cpOffset} ${p2.y}, ${p2.x} ${p2.y}`;
-                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); 
-                    path.setAttribute('d', d); path.setAttribute('stroke', '#0f172a'); path.setAttribute('stroke-width', '4'); path.setAttribute('fill', 'none'); path.setAttribute('stroke-linecap', 'round'); 
                     
-                    // Hover/Click da Lixeira nas Linhas
+                    const color1 = window.getPortColor(fusion.from);
+                    const color2 = window.getPortColor(fusion.to);
+                    const gradId = `grad-${fusion.id}`;
+
+                    if(defs) {
+                        const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+                        grad.setAttribute('id', gradId);
+                        grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+                        grad.setAttribute('x1', p1.x); grad.setAttribute('y1', p1.y);
+                        grad.setAttribute('x2', p2.x); grad.setAttribute('y2', p2.y);
+                        grad.innerHTML = `<stop offset="50%" stop-color="${color1}"/><stop offset="50%" stop-color="${color2}"/>`;
+                        defs.appendChild(grad);
+                    }
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); 
+                    path.setAttribute('d', d); 
+                    path.setAttribute('stroke', `url(#${gradId})`); 
+                    path.setAttribute('stroke-width', '4'); path.setAttribute('fill', 'none'); path.setAttribute('stroke-linecap', 'round'); 
+                    
                     path.classList.add('fusion-line-clickable');
                     path.onmousemove = function(e) {
                         let trash = document.getElementById('floating-trash');
