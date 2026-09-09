@@ -206,7 +206,7 @@
         .cm-item.danger { color: #ef4444; border-bottom: 1px solid #f1f5f9; margin-bottom: 4px; padding-bottom: 10px; }
         .cm-item.danger:hover { background: #fef2f2; color: #dc2626; }
         
-        /* ADIÇÃO: BOLINHA DE LUZ E MODAL */
+        /* BOLINHA DE LUZ E MODAL (MANTIDO 100%) */
         #fixed-power-btn {
             position: fixed; top: 100px; right: 30px; width: 60px; height: 60px; background: #3b82f6; 
             border-radius: 50%; color: white; display: none; align-items: center; justify-content: center; 
@@ -460,10 +460,11 @@
             </div>
             
             <div class="diag-tb-group">
-                <!-- NOVOS BOTÕES: OLT e DIO -->
+                <!-- BOTÕES: OLT e DIO -->
                 <button class="diag-btn font-bold text-blue-800" id="btn-add-dio" style="display:none;" onclick="window.promptAddDIO()"><i class="fa-solid fa-server"></i> DIO</button>
                 <button class="diag-btn font-bold text-blue-800" id="btn-add-olt" style="display:none;" onclick="window.promptAddOLT()"><i class="fa-solid fa-network-wired"></i> OLT</button>
                 
+                <button class="diag-btn"><i class="fa-solid fa-bolt text-purple-500"></i> Potência</button>
                 <button class="diag-btn font-bold text-blue-600" onclick="window.addSplitterToDiagram('1x2')"><i class="fa-solid fa-sitemap"></i> 1x2</button>
                 <button class="diag-btn font-bold text-blue-600" onclick="window.addSplitterToDiagram('1x4')"><i class="fa-solid fa-sitemap"></i> 1x4</button>
                 <button class="diag-btn font-bold text-blue-600" onclick="window.addSplitterToDiagram('1x8')"><i class="fa-solid fa-sitemap"></i> 1x8</button>
@@ -500,7 +501,7 @@
         // ==========================================
         window.appState = {
             currentProjectId: null, projects: [], mode: 'view', nodes: [], cables: [], fusions: [], splitters: [], olts: [], dios: [], 
-            portPowers: {}, // NOVO: Armazena o calculo da luz por porta
+            portPowers: {}, // Armazena o calculo da luz por porta
             selectedNodeId: null, editingNodeId: null,
             nodeSetup: { name: 'CEO 01', type: 'CEO', icon: 'fa-layer-group', color: '#f97316', splitter: null },
             cableSetup: { name: '', capacity: 12, color: '#3b82f6' },
@@ -574,7 +575,28 @@
             if(!auth || !auth.currentUser) return;
             onSnapshot(getCollectionPath('projects'), (snapshot) => { window.appState.projects = []; snapshot.forEach(doc => { window.appState.projects.push({ id: doc.id, ...doc.data() }); }); if(window.renderProjectsList) window.renderProjectsList(); }, (e) => console.error(e));
             onSnapshot(getCollectionPath('nodes'), (snapshot) => { window.appState.nodes = []; snapshot.forEach(doc => { window.appState.nodes.push({ id: doc.id, ...doc.data() }); }); window.renderMap(); }, (e) => console.error(e));
-            onSnapshot(getCollectionPath('cables'), (snapshot) => { window.appState.cables = []; snapshot.forEach(doc => { const data = doc.data(); if (data.path && data.path.length > 0 && typeof data.path[0] === 'object' && !Array.isArray(data.path[0])) { data.path = data.path.map(p => [p.lat, p.lng]); } window.appState.cables.push({ id: doc.id, ...data }); }); window.renderMap(); }, (e) => console.error(e));
+            
+            // CORREÇÃO E ATUALIZAÇÃO NO CABO
+            onSnapshot(getCollectionPath('cables'), (snapshot) => { 
+                window.appState.cables = []; 
+                snapshot.forEach(doc => { 
+                    const data = doc.data(); 
+                    if (data.path && Array.isArray(data.path)) { 
+                        // GARANTE QUE O ARRAY DE COORDENADAS SEJA SEMPRE [lat, lng] PARA O MAPA NÃO PERDER O CABO
+                        data.path = data.path.map(p => {
+                            if (Array.isArray(p)) return [p[0], p[1]];
+                            if (p && typeof p === 'object') return [p.lat, p.lng];
+                            return p;
+                        }); 
+                    } 
+                    window.appState.cables.push({ id: doc.id, ...data }); 
+                }); 
+                window.renderMap(); 
+                if(document.getElementById('diagram-view').style.display === 'flex') {
+                    window.openCanvasDiagram();
+                }
+            }, (e) => console.error(e));
+
             onSnapshot(getCollectionPath('fusions'), (snapshot) => { window.appState.fusions = []; snapshot.forEach(doc => { window.appState.fusions.push({ id: doc.id, ...doc.data() }); }); if(document.getElementById('diagram-view').style.display === 'flex') { window.updateAllFusionLines(); window.calculateNetworkPower(); } }, (e) => console.error(e));
             onSnapshot(getCollectionPath('splitters'), (snapshot) => { window.appState.splitters = []; snapshot.forEach(doc => { window.appState.splitters.push({ id: doc.id, ...doc.data() }); }); if(document.getElementById('diagram-view').style.display === 'flex') window.openCanvasDiagram(); }, (e) => console.error(e));
             onSnapshot(getCollectionPath('olts'), (snapshot) => { window.appState.olts = []; snapshot.forEach(doc => { window.appState.olts.push({ id: doc.id, ...doc.data() }); }); if(document.getElementById('diagram-view').style.display === 'flex') window.openCanvasDiagram(); }, (e) => console.error(e));
@@ -597,7 +619,6 @@
             catch(e) { const id = 'local_c_'+Date.now(); window.appState.cables.push({id, ...cableData}); window.renderMap(); return id; } 
         };
         
-        // CORREÇÃO: Traduz os paths corretamente para o local no fallback de erro/offline para os cabos acompanharem o drag
         window.updateCableInFirebase = async (id, cableData) => { 
             let localData = { ...cableData };
             if(localData.path && localData.path.length > 0) {
@@ -621,6 +642,7 @@
         window.deleteCableFromFirebase = async (id) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { window.appState.cables = window.appState.cables.filter(c=>c.id!==id); window.renderMap(); return; } try { await deleteDoc(getDocPath('cables', id)); } catch(e) { window.appState.cables = window.appState.cables.filter(c=>c.id!==id); window.renderMap(); } };
         
         window.saveFusionToFirebase = async (fusionData) => { if(!db || !auth || !auth.currentUser) { window.appState.fusions.push({id: 'local_'+Date.now(), ...fusionData}); window.updateAllFusionLines(); window.calculateNetworkPower(); return; } try { await addDoc(getCollectionPath('fusions'), fusionData); } catch(e) { window.appState.fusions.push({id: 'local_'+Date.now(), ...fusionData}); window.updateAllFusionLines(); window.calculateNetworkPower(); } };
+        
         window.saveSplitterToFirebase = async (data) => { if(!db || !auth || !auth.currentUser) { window.appState.splitters.push({id: 'local_sp_'+Date.now(), ...data}); window.openCanvasDiagram(); return; } try { await addDoc(getCollectionPath('splitters'), data); } catch(e) { window.appState.splitters.push({id: 'local_sp_'+Date.now(), ...data}); window.openCanvasDiagram(); } };
         window.updateSplitterInFirebase = async (id, data) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.splitters.findIndex(s=>s.id===id); if(idx>-1) window.appState.splitters[idx] = {...window.appState.splitters[idx], ...data}; window.openCanvasDiagram(); return; } try { await updateDoc(getDocPath('splitters', id), data); } catch(e) { } };
 
@@ -1196,6 +1218,15 @@
             });
         };
 
+        // Adiciona Spacing (Off-set Y) Inteligente em Splitters novos
+        window.addSplitterToDiagram = async function(type) {
+            if(!window.appState.selectedNodeId) return; 
+            window.showToast(`Adicionando Splitter ${type}...`);
+            const existingSp = window.appState.splitters.filter(s => s.nodeId === window.appState.selectedNodeId);
+            const newY = 150 + (existingSp.length * 90);
+            await window.saveSplitterToFirebase({ nodeId: window.appState.selectedNodeId, type: type, x: 450, y: newY, rotation: 0, flipped: false, sideFlipped: false });
+        };
+
         window.openCanvasDiagram = function() { 
             const node = window.appState.nodes.find(n => n.id === window.appState.selectedNodeId); if(!node) return; 
             document.getElementById('diag-toolbar-title').innerText = node.name; document.getElementById('diag-center-name').innerText = node.name; 
@@ -1227,7 +1258,7 @@
             }); 
             
             const mySplitters = window.appState.splitters.filter(s => s.nodeId === node.id);
-            mySplitters.forEach((sp, index) => { window.createSplitterBlock(canvas, sp, sp.x || 450, sp.y || (100 + index * 100), sp.rotation || 0, sp.flipped || false, sp.sideFlipped || false); });
+            mySplitters.forEach((sp) => { window.createSplitterBlock(canvas, sp, sp.x || 450, sp.y || 150, sp.rotation || 0, sp.flipped || false, sp.sideFlipped || false); });
 
             const myOLTs = window.appState.olts.filter(o => o.nodeId === node.id);
             myOLTs.forEach((olt, index) => { window.createOLTBlock(canvas, olt, olt.x || 150, olt.y || (100 + index * 100), olt.rotation || 0, olt.flipped || false, olt.sideFlipped || false); });
@@ -1251,9 +1282,9 @@
             
             let infoHtml = `<div class="cable-block-info" onmousedown="window.startDragBlock(event, this.parentElement)">
                 <div style="display: flex; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">
-                    <i class="fa-solid fa-rotate-right cursor-pointer text-gray-400 hover:text-blue-500" onmousedown="event.stopPropagation(); window.rotateBlock('cable', '${cable.id}')" title="Rotacionar"></i>
-                    <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-gray-400 hover:text-blue-500" onmousedown="event.stopPropagation(); window.activeContextMenuType='cable'; window.activeContextMenuId='${cable.id}'; window.toggleSide()" title="Inverter Lado"></i>
-                    <i class="fa-solid fa-arrows-up-down cursor-pointer text-gray-400 hover:text-blue-500" onmousedown="event.stopPropagation(); window.activeContextMenuType='cable'; window.activeContextMenuId='${cable.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
+                    <i class="fa-solid fa-rotate-right cursor-pointer text-gray-400 hover:text-blue-500" onclick="event.stopPropagation(); window.rotateBlock('cable', '${cable.id}')" title="Rotacionar"></i>
+                    <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-gray-400 hover:text-blue-500" onclick="event.stopPropagation(); window.activeContextMenuType='cable'; window.activeContextMenuId='${cable.id}'; window.toggleSide()" title="Inverter Lado"></i>
+                    <i class="fa-solid fa-arrows-up-down cursor-pointer text-gray-400 hover:text-blue-500" onclick="event.stopPropagation(); window.activeContextMenuType='cable'; window.activeContextMenuId='${cable.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
                 </div>
                 <div class="cb-title">${title}</div><div class="cb-cap">${cable.capacity} FIBRAS</div>
             </div>`; 
@@ -1275,11 +1306,11 @@
             
             let infoHtml = `<div class="cable-block-info" style="background: #e0f2fe; border-left: 4px solid #0284c7;" onmousedown="window.startDragBlock(event, this.parentElement)">
                 <div style="display: flex; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid #bae6fd; padding-bottom: 4px;">
-                    <i class="fa-solid fa-rotate-right cursor-pointer text-slate-500 hover:text-blue-700" onmousedown="event.stopPropagation(); window.rotateBlock('olt', '${olt.id}')" title="Rotacionar"></i>
-                    <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-slate-500 hover:text-blue-700" onmousedown="event.stopPropagation(); window.activeContextMenuType='olt'; window.activeContextMenuId='${olt.id}'; window.toggleSide()" title="Inverter Lado"></i>
-                    <i class="fa-solid fa-arrows-up-down cursor-pointer text-slate-500 hover:text-blue-700" onmousedown="event.stopPropagation(); window.activeContextMenuType='olt'; window.activeContextMenuId='${olt.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
-                    <i class="fa-solid fa-pen cursor-pointer text-slate-500 hover:text-blue-700" onmousedown="event.stopPropagation(); window.promptEditOLTPower('${olt.id}')" title="Editar Potência"></i>
-                    <i class="fa-solid fa-trash cursor-pointer text-red-400 hover:text-red-600 ml-2" onmousedown="event.stopPropagation(); window.deleteOLT('${olt.id}')" title="Excluir"></i>
+                    <i class="fa-solid fa-rotate-right cursor-pointer text-slate-500 hover:text-blue-700" onclick="event.stopPropagation(); window.rotateBlock('olt', '${olt.id}')" title="Rotacionar"></i>
+                    <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-slate-500 hover:text-blue-700" onclick="event.stopPropagation(); window.activeContextMenuType='olt'; window.activeContextMenuId='${olt.id}'; window.toggleSide()" title="Inverter Lado"></i>
+                    <i class="fa-solid fa-arrows-up-down cursor-pointer text-slate-500 hover:text-blue-700" onclick="event.stopPropagation(); window.activeContextMenuType='olt'; window.activeContextMenuId='${olt.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
+                    <i class="fa-solid fa-pen cursor-pointer text-slate-500 hover:text-blue-700" onclick="event.stopPropagation(); window.promptEditOLTPower('${olt.id}')" title="Editar Potência"></i>
+                    <i class="fa-solid fa-trash cursor-pointer text-red-400 hover:text-red-600 ml-2" onclick="event.stopPropagation(); window.deleteOLT('${olt.id}')" title="Excluir"></i>
                 </div>
                 <div class="cb-title">OLT</div><div class="cb-cap">${olt.pons} PORTAS PON</div><div class="cb-dest" style="color: #0284c7;">TX: ${olt.tx} dBm</div>
             </div>`; 
@@ -1302,10 +1333,10 @@
             const h = Math.max(outs * 24, 60); 
             
             let actionsHtml = `<div style="position: absolute; top: -30px; left: 0; display: flex; gap: 8px; background: white; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 10;">
-                <i class="fa-solid fa-rotate-right cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.rotateBlock('dio', '${dio.id}')" title="Rotacionar"></i>
-                <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.activeContextMenuType='dio'; window.activeContextMenuId='${dio.id}'; window.toggleSide()" title="Inverter Lado"></i>
-                <i class="fa-solid fa-arrows-up-down cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.activeContextMenuType='dio'; window.activeContextMenuId='${dio.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
-                <i class="fa-solid fa-trash cursor-pointer text-red-400 hover:text-red-600 ml-2" onmousedown="event.stopPropagation(); window.deleteDIO('${dio.id}')" title="Excluir"></i>
+                <i class="fa-solid fa-rotate-right cursor-pointer text-gray-500 hover:text-blue-500" onclick="event.stopPropagation(); window.rotateBlock('dio', '${dio.id}')" title="Rotacionar"></i>
+                <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-gray-500 hover:text-blue-500" onclick="event.stopPropagation(); window.activeContextMenuType='dio'; window.activeContextMenuId='${dio.id}'; window.toggleSide()" title="Inverter Lado"></i>
+                <i class="fa-solid fa-arrows-up-down cursor-pointer text-gray-500 hover:text-blue-500" onclick="event.stopPropagation(); window.activeContextMenuType='dio'; window.activeContextMenuId='${dio.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
+                <i class="fa-solid fa-trash cursor-pointer text-red-400 hover:text-red-600 ml-2" onclick="event.stopPropagation(); window.deleteDIO('${dio.id}')" title="Excluir"></i>
             </div>`;
 
             let portsInHtml = `<div class="sp-in-col" style="display: flex; flex-direction: column; justify-content: space-around; height: ${h}px; z-index: 2;">`;
@@ -1342,10 +1373,10 @@
             const h = Math.max(outs * 30, 60); 
             
             let actionsHtml = `<div style="position: absolute; top: -30px; left: 0; display: flex; gap: 8px; background: white; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 10;">
-                <i class="fa-solid fa-rotate-right cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.rotateBlock('splitter', '${splitter.id}')" title="Rotacionar"></i>
-                <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.activeContextMenuType='splitter'; window.activeContextMenuId='${splitter.id}'; window.toggleSide()" title="Inverter Lado"></i>
-                <i class="fa-solid fa-arrows-up-down cursor-pointer text-gray-500 hover:text-blue-500" onmousedown="event.stopPropagation(); window.activeContextMenuType='splitter'; window.activeContextMenuId='${splitter.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
-                <i class="fa-solid fa-trash cursor-pointer text-red-400 hover:text-red-600 ml-2" onmousedown="event.stopPropagation(); window.deleteSplitter('${splitter.id}')" title="Excluir"></i>
+                <i class="fa-solid fa-rotate-right cursor-pointer text-gray-500 hover:text-blue-500" onclick="event.stopPropagation(); window.rotateBlock('splitter', '${splitter.id}')" title="Rotacionar"></i>
+                <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-gray-500 hover:text-blue-500" onclick="event.stopPropagation(); window.activeContextMenuType='splitter'; window.activeContextMenuId='${splitter.id}'; window.toggleSide()" title="Inverter Lado"></i>
+                <i class="fa-solid fa-arrows-up-down cursor-pointer text-gray-500 hover:text-blue-500" onclick="event.stopPropagation(); window.activeContextMenuType='splitter'; window.activeContextMenuId='${splitter.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
+                <i class="fa-solid fa-trash cursor-pointer text-red-400 hover:text-red-600 ml-2" onclick="event.stopPropagation(); window.deleteSplitter('${splitter.id}')" title="Excluir"></i>
             </div>`;
 
             let inPortId = `sp-${splitter.id}-in`;
