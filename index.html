@@ -42,61 +42,30 @@
             --input-bg: #111827;
         }
 
-        /* STREAMING_CHUNK:Configurando fontes e variaveis globais do CSS... */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; overflow: hidden; background-color: var(--bg-main); margin: 0; padding: 0; }
         
-        /* ================= TELA INICIAL (DASHBOARD FIEL AO PRINT) ================= */
-        #regions-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: var(--bg-main); z-index: 9999;
-            display: flex; font-family: 'Inter', sans-serif; transition: background-color 0.3s ease;
-        }
+        /* ================= TELA INICIAL (DASHBOARD) ================= */
+        #regions-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: var(--bg-main); z-index: 9999; display: flex; transition: background-color 0.3s ease; }
         
-        /* SIDEBAR (MENU ESQUERDO) */
-        .home-sidebar {
-            width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; transition: all 0.3s ease;
-        }
-        .sidebar-logo {
-            padding: 24px; display: flex; justify-content: space-between; align-items: flex-start;
-        }
-        .sidebar-section-title {
-            font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; padding: 16px 24px 8px 24px; letter-spacing: 0.05em;
-        }
-        .sidebar-item {
-            padding: 10px 24px; display: flex; align-items: center; gap: 12px; color: var(--text-secondary); font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s;
-        }
+        .home-sidebar { width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; transition: all 0.3s ease; }
+        .sidebar-logo { padding: 24px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .sidebar-section-title { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; padding: 16px 24px 8px 24px; letter-spacing: 0.05em; }
+        .sidebar-item { padding: 10px 24px; display: flex; align-items: center; gap: 12px; color: var(--text-secondary); font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
         .sidebar-item:hover { background-color: var(--bg-hover); color: var(--text-primary); }
         .sidebar-item.active { background-color: var(--brand-green); color: white; border-radius: 0 20px 20px 0; margin-right: 16px; width: calc(100% - 16px); }
         .sidebar-item.active:hover { background-color: var(--brand-green-hover); }
 
-        /* PERFIL DO USUARIO (RODAPÉ SIDEBAR) */
-        .user-profile-box {
-            margin-top: auto; padding: 24px; border-top: 1px solid var(--border-color);
-        }
-        .btn-upgrade {
-            width: 100%; background-color: #0f172a; color: white; padding: 10px; border-radius: 6px; font-size: 12px; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 16px; cursor: pointer;
-        }
-        .sidebar-footer-icons {
-            display: flex; justify-content: space-between; align-items: center; padding-top: 16px; margin-top: 16px; border-top: 1px solid var(--border-color);
-        }
-        .sf-icon {
-            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); border-radius: 6px; cursor: pointer; transition: all 0.2s;
-        }
+        .user-profile-box { margin-top: auto; padding: 24px; border-top: 1px solid var(--border-color); }
+        .btn-upgrade { width: 100%; background-color: #0f172a; color: white; padding: 10px; border-radius: 6px; font-size: 12px; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 16px; cursor: pointer; }
+        .sidebar-footer-icons { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; margin-top: 16px; border-top: 1px solid var(--border-color); }
+        .sf-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); border-radius: 6px; cursor: pointer; transition: all 0.2s; }
         .sf-icon:hover { background-color: var(--bg-hover); color: var(--text-primary); }
 
-        /* ÁREA PRINCIPAL */
-        .home-main {
-            flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-main); overflow-y: auto; transition: background-color 0.3s ease;
-        }
-        .home-header {
-            padding: 32px 40px 16px 40px; display: flex; align-items: flex-end; justify-content: space-between; flex-shrink: 0;
-        }
-        .home-content {
-            flex-grow: 1; display: flex; flex-direction: column; position: relative; padding: 16px 40px 40px 40px;
-        }
+        .home-main { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-main); overflow-y: auto; transition: background-color 0.3s ease; }
+        .home-header { padding: 32px 40px 16px 40px; display: flex; align-items: flex-end; justify-content: space-between; flex-shrink: 0; }
+        .home-content { flex-grow: 1; display: flex; flex-direction: column; position: relative; padding: 16px 40px 40px 40px; }
         
-        /* BARRA DE PESQUISA TOPO */
         .top-action-bar { display: flex; align-items: center; gap: 12px; }
         .search-bar-dash { background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 16px; display: flex; align-items: center; gap: 8px; color: var(--text-secondary); width: 280px; }
         .search-bar-dash input { background: transparent; border: none; outline: none; color: var(--text-primary); width: 100%; font-size: 13px; }
@@ -104,39 +73,30 @@
         .view-toggle-btn { padding: 8px 12px; color: var(--text-secondary); background: transparent; border: none; cursor: pointer; }
         .view-toggle-btn.active { background: var(--bg-hover); color: var(--text-primary); }
 
-        /* GRID E CARDS DE PROJETO */
-        #projects-grid {
-            display: flex; flex-wrap: wrap; gap: 24px; width: 100%; justify-content: flex-start; align-items: flex-start;
-        }
-        .project-card {
-            background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; width: 280px; padding: 24px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; position: relative;
-        }
+        #projects-grid { display: flex; flex-wrap: wrap; gap: 24px; width: 100%; justify-content: flex-start; align-items: flex-start; }
+        .project-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; width: 280px; padding: 24px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; position: relative; }
         .project-card:hover { border-color: var(--brand-green); box-shadow: 0 4px 12px rgba(0,0,0,0.05); transform: translateY(-2px); }
         .proj-title { color: var(--text-primary); font-size: 16px; font-weight: 700; margin-top: 12px; margin-bottom: 4px; }
         .proj-sub { color: var(--text-muted); font-size: 11px; }
 
-        /* EMPTY STATE (ESTADO VAZIO) */
-        #empty-state {
-            display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 60vh; border: 2px dashed var(--border-color); border-radius: 16px; background-color: var(--bg-dashed);
-        }
-
+        #empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 60vh; border: 2px dashed var(--border-color); border-radius: 16px; background-color: var(--bg-dashed); }
         .btn-green-dash { background-color: var(--brand-green); color: white; padding: 8px 20px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px; border: none; }
         .btn-green-dash:hover { background-color: var(--brand-green-hover); }
 
-        /* CHAT FAB (BALÃO VERDE NO CANTO) */
         .chat-fab { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background-color: var(--brand-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; cursor: pointer; box-shadow: 0 10px 25px rgba(0,168,89,0.4); z-index: 9999; transition: transform 0.2s; }
         .chat-fab:hover { transform: scale(1.1); }
 
-        /* STREAMING_CHUNK:Estilos do Workspace de Mapa... */
-        #app-workspace { display: none; width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; }
+        /* ================= WORKSPACE MAPA E SIDEBAR INTERNA ================= */
+        #app-workspace { display: none; width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; flex-direction: row; }
         
-        #map-container { position: absolute; top: 0; left: 0; height: 100vh; width: 100vw; z-index: 10; }
+        .workspace-sidebar { width: 260px; height: 100vh; background-color: var(--bg-sidebar); border-right: 1px solid var(--border-color); flex-shrink: 0; z-index: 2000; display: flex; flex-direction: column; transition: background-color 0.3s; }
+        #map-container { flex-grow: 1; height: 100vh; position: relative; z-index: 10; }
+        
         .leaflet-control-zoom { display: none !important; }
-        
         .mode-placing #map-container { cursor: crosshair !important; }
         .mode-drawing #map-container { cursor: crosshair !important; }
 
-        .top-toolbar { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; gap: 12px; align-items: center; background: transparent; width: 98%; max-width: 1400px; }
+        .top-toolbar { position: absolute; top: 20px; left: calc(50% + 130px); transform: translateX(-50%); z-index: 1000; display: flex; gap: 12px; align-items: center; background: transparent; width: 98%; max-width: 1400px; }
         .search-bar { background: white; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; align-items: center; padding: 8px 16px; flex-grow: 1; max-width: 350px; height: 48px; }
         .search-bar input { border: none; outline: none; width: 100%; font-size: 14px; color: #374151; background: transparent; }
         
@@ -150,7 +110,7 @@
         .rt-btn:hover { background: #f3f4f6; color: #111827; }
         .rt-btn.active { background: #2563eb; color: white; }
 
-        .info-card { position: absolute; top: 80px; left: 20px; width: 360px; background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); z-index: 1000; padding: 24px; display: none; border: 1px solid #f3f4f6; }
+        .info-card { position: absolute; top: 80px; left: 20px; width: 360px; background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); z-index: 2000; padding: 24px; display: none; border: 1px solid #f3f4f6; }
         .action-buttons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
         
         .btn-primary-blue { background-color: #2563eb; color: white; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s; border: none; }
@@ -164,8 +124,8 @@
         .btn-small-action.danger { color: #ef4444; }
         .btn-small-action.danger:hover { background: #fef2f2; border-color: #fca5a5; }
 
-        /* STREAMING_CHUNK:Estilizando Modais Pop-up e Novo Modal de Caixa... */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(2px); z-index: 20000; display: none; align-items: center; justify-content: center; }
+        /* MODAIS POP-UP */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); z-index: 20000; display: none; align-items: center; justify-content: center; }
         .modal-content { background: white; border-radius: 20px; width: 100%; max-width: 480px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; }
         .modal-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f3f4f6; }
         .modal-header h2 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
@@ -198,76 +158,60 @@
         .btn-submit-dark:hover { background: #1e293b; }
         .btn-submit-orange { flex: 1; padding: 12px; background: #f97316; border: none; border-radius: 8px; font-weight: 600; color: white; cursor: pointer; }
 
-        /* STREAMING_CHUNK:Estilizando UI Flutuante de Notificações... */
+        /* NOTIFICAÇÕES E MAP ICONS */
         .instruction-banner { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; background: #111827; color: white; padding: 12px 24px; border-radius: 30px; font-weight: 600; font-size: 14px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); display: none; align-items: center; gap: 10px; }
         #toast-container { position: absolute; bottom: 20px; right: 20px; z-index: 999999; display: flex; flex-direction: column; gap: 10px; }
         .toast-msg { background: #111827; color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transform: translateY(20px); transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
         .toast-msg.show { opacity: 1; transform: translateY(0); }
 
-        /* STREAMING_CHUNK:Estilizando ícones Leaflet no mapa... */
+        /* ÍCONES LEAFLET E TOOLTIP FIX */
         .map-icon-wrapper { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; border: 2px solid white; transition: transform 0.2s; }
         .map-icon-wrapper.rounded-full { border-radius: 50%; }
         .leaflet-div-icon { background: transparent; border: none; }
         .node-anchorable .map-icon-wrapper { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5); transform: scale(1.1); }
         .node-hover .map-icon-wrapper { transform: scale(1.3); border-color: #3b82f6; z-index: 1000 !important;}
+        
         .preview-line-active { stroke-dasharray: 10, 10; animation: dash 1s linear infinite; }
         @keyframes dash { to { stroke-dashoffset: -20; } }
 
-        /* STREAMING_CHUNK:Estilizando Overlay de Inventário... */
-        #inventory-panel {
-            position: absolute; top: 80px; right: 20px; width: 400px; max-height: calc(100vh - 100px);
-            background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
-            z-index: 1000; display: none; flex-direction: column; border: 1px solid #e5e7eb; overflow: hidden;
-        }
+        /* NOVO: CORREÇÃO DEFINITIVA DO TEXTO DO MAPA NUNCA SUMIR */
+        .transparent-tooltip { background: transparent !important; border: none !important; box-shadow: none !important; margin: 0 !important; padding: 0 !important; }
+        .transparent-tooltip::before { display: none !important; }
+
+        /* INVENTÁRIO */
+        #inventory-panel { position: absolute; top: 80px; right: 20px; width: 400px; max-height: calc(100vh - 100px); background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2); z-index: 1000; display: none; flex-direction: column; border: 1px solid #e5e7eb; overflow: hidden; }
         .inv-header { padding: 16px 20px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; background-color: #f8fafc; }
         .inv-list { overflow-y: auto; padding: 10px; flex-grow: 1; }
         .inv-item { padding: 12px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; transition: background 0.2s; cursor: pointer; }
         .inv-item:hover { background-color: #f0fdf4; }
 
-        /* STREAMING_CHUNK:NOVO MOTOR DE DIAGRAMA (WHITEBOARD / CANVAS) estilo UpperX... */
+        /* DIAGRAMA CANVAS OSP */
         #diagram-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; z-index: 3000; display: none; flex-direction: column; }
-        
         .diagram-toolbar { background: white; height: 60px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); z-index: 10; }
         .diag-tb-group { display: flex; align-items: center; gap: 12px; }
         .diag-btn { border: 1px solid #e5e7eb; background: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; color: #4b5563; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
         .diag-btn:hover { background: #f3f4f6; }
         .diag-btn-primary { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
         .diag-btn-primary:hover { background: #1d4ed8; }
-        
         .diag-tab-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; }
         .diag-active-tab { background: #eff6ff; color: #2563eb; border: 2px solid #3b82f6; padding: 6px 16px; border-radius: 12px; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 12px; }
         .diag-active-tab button { color: #60a5fa; cursor: pointer; background: transparent; border: none; outline: none; transition: color 0.2s; }
         .diag-active-tab button:hover { color: #2563eb; }
-
-        .diagram-canvas-area { 
-            flex-grow: 1; position: relative; overflow: hidden; background-color: #f8fafc;
-            background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
-            background-size: 24px 24px;
-        }
-
+        .diagram-canvas-area { flex-grow: 1; position: relative; overflow: hidden; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px); background-size: 24px 24px; }
         #fusion-lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
-
         .cable-block { position: absolute; background: white; border: 2px solid #111827; border-radius: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 2; width: max-content; }
         .cable-block-header { padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; border-bottom: 2px solid #111827; cursor: grab; background: white; }
         .cable-block-header:active { cursor: grabbing; }
         .cable-block-title { font-size: 11px; font-weight: 800; color: #111827; line-height: 1.2; text-transform: uppercase; }
         .cable-block-sub { font-size: 9px; font-weight: 600; color: #6b7280; }
-        
         .fiber-grid { display: flex; }
         .fiber-port { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; border-right: 1px solid rgba(0,0,0,0.5); cursor: crosshair; user-select: none; transition: filter 0.1s; position: relative; }
         .fiber-port:hover { filter: brightness(1.2); z-index: 10; box-shadow: 0 0 0 2px white inset; }
         .fiber-port:last-child { border-right: none; }
-        
-        .fiber-bg-0 { background-color: #22c55e; color: #000; } 
-        .fiber-bg-1 { background-color: #eab308; color: #000; } 
-        .fiber-bg-2 { background-color: #f8fafc; color: #000; } 
-        .fiber-bg-3 { background-color: #2563eb; color: #fff; } 
-        .fiber-bg-4 { background-color: #ef4444; color: #fff; } 
-        .fiber-bg-5 { background-color: #9333ea; color: #fff; } 
-        
+        .fiber-bg-0 { background-color: #22c55e; color: #000; } .fiber-bg-1 { background-color: #eab308; color: #000; } .fiber-bg-2 { background-color: #f8fafc; color: #000; } .fiber-bg-3 { background-color: #2563eb; color: #fff; } .fiber-bg-4 { background-color: #ef4444; color: #fff; } .fiber-bg-5 { background-color: #9333ea; color: #fff; } 
         #active-fusion-line { pointer-events: none; stroke: #3b82f6; stroke-width: 3; stroke-dasharray: 6,6; fill: none; }
 
-        /* STREAMING_CHUNK:Estilos Específicos do Data Center (Inside Plant - Fundo Escuro)... */
+        /* DATA CENTER (INSIDE PLANT) */
         #inside-plant-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #f3f4f6; z-index: 3000; display: none; overflow-y: auto; }
         .isp-header { background-color: #0f172a; border-bottom: 1px solid #1e293b; padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
         .isp-logo-area { display: flex; align-items: center; gap: 12px; color: white; }
@@ -276,7 +220,6 @@
         .isp-header-actions { display: flex; gap: 12px; }
         .btn-isp-action { background-color: #1e293b; color: #c7d2fe; border: 1px solid #334155; border-radius: 6px; padding: 8px 16px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s; }
         .btn-isp-action:hover { background-color: #312e81; color: white; border-color: #4338ca; }
-
         .olt-card { background: linear-gradient(145deg, #4c1d95, #312e81); border-radius: 20px; width: 380px; padding: 24px; color: white; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2); }
         .olt-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
         .olt-icon { width: 48px; height: 48px; background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
@@ -284,7 +227,6 @@
         .olt-info-box { background-color: rgba(0, 0, 0, 0.2); border-radius: 12px; padding: 12px; }
         .olt-label { font-size: 9px; font-weight: 700; color: #a5b4fc; text-transform: uppercase; margin-bottom: 4px; }
         .olt-value { font-size: 13px; font-weight: 700; color: white; display: flex; align-items: center; gap: 6px; }
-        
         .dio-section { background-color: #1e293b; border-radius: 24px 24px 0 0; margin-top: 40px; min-height: 400px; padding: 32px; color: white; }
         .dio-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
         .dio-badge { background-color: #334155; color: #94a3b8; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
@@ -416,7 +358,7 @@
         </div>
     </div>
 
-    <!-- MODAL: CRIAR NOVO PROJETO (ESTILO ORIGINAL MANTIDO COM CORES ESCURAS) -->
+    <!-- MODAL: CRIAR NOVO PROJETO -->
     <div class="modal-overlay" id="modal-novo-projeto" style="z-index: 100000;">
         <div class="modal-content" style="background:#1e293b; color:white; border:1px solid #334155;">
             <div class="modal-header" style="border-bottom-color:#334155;">
@@ -441,11 +383,59 @@
         </div>
     </div>
 
-    <!-- AREA DO MAPA DE ENGENHARIA -->
+    <!-- ================= AREA DO MAPA DE ENGENHARIA (COM NOVA SIDEBAR E LAYERS) ================= -->
     <div id="app-workspace">
+        
+        <!-- NOVO: BARRA LATERAL (SIDEBAR) DO MAPA (Para Tabela de Elementos e Layers) -->
+        <div class="workspace-sidebar">
+            <div class="p-4 border-b flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition" style="border-color: var(--border-color);" onclick="window.voltarParaProjetos()">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white" style="background-color: var(--brand-green);">
+                    <i class="fa-solid fa-map"></i>
+                </div>
+                <div class="leading-tight">
+                    <div class="text-[10px] font-bold" style="color: var(--text-muted);">PROJETO ABERTO</div>
+                    <div class="text-sm font-bold truncate w-32" style="color: var(--text-primary);" id="current-project-name">Roma</div>
+                </div>
+            </div>
+
+            <div class="flex-grow overflow-y-auto p-4">
+                <div class="text-[10px] font-bold uppercase tracking-wider mb-2" style="color: var(--text-muted);">Geral</div>
+                
+                <div class="flex items-center gap-3 p-2 rounded cursor-pointer mb-1 hover:bg-slate-50 transition" style="color: var(--text-secondary);" onclick="window.showToast('Módulo em desenvolvimento')">
+                    <i class="fa-solid fa-chart-network w-5 text-center"></i> <span class="text-sm font-medium">Análise de Rede</span>
+                </div>
+                <div class="flex items-center gap-3 p-2 rounded cursor-pointer mb-1 hover:bg-slate-50 transition" style="color: var(--text-secondary);" onclick="window.showToast('Módulo em desenvolvimento')">
+                    <i class="fa-solid fa-table w-5 text-center"></i> <span class="text-sm font-medium">Tabela de Fusões</span>
+                </div>
+                <div class="flex items-center gap-3 p-2 rounded cursor-pointer mb-6 hover:bg-slate-50 transition" style="color: var(--text-secondary);" onclick="window.showToast('Módulo em desenvolvimento')">
+                    <i class="fa-solid fa-gear w-5 text-center"></i> <span class="text-sm font-medium">Configurações</span>
+                </div>
+
+                <div class="text-[10px] font-bold uppercase tracking-wider mb-2" style="color: var(--text-muted);">Elementos</div>
+                
+                <div class="flex items-center justify-between p-2 rounded cursor-pointer mb-1 hover:bg-slate-50 transition" style="color: var(--text-secondary);" onclick="window.toggleLayerVisibility('CTO')">
+                    <div class="flex items-center gap-3"><i class="fa-solid fa-box w-5 text-center" style="color: #22c55e;"></i> <span class="text-sm font-medium">CTOs</span></div>
+                    <i class="fa-solid fa-eye" id="eye-icon-CTO"></i>
+                </div>
+                <div class="flex items-center justify-between p-2 rounded cursor-pointer mb-1 hover:bg-slate-50 transition" style="color: var(--text-secondary);" onclick="window.toggleLayerVisibility('CEO')">
+                    <div class="flex items-center gap-3"><i class="fa-solid fa-layer-group w-5 text-center" style="color: #f97316;"></i> <span class="text-sm font-medium">CEOs</span></div>
+                    <i class="fa-solid fa-eye" id="eye-icon-CEO"></i>
+                </div>
+                <div class="flex items-center justify-between p-2 rounded cursor-pointer mb-1 hover:bg-slate-50 transition" style="color: var(--text-secondary);" onclick="window.toggleLayerVisibility('POP / DC')">
+                    <div class="flex items-center gap-3"><i class="fa-solid fa-server w-5 text-center" style="color: #3b82f6;"></i> <span class="text-sm font-medium">POPs</span></div>
+                    <i class="fa-solid fa-eye" id="eye-icon-POP / DC"></i>
+                </div>
+                <div class="flex items-center justify-between p-2 rounded cursor-pointer mb-1 hover:bg-slate-50 transition" style="color: var(--text-secondary);" onclick="window.toggleLayerVisibility('CABOS')">
+                    <div class="flex items-center gap-3"><i class="fa-solid fa-share-nodes w-5 text-center text-slate-500"></i> <span class="text-sm font-medium">Cabos</span></div>
+                    <i class="fa-solid fa-eye" id="eye-icon-CABOS"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapa container com flex-grow pra dividir espaço com a barra lateral -->
         <div id="map-container"></div>
-        <div class="top-toolbar">
-            <button class="bg-white rounded-lg shadow w-12 h-12 flex items-center justify-center text-gray-500 hover:text-gray-700 transition" onclick="window.voltarParaProjetos()"><i class="fa-solid fa-arrow-left"></i></button>
+        
+        <div class="top-toolbar" style="left: calc(50% + 130px);">
             <div class="search-bar">
                 <i class="fa-solid fa-magnifying-glass text-gray-400 mr-2"></i>
                 <input type="text" id="search-input" placeholder="Buscar Coordenadas / Endereço...">
@@ -460,12 +450,6 @@
                 <div class="w-px h-6 bg-gray-200 mx-1"></div>
                 <button class="tool-btn" id="btn-mover" onclick="window.setMode('move')"><i class="fa-solid fa-arrows-up-down-left-right"></i> MOVER</button>
             </div>
-            <div class="flex-grow"></div>
-            <div class="flex items-center gap-4">
-                <button class="bg-white text-gray-700 px-4 py-3 rounded-lg font-bold text-xs flex items-center gap-2 shadow hover:bg-gray-50 border border-gray-200 transition" onclick="window.toggleInventory()">
-                    <i class="fa-solid fa-table-list text-blue-500"></i> INVENTÁRIO
-                </button>
-            </div>
         </div>
 
         <div class="right-toolbar">
@@ -474,14 +458,9 @@
             </button>
         </div>
 
-        <div id="inventory-panel">
-            <div class="inv-header"><h3 class="font-bold text-gray-800 text-sm flex items-center gap-2"><i class="fa-solid fa-boxes-stacked text-blue-500"></i> Tabela de Rastreio</h3><button onclick="window.toggleInventory()" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button></div>
-            <div class="px-4 py-2 border-b border-gray-100 flex gap-2"><button class="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded" onclick="window.renderInventoryList('all')">Todos</button><button class="text-[10px] font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded" onclick="window.renderInventoryList('nodes')">Caixas</button><button class="text-[10px] font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded" onclick="window.renderInventoryList('cables')">Cabos</button></div>
-            <div class="inv-list" id="inventory-list-content"></div>
-        </div>
-
         <div class="instruction-banner" id="instruction-banner"><i class="fa-solid fa-circle-info text-blue-400"></i><span id="instruction-text">Clique no mapa...</span><button class="ml-4 bg-white/20 hover:bg-white/30 px-3 py-1 rounded text-xs" onclick="window.setMode('view')">Cancelar</button></div>
 
+        <!-- Info Card Flutuante -->
         <div class="info-card" id="info-card">
             <div class="flex justify-between items-start">
                 <div class="flex gap-4">
@@ -505,103 +484,85 @@
                 <div class="bg-white border border-gray-200 rounded-lg p-2 flex justify-between items-center text-xs font-mono text-gray-600 shadow-sm mt-2"><span class="font-bold text-gray-400 text-[10px] ml-1">Coodenadas:</span><div class="flex items-center gap-2"><span id="card-coords">0, 0</span><button class="text-gray-400 hover:text-blue-500" onclick="window.copyCoords()"><i class="fa-regular fa-copy"></i></button></div></div>
             </div>
         </div>
+    </div>
 
-        <div class="modal-overlay" id="modal-caixa">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="text-slate-800 text-xl" id="modal-caixa-title"><i class="fa-solid fa-location-dot text-cyan-500 mr-1"></i> Nova Caixa/Prédio</h2>
-                    <button class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition" onclick="window.closeModal('caixa')"><i class="fa-solid fa-xmark"></i></button>
+    <!-- Modais de Caixa e Cabo -->
+    <div class="modal-overlay" id="modal-caixa">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="text-slate-800 text-xl" id="modal-caixa-title"><i class="fa-solid fa-location-dot text-cyan-500 mr-1"></i> Nova Caixa/Prédio</h2>
+                <button class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition" onclick="window.closeModal('caixa')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-6"><input type="text" id="input-caixa-nome" class="custom-input shadow-sm" placeholder="Ex: CEO 01"></div>
+                <label class="input-label mb-3">TIPO DE ESTRUTURA</label>
+                <div class="structure-grid" id="structure-type-grid">
+                    <button class="structure-btn" data-type="POP / DC" data-icon="fa-server" data-color="#111827" onclick="window.selectStructure(this)"><i class="fa-solid fa-server"></i> DC</button>
+                    <button class="structure-btn" data-type="Prédio" data-icon="fa-building" data-color="#6b7280" onclick="window.selectStructure(this)"><i class="fa-solid fa-building"></i> Prédio</button>
+                    <button class="structure-btn" data-type="Poste" data-icon="fa-bolt" data-color="#6b7280" onclick="window.selectStructure(this)"><i class="fa-solid fa-bolt"></i> Poste</button>
+                    <button class="structure-btn selected" data-type="CEO" data-icon="fa-layer-group" data-color="#f97316" onclick="window.selectStructure(this)"><i class="fa-solid fa-layer-group"></i> CEO</button>
+                    <button class="structure-btn" data-type="Cliente" data-icon="fa-face-smile" data-color="#22c55e" onclick="window.selectStructure(this)"><i class="fa-regular fa-face-smile"></i> Cliente</button>
+                    <button class="structure-btn" data-type="CTO" data-icon="fa-box" data-color="#f59e0b" onclick="window.selectStructure(this)"><i class="fa-solid fa-box"></i> CTO</button>
+                    <button class="structure-btn" data-type="CTO AP" data-icon="fa-box" data-color="#3b82f6" onclick="window.selectStructure(this)"><i class="fa-solid fa-box"></i> CTO AP</button>
+                    <button class="structure-btn" data-type="Problema" data-icon="fa-triangle-exclamation" data-color="#ef4444" onclick="window.selectStructure(this)"><i class="fa-solid fa-triangle-exclamation"></i> Problema</button>
+                    <button class="structure-btn" data-type="Reserva" data-icon="fa-life-ring" data-color="#cbd5e1" onclick="window.selectStructure(this)"><i class="fa-regular fa-life-ring"></i> Reserva</button>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-6">
-                        <input type="text" id="input-caixa-nome" class="custom-input shadow-sm" placeholder="Ex: CEO 01">
+                <div id="cto-settings" style="display:none;" class="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <label class="input-label text-slate-600 mb-3">SPLITTER INTERNO (OPCIONAL)</label>
+                    <div class="splitter-pills" id="splitter-pills-container">
+                        <div class="splitter-pill" data-val="Nenhum" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> Nenhum</div>
+                        <div class="splitter-pill" data-val="1x2" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/2</div>
+                        <div class="splitter-pill" data-val="1x4" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/4</div>
+                        <div class="splitter-pill" data-val="1x8" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/8</div>
+                        <div class="splitter-pill selected" data-val="1x16" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/16</div>
                     </div>
-                    
-                    <label class="input-label mb-3">TIPO DE ESTRUTURA</label>
-                    <div class="structure-grid" id="structure-type-grid">
-                        <button class="structure-btn" data-type="POP / DC" data-icon="fa-server" data-color="#111827" onclick="window.selectStructure(this)"><i class="fa-solid fa-server"></i> DC</button>
-                        <button class="structure-btn" data-type="Prédio" data-icon="fa-building" data-color="#6b7280" onclick="window.selectStructure(this)"><i class="fa-solid fa-building"></i> Prédio</button>
-                        <button class="structure-btn" data-type="Poste" data-icon="fa-bolt" data-color="#6b7280" onclick="window.selectStructure(this)"><i class="fa-solid fa-bolt"></i> Poste</button>
-                        <button class="structure-btn selected" data-type="CEO" data-icon="fa-layer-group" data-color="#f97316" onclick="window.selectStructure(this)"><i class="fa-solid fa-layer-group"></i> CEO</button>
-                        <button class="structure-btn" data-type="Cliente" data-icon="fa-face-smile" data-color="#22c55e" onclick="window.selectStructure(this)"><i class="fa-regular fa-face-smile"></i> Cliente</button>
-                        <button class="structure-btn" data-type="CTO" data-icon="fa-box" data-color="#f59e0b" onclick="window.selectStructure(this)"><i class="fa-solid fa-box"></i> CTO</button>
-                        <button class="structure-btn" data-type="CTO AP" data-icon="fa-box" data-color="#3b82f6" onclick="window.selectStructure(this)"><i class="fa-solid fa-box"></i> CTO AP</button>
-                        <button class="structure-btn" data-type="Problema" data-icon="fa-triangle-exclamation" data-color="#ef4444" onclick="window.selectStructure(this)"><i class="fa-solid fa-triangle-exclamation"></i> Problema</button>
-                        <button class="structure-btn" data-type="Reserva" data-icon="fa-life-ring" data-color="#cbd5e1" onclick="window.selectStructure(this)"><i class="fa-regular fa-life-ring"></i> Reserva</button>
-                    </div>
+                </div>
+                <label class="input-label mb-3">COR DE IDENTIFICAÇÃO</label>
+                <div class="color-palette" id="caixa-color-palette"></div>
+            </div>
+            <div class="modal-footer"><button class="btn-cancel" onclick="window.closeModal('caixa')">Cancelar</button><button class="btn-submit-dark" id="btn-caixa-submit" onclick="window.startNodePlacement()">Ancorar no Mapa</button></div>
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="modal-cabo"><div class="modal-content"><div class="modal-header"><h2 class="text-orange-500"><i class="fa-solid fa-share-nodes"></i> Lançar Cabo</h2><button class="text-gray-400 hover:text-gray-600" onclick="window.closeModal('cabo')"><i class="fa-solid fa-xmark"></i></button></div><div class="modal-body"><div class="mb-5"><label class="input-label">NOME DO CABO</label><input type="text" id="input-cabo-nome" class="custom-input" placeholder="Ex: Rota 01"></div><div class="flex gap-4 mb-6"><div class="flex-1"><label class="input-label">CAPACIDADE</label><select id="input-cabo-capacidade" class="custom-input bg-white cursor-pointer"><option value="6">6 FO</option><option value="12" selected>12 FO</option><option value="36">36 FO</option></select></div><div class="flex-1"><label class="input-label">PADRÃO</label><select class="custom-input bg-white cursor-pointer"><option>ABNT</option></select></div></div><div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100"><div class="flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-blue-500" id="preview-cable-color"></div><span class="text-sm font-semibold text-gray-700">Cor</span></div></div></div><div class="modal-footer"><button class="btn-cancel" onclick="window.closeModal('cabo')">Cancelar</button><button class="btn-submit-orange" onclick="window.startCableDrawing()">Iniciar Traçado</button></div></div></div>
 
-                    <div id="cto-settings" style="display:none;" class="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <label class="input-label text-slate-600 mb-3">SPLITTER INTERNO (OPCIONAL)</label>
-                        <div class="splitter-pills" id="splitter-pills-container">
-                            <div class="splitter-pill" data-val="Nenhum" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> Nenhum</div>
-                            <div class="splitter-pill" data-val="1x2" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/2</div>
-                            <div class="splitter-pill" data-val="1x4" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/4</div>
-                            <div class="splitter-pill" data-val="1x8" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/8</div>
-                            <div class="splitter-pill selected" data-val="1x16" onclick="window.selectSplitterPill(this)"><i class="fa-solid fa-sitemap"></i> SPL 1/16</div>
-                        </div>
-                    </div>
-
-                    <label class="input-label mb-3">COR DE IDENTIFICAÇÃO</label>
-                    <div class="color-palette" id="caixa-color-palette"></div>
+    <!-- Telas de Engenharia Interna -->
+    <div id="diagram-view">
+        <div class="diagram-toolbar">
+            <div class="diag-tb-group">
+                <button class="diag-btn" onclick="window.closeCanvasDiagram()" style="padding: 8px; width: 40px; justify-content: center;"><i class="fa-solid fa-minus text-gray-500"></i></button>
+                <div class="ml-2">
+                    <div class="font-bold text-sm text-gray-800" id="diag-toolbar-title">emenda</div>
+                    <div class="text-[10px] font-bold text-green-600 flex items-center gap-1"><i class="fa-solid fa-cloud-arrow-up"></i> Sincronizado</div>
                 </div>
-                <div class="modal-footer">
-                    <button class="btn-cancel" onclick="window.closeModal('caixa')">Cancelar</button>
-                    <button class="btn-submit-dark" id="btn-caixa-submit" onclick="window.startNodePlacement()">Ancorar no Mapa</button>
-                </div>
+            </div>
+            <div class="diag-tb-group">
+                <button class="diag-btn-primary" onclick="window.showToast('Salvo!', 'sucesso')"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
+                <button class="diag-btn" style="padding: 8px; width: 36px; justify-content: center;"><i class="fa-solid fa-rotate-left"></i></button>
+                <button class="diag-btn" style="padding: 8px; width: 36px; justify-content: center;"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+            <div class="diag-tab-center">
+                <div class="diag-active-tab"><span id="diag-center-name">emenda</span><button onclick="window.closeCanvasDiagram()"><i class="fa-solid fa-xmark"></i></button></div>
+            </div>
+            <div class="diag-tb-group">
+                <button class="diag-btn"><i class="fa-solid fa-bolt text-purple-500"></i> Potência das Fibras</button>
+                <button class="diag-btn"><i class="fa-solid fa-route text-blue-500"></i> Linhas Retas</button>
+                <button class="diag-btn text-red-500"><i class="fa-regular fa-file-pdf"></i> Exportar PDF</button>
+                <button class="diag-btn-primary"><i class="fa-solid fa-wrench"></i> Ferramentas <i class="fa-solid fa-chevron-right text-[10px]"></i></button>
             </div>
         </div>
-        
-        <div class="modal-overlay" id="modal-cabo"><div class="modal-content"><div class="modal-header"><h2 class="text-orange-500"><i class="fa-solid fa-share-nodes"></i> Lançar Cabo</h2><button class="text-gray-400 hover:text-gray-600" onclick="window.closeModal('cabo')"><i class="fa-solid fa-xmark"></i></button></div><div class="modal-body"><div class="mb-5"><label class="input-label">NOME DO CABO</label><input type="text" id="input-cabo-nome" class="custom-input" placeholder="Ex: Rota 01"></div><div class="flex gap-4 mb-6"><div class="flex-1"><label class="input-label">CAPACIDADE</label><select id="input-cabo-capacidade" class="custom-input bg-white cursor-pointer"><option value="6">6 FO</option><option value="12" selected>12 FO</option><option value="36">36 FO</option></select></div><div class="flex-1"><label class="input-label">PADRÃO</label><select class="custom-input bg-white cursor-pointer"><option>ABNT</option></select></div></div><div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100"><div class="flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-blue-500" id="preview-cable-color"></div><span class="text-sm font-semibold text-gray-700">Cor</span></div></div></div><div class="modal-footer"><button class="btn-cancel" onclick="window.closeModal('cabo')">Cancelar</button><button class="btn-submit-orange" onclick="window.startCableDrawing()">Iniciar Traçado</button></div></div></div>
-
-        <div id="diagram-view">
-            <div class="diagram-toolbar">
-                <div class="diag-tb-group">
-                    <button class="diag-btn" onclick="window.closeCanvasDiagram()" style="padding: 8px; width: 40px; justify-content: center;"><i class="fa-solid fa-minus text-gray-500"></i></button>
-                    <div class="ml-2">
-                        <div class="font-bold text-sm text-gray-800" id="diag-toolbar-title">emenda</div>
-                        <div class="text-[10px] font-bold text-green-600 flex items-center gap-1"><i class="fa-solid fa-cloud-arrow-up"></i> Sincronizado</div>
-                    </div>
-                </div>
-
-                <div class="diag-tb-group">
-                    <button class="diag-btn-primary" onclick="window.showToast('Salvo!', 'sucesso')"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
-                    <button class="diag-btn" style="padding: 8px; width: 36px; justify-content: center;"><i class="fa-solid fa-rotate-left"></i></button>
-                    <button class="diag-btn" style="padding: 8px; width: 36px; justify-content: center;"><i class="fa-solid fa-rotate-right"></i></button>
-                </div>
-                
-                <div class="diag-tab-center">
-                    <div class="diag-active-tab">
-                        <span id="diag-center-name">emenda</span>
-                        <button onclick="window.closeCanvasDiagram()"><i class="fa-solid fa-xmark"></i></button>
-                    </div>
-                </div>
-
-                <div class="diag-tb-group">
-                    <button class="diag-btn"><i class="fa-solid fa-bolt text-purple-500"></i> Potência das Fibras</button>
-                    <button class="diag-btn"><i class="fa-solid fa-route text-blue-500"></i> Linhas Retas</button>
-                    <button class="diag-btn text-red-500"><i class="fa-regular fa-file-pdf"></i> Exportar PDF</button>
-                    <button class="diag-btn-primary"><i class="fa-solid fa-wrench"></i> Ferramentas <i class="fa-solid fa-chevron-right text-[10px]"></i></button>
-                </div>
-            </div>
-
-            <div class="diagram-canvas-area" id="diagram-canvas" onmousemove="window.handleFusionDragMove(event)" onmouseup="window.handleFusionDragEnd(event)" onmouseleave="window.handleFusionDragEnd(event)">
-                <svg id="fusion-lines">
-                    <path id="active-fusion-line" d="" />
-                </svg>
-            </div>
-            
-            <div style="position: absolute; bottom: 20px; left: 20px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; box-shadow: 0 4px 6px rgba(0,0,0,0.05); z-index: 10;">
-                <button class="p-3 border-b border-gray-100 hover:bg-gray-50 font-bold" onclick="window.showToast('Zoom In')"><i class="fa-solid fa-plus text-gray-600"></i></button>
-                <button class="p-3 border-b border-gray-100 hover:bg-gray-50 font-bold" onclick="window.showToast('Zoom Out')"><i class="fa-solid fa-minus text-gray-600"></i></button>
-                <button class="p-3 hover:bg-gray-50" onclick="window.showToast('Centralizado')"><i class="fa-solid fa-house text-gray-800"></i></button>
-            </div>
+        <div class="diagram-canvas-area" id="diagram-canvas" onmousemove="window.handleFusionDragMove(event)" onmouseup="window.handleFusionDragEnd(event)" onmouseleave="window.handleFusionDragEnd(event)">
+            <svg id="fusion-lines"><path id="active-fusion-line" d="" /></svg>
         </div>
-
-        <div id="inside-plant-view">
-            <div id="diagram-content-isp"></div>
+        <div style="position: absolute; bottom: 20px; left: 20px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; box-shadow: 0 4px 6px rgba(0,0,0,0.05); z-index: 10;">
+            <button class="p-3 border-b border-gray-100 hover:bg-gray-50 font-bold" onclick="window.showToast('Zoom In')"><i class="fa-solid fa-plus text-gray-600"></i></button>
+            <button class="p-3 border-b border-gray-100 hover:bg-gray-50 font-bold" onclick="window.showToast('Zoom Out')"><i class="fa-solid fa-minus text-gray-600"></i></button>
+            <button class="p-3 hover:bg-gray-50" onclick="window.showToast('Centralizado')"><i class="fa-solid fa-house text-gray-800"></i></button>
         </div>
+    </div>
 
-    </div> <div id="toast-container"></div>
+    <div id="inside-plant-view"><div id="diagram-content-isp"></div></div>
+    <div id="toast-container"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -612,66 +573,56 @@
         // 1. ESTADO GLOBAL
         // ==========================================
         window.appState = {
-            currentProjectId: null, // NOVO
-            projects: [], // NOVO
-            mode: 'view', nodes: [], cables: [], fusions: [],
+            currentProjectId: null, projects: [], mode: 'view', nodes: [], cables: [], fusions: [],
             selectedNodeId: null, editingNodeId: null,
             nodeSetup: { name: 'CEO 01', type: 'CEO', icon: 'fa-layer-group', color: '#f97316', splitter: null },
             cableSetup: { name: '', capacity: 12, color: '#3b82f6' },
             cablePath: [], cableStartNodeId: null, tempPolyline: null, snapNodePos: null,
             isDraggingFusion: false, fusionStartPort: null, fusionStartCoords: {x:0, y:0},
-            mapLayerType: 'street' // NOVO
+            mapLayerType: 'street',
+            // NOVO: Controle de visibilidade de layers no mapa
+            visibleLayers: { 'CTO': true, 'CEO': true, 'POP / DC': true, 'CABOS': true, 'Prédio': true, 'Poste': true, 'Cliente': true, 'CTO AP': true, 'Problema': true, 'Reserva': true }
         };
 
         const THEME_COLORS = ['#0ea5e9', '#1d4ed8', '#f97316', '#ef4444', '#22c55e', '#eab308', '#a855f7', '#ec4899', '#000000', '#737373', '#78350f'];
 
-        // NOVO: Controle de Tema
         window.toggleTheme = function() {
-            const body = document.body;
-            const icon = document.getElementById('theme-icon');
+            const body = document.body; const icon = document.getElementById('theme-icon');
             if (body.classList.contains('theme-dark')) {
-                body.classList.remove('theme-dark');
-                body.classList.add('theme-light');
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
+                body.classList.remove('theme-dark'); body.classList.add('theme-light'); icon.classList.remove('fa-sun'); icon.classList.add('fa-moon');
             } else {
-                body.classList.remove('theme-light');
-                body.classList.add('theme-dark');
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
+                body.classList.remove('theme-light'); body.classList.add('theme-dark'); icon.classList.remove('fa-moon'); icon.classList.add('fa-sun');
             }
+        };
+
+        // NOVO: Função para ocultar/mostrar elementos do mapa com base no olhinho
+        window.toggleLayerVisibility = function(type) {
+            window.appState.visibleLayers[type] = !window.appState.visibleLayers[type];
+            const icon = document.getElementById('eye-icon-' + type);
+            if (window.appState.visibleLayers[type]) {
+                icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); icon.style.color = '';
+            } else {
+                icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash'); icon.style.color = '#ef4444';
+            }
+            window.renderMap();
         };
 
         // ==========================================
         // 2. INICIALIZAÇÃO LEAFLET
         // ==========================================
         const map = L.map('map-container', { zoomControl: false, doubleClickZoom: false }).setView([-2.24455, -49.50444], 16);
-        
-        // NOVO: Substituído o satélite da ArcGIS (que dava tela branca) pelo Satélite do Google Maps com zoom máximo
         window.streetLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { maxZoom: 22, maxNativeZoom: 19 });
         window.satLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 22, maxNativeZoom: 19 });
-        
         window.streetLayer.addTo(map);
 
-        const cablesLayer = L.layerGroup().addTo(map); 
-        const nodesLayer = L.layerGroup().addTo(map); 
-        const drawLayer = L.layerGroup().addTo(map);
-
-        // NOVO: Inicialização do Mini Mapa do Modal de Projetos
+        const cablesLayer = L.layerGroup().addTo(map); const nodesLayer = L.layerGroup().addTo(map); const drawLayer = L.layerGroup().addTo(map);
         let miniMap = null; let miniMapMarker = null; window.tempProjectCoords = [-2.24455, -49.50444];
 
-        // NOVO: Função para alternar o mapa
         window.toggleMapLayer = function() {
             if(window.appState.mapLayerType === 'street') {
-                map.removeLayer(window.streetLayer);
-                window.satLayer.addTo(map);
-                window.appState.mapLayerType = 'satellite';
-                window.showToast('Visão de Satélite ativada.', 'sucesso');
+                map.removeLayer(window.streetLayer); window.satLayer.addTo(map); window.appState.mapLayerType = 'satellite'; window.showToast('Visão de Satélite ativada.', 'sucesso');
             } else {
-                map.removeLayer(window.satLayer);
-                window.streetLayer.addTo(map);
-                window.appState.mapLayerType = 'street';
-                window.showToast('Visão de Rua ativada.', 'sucesso');
+                map.removeLayer(window.satLayer); window.streetLayer.addTo(map); window.appState.mapLayerType = 'street'; window.showToast('Visão de Rua ativada.', 'sucesso');
             }
         };
 
@@ -679,124 +630,50 @@
         // 3. FIREBASE SETUP
         // ==========================================
         let app, db, auth;
-        const firebaseConfig = {
-            apiKey: "AIzaSyCWMuCACgriWGTrkxALGzF9j5Z7EvL7Lcg",
-            authDomain: "roma-telecom.firebaseapp.com",
-            projectId: "roma-telecom",
-            storageBucket: "roma-telecom.firebasestorage.app",
-            messagingSenderId: "339457858705",
-            appId: "1:339457858705:web:fee9c572cfbb374aca3330"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyCWMuCACgriWGTrkxALGzF9j5Z7EvL7Lcg", authDomain: "roma-telecom.firebaseapp.com", projectId: "roma-telecom", storageBucket: "roma-telecom.firebasestorage.app", messagingSenderId: "339457858705", appId: "1:339457858705:web:fee9c572cfbb374aca3330" };
 
         async function initFirebase() {
             try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
+                app = initializeApp(firebaseConfig); db = getFirestore(app); auth = getAuth(app);
                 await signInAnonymously(auth);
-
-                document.getElementById('sync-status').innerText = 'SINCRONIZADO NA NUVEM';
-                document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-green-500';
+                document.getElementById('sync-status').innerText = 'SINCRONIZADO NA NUVEM'; document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-green-500';
                 setupRealtimeListeners();
-            } catch (e) {
-                console.error("Auth erro:", e);
-                fallbackToLocal();
-            }
+            } catch (e) { console.error("Auth erro:", e); fallbackToLocal(); }
         }
 
-        // Pastas exclusivas do projeto
         function getCollectionPath(type) { return collection(db, 'upperx_' + type); }
         function getDocPath(type, id) { return doc(db, 'upperx_' + type, id); }
 
         function setupRealtimeListeners() {
             if(!auth || !auth.currentUser) return;
-            
-            // NOVO: Listener de Projetos
-            onSnapshot(getCollectionPath('projects'), (snapshot) => {
-                window.appState.projects = []; snapshot.forEach(doc => { window.appState.projects.push({ id: doc.id, ...doc.data() }); });
-                if(window.renderProjectsList) window.renderProjectsList();
-            }, (e) => console.error("Snapshot projects error:", e));
-
-            onSnapshot(getCollectionPath('nodes'), (snapshot) => {
-                window.appState.nodes = []; snapshot.forEach(doc => { window.appState.nodes.push({ id: doc.id, ...doc.data() }); });
-                window.renderMap();
-            }, (e) => console.error("Snapshot nodes error:", e));
-
-            onSnapshot(getCollectionPath('cables'), (snapshot) => {
-                window.appState.cables = []; 
-                snapshot.forEach(doc => { 
-                    const data = doc.data();
-                    
-                    if (data.path && data.path.length > 0 && typeof data.path[0] === 'object' && !Array.isArray(data.path[0])) {
-                        data.path = data.path.map(p => [p.lat, p.lng]);
-                    }
-                    
-                    window.appState.cables.push({ id: doc.id, ...data }); 
-                });
-                window.renderMap();
-            }, (e) => console.error("Snapshot cables error:", e));
-
-            onSnapshot(getCollectionPath('fusions'), (snapshot) => {
-                window.appState.fusions = []; snapshot.forEach(doc => { window.appState.fusions.push({ id: doc.id, ...doc.data() }); });
-                if(document.getElementById('diagram-view').style.display === 'flex') window.updateAllFusionLines();
-            }, (e) => console.error("Snapshot fusions error:", e));
+            onSnapshot(getCollectionPath('projects'), (snapshot) => { window.appState.projects = []; snapshot.forEach(doc => { window.appState.projects.push({ id: doc.id, ...doc.data() }); }); if(window.renderProjectsList) window.renderProjectsList(); }, (e) => console.error(e));
+            onSnapshot(getCollectionPath('nodes'), (snapshot) => { window.appState.nodes = []; snapshot.forEach(doc => { window.appState.nodes.push({ id: doc.id, ...doc.data() }); }); window.renderMap(); }, (e) => console.error(e));
+            onSnapshot(getCollectionPath('cables'), (snapshot) => { window.appState.cables = []; snapshot.forEach(doc => { const data = doc.data(); if (data.path && data.path.length > 0 && typeof data.path[0] === 'object' && !Array.isArray(data.path[0])) { data.path = data.path.map(p => [p.lat, p.lng]); } window.appState.cables.push({ id: doc.id, ...data }); }); window.renderMap(); }, (e) => console.error(e));
+            onSnapshot(getCollectionPath('fusions'), (snapshot) => { window.appState.fusions = []; snapshot.forEach(doc => { window.appState.fusions.push({ id: doc.id, ...doc.data() }); }); if(document.getElementById('diagram-view').style.display === 'flex') window.updateAllFusionLines(); }, (e) => console.error(e));
         }
 
         function fallbackToLocal() {
-            document.getElementById('sync-status').innerText = 'MODO LOCAL (OFFLINE)';
-            document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-red-500';
-            
-            window.appState.nodes = [
-                { id: 'n1', name: 'POP Central', type: 'POP / DC', icon: 'fa-server', color: '#111827', lat: -2.24455, lng: -49.50444, internal: {hasDIO:false, splitters:[]} },
-                { id: 'n2', name: 'CEO 01', type: 'CEO', icon: 'fa-layer-group', color: '#f97316', lat: -2.24500, lng: -49.50500, internal: {hasDIO:false, splitters:[]} },
-                { id: 'n3', name: 'CTO 01', type: 'CTO', icon: 'fa-box', color: '#f59e0b', lat: -2.24600, lng: -49.50600, internal: {hasDIO:false, splitters:[{type:'1x16'}]} }
-            ];
-            window.appState.cables = [
-                { id: 'c1', name: 'Cabo Tronco', capacity: 12, color: '#f97316', startNode: 'n1', endNode: 'n2', path: [[-2.24455, -49.50444], [-2.24480, -49.50480], [-2.24500, -49.50500]]}
-            ];
+            document.getElementById('sync-status').innerText = 'MODO LOCAL (OFFLINE)'; document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-red-500';
+            window.appState.nodes = [ { id: 'n1', name: 'POP Central', type: 'POP / DC', icon: 'fa-server', color: '#111827', lat: -2.24455, lng: -49.50444, internal: {hasDIO:false, splitters:[]} }, { id: 'n2', name: 'CEO 01', type: 'CEO', icon: 'fa-layer-group', color: '#f97316', lat: -2.24500, lng: -49.50500, internal: {hasDIO:false, splitters:[]} }, { id: 'n3', name: 'CTO 01', type: 'CTO', icon: 'fa-box', color: '#f59e0b', lat: -2.24600, lng: -49.50600, internal: {hasDIO:false, splitters:[{type:'1x16'}]} } ];
+            window.appState.cables = [ { id: 'c1', name: 'Cabo Tronco', capacity: 12, color: '#f97316', startNode: 'n1', endNode: 'n2', path: [[-2.24455, -49.50444], [-2.24480, -49.50480], [-2.24500, -49.50500]]} ];
             window.renderMap();
         }
 
-        /* Firebase CRUD Wrappers... */
-        window.saveNodeToFirebase = async (nodeData) => { 
-            if(!db || !auth || !auth.currentUser) { window.appState.nodes.push({id: 'local_'+Date.now(), ...nodeData}); window.renderMap(); return; } 
-            try { await addDoc(getCollectionPath('nodes'), nodeData); } catch(e) { window.appState.nodes.push({id: 'local_'+Date.now(), ...nodeData}); window.renderMap(); }
-        };
-        window.updateNodeInFirebase = async (id, nodeData) => { 
-            if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.nodes.findIndex(n=>n.id===id); if(idx>-1) window.appState.nodes[idx] = {...window.appState.nodes[idx], ...nodeData}; window.renderMap(); return; } 
-            try { await updateDoc(getDocPath('nodes', id), nodeData); } catch(e) { const idx = window.appState.nodes.findIndex(n=>n.id===id); if(idx>-1) window.appState.nodes[idx] = {...window.appState.nodes[idx], ...nodeData}; window.renderMap(); }
-        };
-        window.deleteNodeFromFirebase = async (id) => { 
-            if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { window.appState.nodes = window.appState.nodes.filter(n=>n.id!==id); window.renderMap(); return; } 
-            try { await deleteDoc(getDocPath('nodes', id)); } catch(e) { window.appState.nodes = window.appState.nodes.filter(n=>n.id!==id); window.renderMap(); }
-        };
-        window.saveCableToFirebase = async (cableData) => { 
-            if(!db || !auth || !auth.currentUser) { window.appState.cables.push({id: 'local_'+Date.now(), ...cableData}); window.renderMap(); return; } 
-            try { await addDoc(getCollectionPath('cables'), cableData); } catch(e) { window.appState.cables.push({id: 'local_'+Date.now(), ...cableData}); window.renderMap(); }
-        };
-        window.deleteCableFromFirebase = async (id) => { 
-            if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { window.appState.cables = window.appState.cables.filter(c=>c.id!==id); window.renderMap(); return; } 
-            try { await deleteDoc(getDocPath('cables', id)); } catch(e) { window.appState.cables = window.appState.cables.filter(c=>c.id!==id); window.renderMap(); }
-        };
-        window.saveFusionToFirebase = async (fusionData) => { 
-            if(!db || !auth || !auth.currentUser) { window.appState.fusions.push({id: 'local_'+Date.now(), ...fusionData}); window.updateAllFusionLines(); return; } 
-            try { await addDoc(getCollectionPath('fusions'), fusionData); } catch(e) { window.appState.fusions.push({id: 'local_'+Date.now(), ...fusionData}); window.updateAllFusionLines(); }
-        };
+        window.saveNodeToFirebase = async (nodeData) => { if(!db || !auth || !auth.currentUser) { window.appState.nodes.push({id: 'local_'+Date.now(), ...nodeData}); window.renderMap(); return; } try { await addDoc(getCollectionPath('nodes'), nodeData); } catch(e) { window.appState.nodes.push({id: 'local_'+Date.now(), ...nodeData}); window.renderMap(); } };
+        window.updateNodeInFirebase = async (id, nodeData) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.nodes.findIndex(n=>n.id===id); if(idx>-1) window.appState.nodes[idx] = {...window.appState.nodes[idx], ...nodeData}; window.renderMap(); return; } try { await updateDoc(getDocPath('nodes', id), nodeData); } catch(e) { const idx = window.appState.nodes.findIndex(n=>n.id===id); if(idx>-1) window.appState.nodes[idx] = {...window.appState.nodes[idx], ...nodeData}; window.renderMap(); } };
+        window.deleteNodeFromFirebase = async (id) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { window.appState.nodes = window.appState.nodes.filter(n=>n.id!==id); window.renderMap(); return; } try { await deleteDoc(getDocPath('nodes', id)); } catch(e) { window.appState.nodes = window.appState.nodes.filter(n=>n.id!==id); window.renderMap(); } };
+        window.saveCableToFirebase = async (cableData) => { if(!db || !auth || !auth.currentUser) { window.appState.cables.push({id: 'local_'+Date.now(), ...cableData}); window.renderMap(); return; } try { await addDoc(getCollectionPath('cables'), cableData); } catch(e) { window.appState.cables.push({id: 'local_'+Date.now(), ...cableData}); window.renderMap(); } };
+        window.updateCableInFirebase = async (id, cableData) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.cables.findIndex(c=>c.id===id); if(idx>-1) window.appState.cables[idx] = {...window.appState.cables[idx], ...cableData}; window.renderMap(); return; } try { await updateDoc(getDocPath('cables', id), cableData); } catch(e) { const idx = window.appState.cables.findIndex(c=>c.id===id); if(idx>-1) window.appState.cables[idx] = {...window.appState.cables[idx], ...cableData}; window.renderMap(); } };
+        window.deleteCableFromFirebase = async (id) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { window.appState.cables = window.appState.cables.filter(c=>c.id!==id); window.renderMap(); return; } try { await deleteDoc(getDocPath('cables', id)); } catch(e) { window.appState.cables = window.appState.cables.filter(c=>c.id!==id); window.renderMap(); } };
+        window.saveFusionToFirebase = async (fusionData) => { if(!db || !auth || !auth.currentUser) { window.appState.fusions.push({id: 'local_'+Date.now(), ...fusionData}); window.updateAllFusionLines(); return; } try { await addDoc(getCollectionPath('fusions'), fusionData); } catch(e) { window.appState.fusions.push({id: 'local_'+Date.now(), ...fusionData}); window.updateAllFusionLines(); } };
 
         // ==========================================
-        // NOVO: LÓGICAS DE PROJETOS E TELA INICIAL
+        // LÓGICAS DE PROJETOS E TELA INICIAL
         // ==========================================
         window.renderProjectsList = function() {
-            const grid = document.getElementById('projects-grid');
-            const empty = document.getElementById('empty-state');
-            if(!grid || !empty) return;
-            
-            if(window.appState.projects.length === 0) {
-                grid.style.display = 'none'; empty.style.display = 'flex';
-            } else {
+            const grid = document.getElementById('projects-grid'); const empty = document.getElementById('empty-state'); if(!grid || !empty) return;
+            if(window.appState.projects.length === 0) { grid.style.display = 'none'; empty.style.display = 'flex'; } else {
                 empty.style.display = 'none'; grid.style.display = 'flex';
-                // ATUALIZADO: Usando as novas classes baseadas em Variáveis CSS
                 grid.innerHTML = window.appState.projects.map(p => `
                     <div class="project-card" onclick="window.abrirProjeto('${p.id}', ${p.lat}, ${p.lng})">
                         <button class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition" style="z-index: 20;" onclick="window.deletarProjeto('${p.id}', event)" title="Deletar Projeto"><i class="fa-solid fa-trash"></i></button>
@@ -813,19 +690,15 @@
             }
         };
 
-        // NOVO: Função para deletar projetos
         window.deletarProjeto = async (id, event) => {
             event.stopPropagation();
             if(confirm('Tem certeza que deseja excluir este projeto e todos os seus elementos?')) {
                 if(db && auth && auth.currentUser) {
                     await deleteDoc(getDocPath('projects', id));
-                    // Opcional: Varredura profunda para apagar os itens ligados a este projeto
                     window.appState.nodes.filter(n => n.projectId === id).forEach(n => deleteDoc(getDocPath('nodes', n.id)));
                     window.appState.cables.filter(c => c.projectId === id).forEach(c => deleteDoc(getDocPath('cables', c.id)));
                     window.showToast('Projeto deletado com sucesso.', 'sucesso');
-                } else {
-                    window.showToast('Erro: Não conectado na nuvem.', 'erro');
-                }
+                } else { window.showToast('Erro: Não conectado na nuvem.', 'erro'); }
             }
         };
 
@@ -868,10 +741,14 @@
             }
         };
 
+        // NOVO: Atualizar nome do projeto na barra lateral
         window.abrirProjeto = (id, lat, lng) => {
             window.appState.currentProjectId = id;
+            const proj = window.appState.projects.find(p => p.id === id);
+            if(proj) document.getElementById('current-project-name').innerText = proj.name;
+            
             document.getElementById('regions-screen').style.display = 'none';
-            document.getElementById('app-workspace').style.display = 'block';
+            document.getElementById('app-workspace').style.display = 'flex'; // Modificado para Flex
             setTimeout(() => { map.invalidateSize(); map.flyTo([lat, lng], 15); window.renderMap(); window.showToast('Projeto Carregado.', 'sucesso'); }, 300);
         };
 
@@ -891,16 +768,21 @@
         };
 
         // ==========================================
-        // 4. MAPA INTERACTIONS (Buidling Cables/Nodes)
+        // MAPA INTERACTIONS
         // ==========================================
         window.setMode = function(newMode) {
-            window.appState.mode = newMode; document.body.className = ''; document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            window.appState.mode = newMode; document.body.className = document.body.className.replace(/mode-\w+/g, ''); document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
             const banner = document.getElementById('instruction-banner'); drawLayer.clearLayers(); window.appState.cablePath = []; window.appState.cableStartNodeId = null; window.appState.tempPolyline = null;
-            document.getElementById('map-container').classList.remove('node-anchorable');
+            
+            if (newMode === 'placing_node' || newMode === 'drawing_cable') { document.getElementById('map-container').classList.add('node-anchorable'); } 
+            else { document.getElementById('map-container').classList.remove('node-anchorable'); }
+
             if (newMode === 'view' || newMode === 'move') { document.getElementById(newMode === 'view' ? 'btn-navegar' : 'btn-mover').classList.add('active'); map.dragging.enable(); banner.style.display = 'none'; } 
             else if (newMode === 'placing_node') { document.body.classList.add('mode-placing'); document.getElementById('btn-caixa').classList.add('active'); map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Inserir <b>${window.appState.nodeSetup.name}</b>.`; }
-            else if (newMode === 'drawing_cable') { document.body.classList.add('mode-drawing'); document.getElementById('btn-cabo').classList.add('active'); map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Selecione a <b>Caixa Inicial</b>.`; document.getElementById('map-container').classList.add('node-anchorable'); }
+            else if (newMode === 'drawing_cable') { document.body.classList.add('mode-drawing'); document.getElementById('btn-cabo').classList.add('active'); map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Selecione a <b>Caixa Inicial</b>.`; }
+            
             document.onkeydown = function(evt) { if (evt.key === "Escape") { window.setMode('view'); } };
+            if(window.appState.currentProjectId) window.renderMap();
         };
 
         map.on('mousemove', function(e) { 
@@ -948,21 +830,9 @@
                     } 
                     else if (window.appState.cableStartNodeId !== node.id) { 
                         window.appState.cablePath.push([node.lat, node.lng]); 
-                        
                         const firebasePath = window.appState.cablePath.map(coord => ({ lat: coord[0], lng: coord[1] }));
-                        
-                        await window.saveCableToFirebase({ 
-                            projectId: window.appState.currentProjectId,
-                            name: window.appState.cableSetup.name || `Cabo ${window.appState.cableSetup.capacity}FO`, 
-                            capacity: window.appState.cableSetup.capacity, 
-                            color: window.appState.cableSetup.color, 
-                            startNode: window.appState.cableStartNodeId, 
-                            endNode: node.id, 
-                            path: firebasePath
-                        }); 
-                        
-                        window.showToast(`Cabo finalizado!`, "sucesso"); 
-                        window.setMode('view'); 
+                        await window.saveCableToFirebase({ projectId: window.appState.currentProjectId, name: window.appState.cableSetup.name || `Cabo ${window.appState.cableSetup.capacity}FO`, capacity: window.appState.cableSetup.capacity, color: window.appState.cableSetup.color, startNode: window.appState.cableStartNodeId, endNode: node.id, path: firebasePath }); 
+                        window.showToast(`Cabo finalizado!`, "sucesso"); window.setMode('view'); 
                     }
                 }
             } else if (eventType === 'mouseover' && window.appState.mode === 'drawing_cable' && window.appState.cableStartNodeId !== null) { 
@@ -973,108 +843,108 @@
         };
 
         window.renderMap = function() { 
+            if(!window.appState.currentProjectId) return;
             nodesLayer.clearLayers(); cablesLayer.clearLayers(); 
             
-            // NOVO: Filtrar pelo projeto atual
-            const currentCables = window.appState.currentProjectId ? window.appState.cables.filter(c => c.projectId === window.appState.currentProjectId || !c.projectId) : window.appState.cables;
-            const currentNodes = window.appState.currentProjectId ? window.appState.nodes.filter(n => n.projectId === window.appState.currentProjectId || !n.projectId) : window.appState.nodes;
+            const currentCables = window.appState.cables.filter(c => c.projectId === window.appState.currentProjectId || !c.projectId);
+            let currentNodes = window.appState.nodes.filter(n => n.projectId === window.appState.currentProjectId || !n.projectId);
+            const isMovable = window.appState.mode === 'move';
 
-            currentCables.forEach(c => { 
-                const linhaCabo = L.polyline(c.path, { color: c.color, weight: 5, opacity: 0.9 }).addTo(cablesLayer);
-                linhaCabo.bindTooltip(`<b>${c.name}</b><br><span style="font-size:10px; color:#ef4444;">Clique para excluir</span>`, {sticky: true});
-                
-                linhaCabo.on('click', () => {
-                    if (window.appState.mode === 'view') {
-                        if (confirm(`Tem certeza que deseja excluir o cabo "${c.name}"?`)) {
-                            window.deleteCableFromFirebase(c.id);
-                            window.showToast('Cabo excluído com sucesso.', 'sucesso');
+            // NOVO: Aplicação do Filtro do Olhinho para Cabos
+            if (window.appState.visibleLayers['CABOS']) {
+                currentCables.forEach(c => { 
+                    const linhaCabo = L.polyline(c.path, { color: c.color, weight: 5, opacity: 0.9 }).addTo(cablesLayer);
+                    linhaCabo.bindTooltip(`<b>${c.name}</b>`, {sticky: true});
+                    
+                    linhaCabo.on('click', () => { if (window.appState.mode === 'view' && confirm(`Excluir o cabo "${c.name}"?`)) { window.deleteCableFromFirebase(c.id); window.showToast('Excluído.', 'sucesso'); } });
+
+                    if (isMovable) {
+                        for(let i=1; i < c.path.length-1; i++) {
+                            const iconMid = L.divIcon({ html: `<div style="width:12px; height:12px; background:white; border:3px solid ${c.color}; border-radius:50%; box-shadow:0 0 4px rgba(0,0,0,0.5);"></div>`, className: '', iconSize: [12,12], iconAnchor: [6,6] });
+                            const mkr = L.marker([c.path[i][0], c.path[i][1]], {icon: iconMid, draggable: true}).addTo(cablesLayer);
+                            mkr.on('dragend', async (e) => { const pos = e.target.getLatLng(); let newPath = [...c.path]; newPath[i] = [pos.lat, pos.lng]; await window.updateCableInFirebase(c.id, {path: newPath}); window.showToast('Rota atualizada.', 'sucesso'); });
+                        }
+                        for(let i=0; i < c.path.length-1; i++) {
+                            const p1 = c.path[i], p2 = c.path[i+1]; const mLat = (p1[0] + p2[0])/2, mLng = (p1[1] + p2[1])/2;
+                            const iconGhost = L.divIcon({ html: `<div style="width:12px; height:12px; background:${c.color}; opacity:0.5; border-radius:50%;"></div>`, className: '', iconSize: [12,12], iconAnchor: [6,6] });
+                            const ghost = L.marker([mLat, mLng], {icon: iconGhost, draggable: true}).addTo(cablesLayer);
+                            ghost.on('dragend', async (e) => { const pos = e.target.getLatLng(); let newPath = [...c.path]; newPath.splice(i+1, 0, [pos.lat, pos.lng]); await window.updateCableInFirebase(c.id, {path: newPath}); window.showToast('Ponto criado.', 'sucesso'); });
                         }
                     }
-                });
-            }); 
+                }); 
+            }
             
             currentNodes.forEach(n => { 
-                const shape = (n.type === 'POP / DC' || n.type === 'DC') ? 'rounded-lg' : (n.type === 'CEO' ? 'rounded-full' : 'rounded');
-                const iconHtml = L.divIcon({ html: `<div class="map-icon-wrapper ${shape}" style="width: 32px; height: 32px; border-color: ${n.color}"><div style="background-color: ${n.color}; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px;" class="${shape}"><i class="fa-solid ${n.icon}"></i></div></div>`, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
-                const marker = L.marker([n.lat, n.lng], { icon: iconHtml }).addTo(nodesLayer); 
-                const label = L.divIcon({ html: `<div style="text-align: center; font-weight: 700; font-size: 11px; color: #111827; text-shadow: 1px 1px 2px white, -1px -1px 2px white; margin-top: 4px;">${n.name}</div>`, className: '', iconSize: [100, 20], iconAnchor: [50, -16] }); 
-                L.marker([n.lat, n.lng], { icon: label, interactive: false }).addTo(nodesLayer); 
-                
-                marker.on('click', (e) => { L.DomEvent.stopPropagation(e); window.handleNodeInteraction(n, 'click'); }); 
-                marker.on('mouseover', (e) => { window.handleNodeInteraction(n, 'mouseover'); if(window.appState.mode === 'drawing_cable') e.target.getElement().classList.add('node-hover'); }); 
-                marker.on('mouseout', (e) => { window.handleNodeInteraction(n, 'mouseout'); e.target.getElement().classList.remove('node-hover'); }); 
+                // NOVO: Lógica do Filtro do Olhinho para Caixas
+                let isVisible = window.appState.visibleLayers[n.type];
+                if (n.type === 'POP / DC' || n.type === 'DC') isVisible = window.appState.visibleLayers['POP / DC'];
+                if (isVisible === undefined) isVisible = true; // Mostra tudo que não tem filtro criado
+
+                if (isVisible) {
+                    const shape = (n.type === 'POP / DC' || n.type === 'DC') ? 'rounded-lg' : (n.type === 'CEO' ? 'rounded-full' : 'rounded');
+                    const iconHtml = L.divIcon({ html: `<div class="map-icon-wrapper ${shape}" style="width: 32px; height: 32px; border-color: ${n.color}; cursor: ${isMovable ? 'grab' : 'pointer'}"><div style="background-color: ${n.color}; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px;" class="${shape}"><i class="fa-solid ${n.icon}"></i></div></div>`, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
+                    const marker = L.marker([n.lat, n.lng], { icon: iconHtml, draggable: isMovable }).addTo(nodesLayer); 
+                    
+                    // NOVO: Correção definitiva da Label (Tooltip permanente). Nunca some no Zoom.
+                    marker.bindTooltip(`
+                        <div style="font-weight: 800; font-size: 11px; color: var(--text-primary); text-shadow: 1px 1px 0px var(--bg-card), -1px -1px 0px var(--bg-card), 1px -1px 0px var(--bg-card), -1px 1px 0px var(--bg-card);">
+                            ${n.name}
+                        </div>
+                    `, { permanent: true, direction: 'bottom', className: 'transparent-tooltip', offset: [0, 5] }).openTooltip();
+                    
+                    marker.on('click', (e) => { L.DomEvent.stopPropagation(e); window.handleNodeInteraction(n, 'click'); }); 
+                    marker.on('mouseover', (e) => { window.handleNodeInteraction(n, 'mouseover'); if(window.appState.mode === 'drawing_cable') e.target.getElement().classList.add('node-hover'); }); 
+                    marker.on('mouseout', (e) => { window.handleNodeInteraction(n, 'mouseout'); e.target.getElement().classList.remove('node-hover'); }); 
+                    
+                    marker.on('dragend', async (e) => {
+                        const pos = e.target.getLatLng();
+                        await window.updateNodeInFirebase(n.id, { lat: pos.lat, lng: pos.lng });
+                        const connectedCables = currentCables.filter(c => c.startNode === n.id || c.endNode === n.id);
+                        for(let c of connectedCables) {
+                            let newPath = [...c.path];
+                            if(c.startNode === n.id) newPath[0] = [pos.lat, pos.lng];
+                            if(c.endNode === n.id) newPath[newPath.length-1] = [pos.lat, pos.lng];
+                            await window.updateCableInFirebase(c.id, { path: newPath });
+                        }
+                        window.showToast('Caixa movida!', 'sucesso');
+                    });
+                }
             }); 
         };
 
-        // ==========================================
-        // 5. LÓGICAS UI E MODAIS
-        // ==========================================
-        window.enterWorkspace = function(regionName) { document.getElementById('regions-screen').style.display = 'none'; document.getElementById('app-workspace').style.display = 'block'; setTimeout(() => { map.invalidateSize(); window.showToast(`Área conectada.`); }, 100); };
-        window.createNewRegion = function() { window.enterWorkspace('Minha Rede FTTH'); };
-        
+        // UI Helpers Modais
         window.openModal = function(type) { 
             window.setMode('view'); 
             if(type === 'caixa') { 
-                window.appState.editingNodeId = null; 
-                document.getElementById('modal-caixa-title').innerHTML = '<i class="fa-solid fa-location-dot text-cyan-500 mr-1"></i> Nova Caixa/Prédio'; 
-                document.getElementById('btn-caixa-submit').innerText = 'Ancorar no Mapa'; 
-                
+                window.appState.editingNodeId = null; document.getElementById('modal-caixa-title').innerHTML = '<i class="fa-solid fa-location-dot text-cyan-500 mr-1"></i> Nova Caixa/Prédio'; document.getElementById('btn-caixa-submit').innerText = 'Ancorar no Mapa'; 
                 const p = document.getElementById('caixa-color-palette'); p.innerHTML = ''; 
                 if(!THEME_COLORS.includes(window.appState.nodeSetup.color)) window.appState.nodeSetup.color = THEME_COLORS[2];
-                THEME_COLORS.forEach(c => { 
-                    const b = document.createElement('div'); b.className = `color-btn ${c === window.appState.nodeSetup.color ? 'selected' : ''}`; b.style.backgroundColor = c; 
-                    b.onclick = () => { document.querySelectorAll('.color-btn').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); window.appState.nodeSetup.color = c; }; 
-                    p.appendChild(b); 
-                }); 
+                THEME_COLORS.forEach(c => { const b = document.createElement('div'); b.className = `color-btn ${c === window.appState.nodeSetup.color ? 'selected' : ''}`; b.style.backgroundColor = c; b.onclick = () => { document.querySelectorAll('.color-btn').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); window.appState.nodeSetup.color = c; }; p.appendChild(b); }); 
                 document.getElementById('input-caixa-nome').value = ''; document.getElementById('modal-caixa').style.display = 'flex'; 
-            } else if (type === 'cabo') { 
-                document.getElementById('input-cabo-capacidade').onchange = (e) => { const cap = parseInt(e.target.value); const color = cap > 12 ? '#f97316' : '#3b82f6'; document.getElementById('preview-cable-color').style.backgroundColor = color; window.appState.cableSetup.color = color; }; 
-                document.getElementById('modal-cabo').style.display = 'flex'; 
-            } 
+            } else if (type === 'cabo') { document.getElementById('input-cabo-capacidade').onchange = (e) => { const cap = parseInt(e.target.value); const color = cap > 12 ? '#f97316' : '#3b82f6'; document.getElementById('preview-cable-color').style.backgroundColor = color; window.appState.cableSetup.color = color; }; document.getElementById('modal-cabo').style.display = 'flex'; } 
         };
         window.closeModal = function(type) { document.getElementById(`modal-${type}`).style.display = 'none'; };
         
         window.openEditModal = function() {
-            if (!window.appState.selectedNodeId) return;
-            const node = window.appState.nodes.find(n => n.id === window.appState.selectedNodeId);
-            if (!node) return;
+            if (!window.appState.selectedNodeId) return; const node = window.appState.nodes.find(n => n.id === window.appState.selectedNodeId); if (!node) return;
             window.appState.editingNodeId = node.id; window.appState.nodeSetup = { ...node };
-            document.getElementById('modal-caixa-title').innerHTML = '<i class="fa-solid fa-pen-to-square text-cyan-500 mr-1"></i> Editar Equipamento';
-            document.getElementById('btn-caixa-submit').innerText = 'Salvar Alterações';
-            document.getElementById('input-caixa-nome').value = node.name;
-            
+            document.getElementById('modal-caixa-title').innerHTML = '<i class="fa-solid fa-pen-to-square text-cyan-500 mr-1"></i> Editar Equipamento'; document.getElementById('btn-caixa-submit').innerText = 'Salvar Alterações'; document.getElementById('input-caixa-nome').value = node.name;
             const p = document.getElementById('caixa-color-palette'); p.innerHTML = '';
             THEME_COLORS.forEach(c => { const b = document.createElement('div'); b.className = `color-btn ${c === node.color ? 'selected' : ''}`; b.style.backgroundColor = c; b.onclick = () => { document.querySelectorAll('.color-btn').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); window.appState.nodeSetup.color = c; }; p.appendChild(b); });
-            
             const btn = document.querySelector(`.structure-btn[data-type="${node.type}"]`);
             if(btn) {
                 document.querySelectorAll('.structure-btn').forEach(b => { b.classList.remove('selected'); b.querySelector('i').style.color = '#94a3b8'; }); 
                 btn.classList.add('selected'); btn.querySelector('i').style.color = btn.getAttribute('data-color');
-                
                 document.getElementById('cto-settings').style.display = (node.type.includes('CTO')) ? 'block' : 'none';
                 document.querySelectorAll('.splitter-pill').forEach(p => p.classList.remove('selected'));
-                if(node.type.includes('CTO') && node.internal && node.internal.splitters && node.internal.splitters.length > 0) { 
-                    const splVal = node.internal.splitters[0].type; const pill = document.querySelector(`.splitter-pill[data-val="${splVal}"]`);
-                    if(pill) { pill.classList.add('selected'); window.appState.nodeSetup.splitter = splVal; }
-                } else {
-                    document.querySelector(`.splitter-pill[data-val="Nenhum"]`).classList.add('selected'); window.appState.nodeSetup.splitter = null;
-                }
+                if(node.type.includes('CTO') && node.internal && node.internal.splitters && node.internal.splitters.length > 0) { const splVal = node.internal.splitters[0].type; const pill = document.querySelector(`.splitter-pill[data-val="${splVal}"]`); if(pill) { pill.classList.add('selected'); window.appState.nodeSetup.splitter = splVal; }
+                } else { document.querySelector(`.splitter-pill[data-val="Nenhum"]`).classList.add('selected'); window.appState.nodeSetup.splitter = null; }
             }
             document.getElementById('modal-caixa').style.display = 'flex';
         };
 
-        window.selectStructure = function(btn) { 
-            document.querySelectorAll('.structure-btn').forEach(b => { b.classList.remove('selected'); b.querySelector('i').style.color = '#94a3b8'; }); 
-            btn.classList.add('selected'); btn.querySelector('i').style.color = btn.getAttribute('data-color');
-            window.appState.nodeSetup.type = btn.getAttribute('data-type'); window.appState.nodeSetup.icon = btn.getAttribute('data-icon'); 
-            if(!window.appState.editingNodeId) document.getElementById('input-caixa-nome').value = window.appState.nodeSetup.type + ' 01'; 
-            document.getElementById('cto-settings').style.display = (window.appState.nodeSetup.type.includes('CTO')) ? 'block' : 'none'; 
-        };
-        
-        window.selectSplitterPill = function(pill) {
-            document.querySelectorAll('.splitter-pill').forEach(p => p.classList.remove('selected'));
-            pill.classList.add('selected'); window.appState.nodeSetup.splitter = pill.getAttribute('data-val') === 'Nenhum' ? null : pill.getAttribute('data-val');
-        };
+        window.selectStructure = function(btn) { document.querySelectorAll('.structure-btn').forEach(b => { b.classList.remove('selected'); b.querySelector('i').style.color = '#94a3b8'; }); btn.classList.add('selected'); btn.querySelector('i').style.color = btn.getAttribute('data-color'); window.appState.nodeSetup.type = btn.getAttribute('data-type'); window.appState.nodeSetup.icon = btn.getAttribute('data-icon'); if(!window.appState.editingNodeId) document.getElementById('input-caixa-nome').value = window.appState.nodeSetup.type + ' 01'; document.getElementById('cto-settings').style.display = (window.appState.nodeSetup.type.includes('CTO')) ? 'block' : 'none'; };
+        window.selectSplitterPill = function(pill) { document.querySelectorAll('.splitter-pill').forEach(p => p.classList.remove('selected')); pill.classList.add('selected'); window.appState.nodeSetup.splitter = pill.getAttribute('data-val') === 'Nenhum' ? null : pill.getAttribute('data-val'); };
         
         window.startNodePlacement = async function() { 
             window.appState.nodeSetup.name = document.getElementById('input-caixa-nome').value; 
@@ -1083,7 +953,7 @@
                 if(node) {
                     const updateData = { name: window.appState.nodeSetup.name, type: window.appState.nodeSetup.type, icon: window.appState.nodeSetup.icon, color: window.appState.nodeSetup.color };
                     if(window.appState.nodeSetup.type.includes('CTO') && window.appState.nodeSetup.splitter) { updateData.internal = { splitters: [{ type: window.appState.nodeSetup.splitter, id: 'SPL001' }] }; } else if (window.appState.nodeSetup.type.includes('CTO')) { updateData.internal = { splitters: [] }; }
-                    await window.updateNodeInFirebase(node.id, updateData); window.closeModal('caixa'); window.showToast("Editado com sucesso!", "sucesso"); 
+                    await window.updateNodeInFirebase(node.id, updateData); window.closeModal('caixa'); window.showToast("Editado!", "sucesso"); 
                 }
             } else { window.closeModal('caixa'); window.setMode('placing_node'); } 
         };
@@ -1091,14 +961,7 @@
         window.startCableDrawing = function() { window.appState.cableSetup.name = document.getElementById('input-cabo-nome').value; window.appState.cableSetup.capacity = parseInt(document.getElementById('input-cabo-capacidade').value); window.closeModal('cabo'); window.setMode('drawing_cable'); };
         
         window.openInfoCard = function(node) { 
-            window.appState.selectedNodeId = node.id; const card = document.getElementById('info-card'); 
-            document.getElementById('card-title').innerText = node.name; document.getElementById('card-subtitle').innerText = node.type.toUpperCase(); 
-            document.getElementById('card-coords').innerText = `${node.lat.toFixed(5)}, ${node.lng.toFixed(5)}`; 
-            document.getElementById('card-icon').className = `fa-solid ${node.icon}`; 
-            const iconC = document.getElementById('card-icon-container'); iconC.style.color = node.color; iconC.style.backgroundColor = node.color + '15'; iconC.style.borderColor = node.color + '40'; 
-            const btnAction = document.getElementById('btn-card-type-action'); 
-            if (node.type === 'POP / DC' || node.type === 'DC') { btnAction.style.display = 'flex'; } else { btnAction.style.display = 'none'; } 
-            card.style.display = 'block'; 
+            window.appState.selectedNodeId = node.id; const card = document.getElementById('info-card'); document.getElementById('card-title').innerText = node.name; document.getElementById('card-subtitle').innerText = node.type.toUpperCase(); document.getElementById('card-coords').innerText = `${node.lat.toFixed(5)}, ${node.lng.toFixed(5)}`; document.getElementById('card-icon').className = `fa-solid ${node.icon}`; const iconC = document.getElementById('card-icon-container'); iconC.style.color = node.color; iconC.style.backgroundColor = node.color + '15'; iconC.style.borderColor = node.color + '40'; const btnAction = document.getElementById('btn-card-type-action'); if (node.type === 'POP / DC' || node.type === 'DC') { btnAction.style.display = 'flex'; } else { btnAction.style.display = 'none'; } card.style.display = 'block'; 
         };
         window.closeInfoCard = function() { document.getElementById('info-card').style.display = 'none'; window.appState.selectedNodeId = null; };
         window.deleteSelectedNode = async function() { const nId = window.appState.selectedNodeId; if (!nId) return; const connectedCables = window.appState.cables.filter(c => c.startNode === nId || c.endNode === nId); for(let c of connectedCables) { await window.deleteCableFromFirebase(c.id); } await window.deleteNodeFromFirebase(nId); window.closeInfoCard(); window.showToast('Excluído do banco.', 'sucesso'); };
@@ -1108,92 +971,29 @@
         window.copyCoords = function() { navigator.clipboard.writeText(document.getElementById('card-coords').innerText); window.showToast("Copiado!"); };
         window.showToast = function(msg, type='info') { const c = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast-msg show'; t.innerHTML = `<i class="fa-solid fa-info-circle text-blue-400"></i> <span>${msg}</span>`; c.appendChild(t); setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 300); }, 3000); };
 
-
         // ==========================================
-        // 6. MOTOR DO DIAGRAMA CANVAS (WHITEBOARD DE EMENDAS)... 
+        // 6. MOTOR DO DIAGRAMA CANVAS OSP E INSIDE PLANT (Mantidos)
         // ==========================================
-        window.openCanvasDiagram = function() {
-            const node = window.appState.nodes.find(n => n.id === window.appState.selectedNodeId); 
-            if(!node) return;
-            
-            document.getElementById('diag-toolbar-title').innerText = node.name; document.getElementById('diag-center-name').innerText = node.name;
-            const incoming = window.appState.cables.filter(c => c.endNode === node.id); const outgoing = window.appState.cables.filter(c => c.startNode === node.id);
-            const canvas = document.getElementById('diagram-canvas');
-            const blocks = canvas.querySelectorAll('.cable-block'); blocks.forEach(b => b.remove());
-            document.getElementById('fusion-lines').innerHTML = '<path id="active-fusion-line" d="" />';
-
-            let yOffsetIn = 100; let yOffsetOut = 100;
-            incoming.forEach(cable => { const origin = window.appState.nodes.find(n => n.id === cable.startNode); window.createCableBlock(canvas, cable, `ST ${origin ? origin.name.toUpperCase() : 'ORIGEM'}`, `CABO ${cable.capacity}FO`, 100, yOffsetIn); yOffsetIn += 100; });
-            outgoing.forEach(cable => { const dest = window.appState.nodes.find(n => n.id === cable.endNode); window.createCableBlock(canvas, cable, `ST ${dest ? dest.name.toUpperCase() : 'DESTINO'}`, `CABO ${cable.capacity}FO`, 600, yOffsetOut); yOffsetOut += 100; });
-
-            setTimeout(() => window.updateAllFusionLines(), 100);
-            document.getElementById('diagram-view').style.display = 'flex';
-        };
-
+        window.openCanvasDiagram = function() { const node = window.appState.nodes.find(n => n.id === window.appState.selectedNodeId); if(!node) return; document.getElementById('diag-toolbar-title').innerText = node.name; document.getElementById('diag-center-name').innerText = node.name; const incoming = window.appState.cables.filter(c => c.endNode === node.id); const outgoing = window.appState.cables.filter(c => c.startNode === node.id); const canvas = document.getElementById('diagram-canvas'); const blocks = canvas.querySelectorAll('.cable-block'); blocks.forEach(b => b.remove()); document.getElementById('fusion-lines').innerHTML = '<path id="active-fusion-line" d="" />'; let yOffsetIn = 100; let yOffsetOut = 100; incoming.forEach(cable => { const origin = window.appState.nodes.find(n => n.id === cable.startNode); window.createCableBlock(canvas, cable, `ST ${origin ? origin.name.toUpperCase() : 'ORIGEM'}`, `CABO ${cable.capacity}FO`, 100, yOffsetIn); yOffsetIn += 100; }); outgoing.forEach(cable => { const dest = window.appState.nodes.find(n => n.id === cable.endNode); window.createCableBlock(canvas, cable, `ST ${dest ? dest.name.toUpperCase() : 'DESTINO'}`, `CABO ${cable.capacity}FO`, 600, yOffsetOut); yOffsetOut += 100; }); setTimeout(() => window.updateAllFusionLines(), 100); document.getElementById('diagram-view').style.display = 'flex'; };
         window.closeCanvasDiagram = function() { document.getElementById('diagram-view').style.display = 'none'; };
-
-        window.createCableBlock = function(canvas, cable, title, sub, startX, startY) {
-            const block = document.createElement('div'); block.className = 'cable-block shadow-lg'; block.style.left = `${startX}px`; block.style.top = `${startY}px`;
-            let headerHtml = `<div class="cable-block-header" onmousedown="window.startDragBlock(event, this.parentElement)"><div class="flex gap-2 text-gray-400 text-xs"><i class="fa-solid fa-rotate-right hover:text-gray-800 cursor-pointer"></i><i class="fa-solid fa-arrow-right-arrow-left hover:text-gray-800 cursor-pointer"></i></div><div class="text-right flex-grow"><div class="cable-block-title">${title}</div><div class="cable-block-sub">${sub}</div></div></div>`;
-            let fibersHtml = '<div class="fiber-grid">';
-            for(let i=0; i<cable.capacity; i++) {
-                const colorIdx = i % 6; const portId = `port-${cable.id}-${i}`;
-                fibersHtml += `<div id="${portId}" class="fiber-port fiber-bg-${colorIdx}" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="Fibra ${i+1}">Fo${(i+1).toString().padStart(2,'0')}</div>`;
-            }
-            fibersHtml += '</div>'; block.innerHTML = headerHtml + fibersHtml; canvas.appendChild(block);
-        };
-
+        window.createCableBlock = function(canvas, cable, title, sub, startX, startY) { const block = document.createElement('div'); block.className = 'cable-block shadow-lg'; block.style.left = `${startX}px`; block.style.top = `${startY}px`; let headerHtml = `<div class="cable-block-header" onmousedown="window.startDragBlock(event, this.parentElement)"><div class="flex gap-2 text-gray-400 text-xs"><i class="fa-solid fa-rotate-right hover:text-gray-800 cursor-pointer"></i><i class="fa-solid fa-arrow-right-arrow-left hover:text-gray-800 cursor-pointer"></i></div><div class="text-right flex-grow"><div class="cable-block-title">${title}</div><div class="cable-block-sub">${sub}</div></div></div>`; let fibersHtml = '<div class="fiber-grid">'; for(let i=0; i<cable.capacity; i++) { const colorIdx = i % 6; const portId = `port-${cable.id}-${i}`; fibersHtml += `<div id="${portId}" class="fiber-port fiber-bg-${colorIdx}" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="Fibra ${i+1}">Fo${(i+1).toString().padStart(2,'0')}</div>`; } fibersHtml += '</div>'; block.innerHTML = headerHtml + fibersHtml; canvas.appendChild(block); };
+        
         let draggedBlock = null; let dragOffset = {x:0, y:0};
         window.startDragBlock = function(e, block) { if(e.target.closest('.fiber-port')) return; draggedBlock = block; const rect = block.getBoundingClientRect(); const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); dragOffset.x = e.clientX - rect.left + canvasRect.left; dragOffset.y = e.clientY - rect.top + canvasRect.top; document.onmousemove = window.dragBlockMove; document.onmouseup = window.dragBlockEnd; };
         window.dragBlockMove = function(e) { if(!draggedBlock) return; const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); let x = e.clientX - dragOffset.x + canvasRect.left; let y = e.clientY - dragOffset.y + canvasRect.top; x = Math.max(0, x); y = Math.max(0, y); draggedBlock.style.left = `${x}px`; draggedBlock.style.top = `${y}px`; window.updateAllFusionLines(); };
         window.dragBlockEnd = function() { draggedBlock = null; document.onmousemove = null; document.onmouseup = null; };
-
+        
         window.startFusionDrag = function(e, portId) { e.stopPropagation(); window.appState.isDraggingFusion = true; window.appState.fusionStartPort = portId; const port = document.getElementById(portId); const portRect = port.getBoundingClientRect(); const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); window.appState.fusionStartCoords = { x: portRect.left - canvasRect.left + (portRect.width/2), y: portRect.top - canvasRect.top + (portRect.height/2) }; const activeLine = document.getElementById('active-fusion-line'); activeLine.setAttribute('d', `M ${window.appState.fusionStartCoords.x} ${window.appState.fusionStartCoords.y} L ${window.appState.fusionStartCoords.x} ${window.appState.fusionStartCoords.y}`); };
         window.handleFusionDragMove = function(e) { if(!window.appState.isDraggingFusion) return; const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const p1 = window.appState.fusionStartCoords; const p2 = { x: e.clientX - canvasRect.left, y: e.clientY - canvasRect.top }; const cpOffset = Math.abs(p2.x - p1.x) / 2; const d = `M ${p1.x} ${p1.y} C ${p1.x + cpOffset} ${p1.y}, ${p2.x - cpOffset} ${p2.y}, ${p2.x} ${p2.y}`; document.getElementById('active-fusion-line').setAttribute('d', d); };
         window.handleFusionDragEnd = function(e) { if(!window.appState.isDraggingFusion) return; window.appState.isDraggingFusion = false; document.getElementById('active-fusion-line').setAttribute('d', ''); };
-        window.endFusionDrag = async function(e, targetPortId) { 
-            if(!window.appState.isDraggingFusion) return; e.stopPropagation(); 
-            if(window.appState.fusionStartPort !== targetPortId) { 
-                const existing = window.appState.fusions.find(f => (f.nodeId === window.appState.selectedNodeId) && (f.from === targetPortId || f.to === targetPortId || f.from === window.appState.fusionStartPort || f.to === window.appState.fusionStartPort));
-                if(existing) { window.showToast('Fibra ocupada.', 'aviso'); } else {
-                    await window.saveFusionToFirebase({ nodeId: window.appState.selectedNodeId, from: window.appState.fusionStartPort, to: targetPortId });
-                    window.showToast('Fusão salva na nuvem!', 'sucesso'); 
-                }
-            } 
-            window.appState.isDraggingFusion = false; document.getElementById('active-fusion-line').setAttribute('d', ''); 
-        };
-
-        window.updateAllFusionLines = function() {
-            const svg = document.getElementById('fusion-lines'); Array.from(svg.children).forEach(c => { if(c.id !== 'active-fusion-line') c.remove(); });
-            const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect();
-            window.appState.fusions.filter(f => f.nodeId === window.appState.selectedNodeId).forEach(fusion => {
-                const p1El = document.getElementById(fusion.from); const p2El = document.getElementById(fusion.to);
-                if(p1El && p2El) {
-                    const r1 = p1El.getBoundingClientRect(); const r2 = p2El.getBoundingClientRect();
-                    const p1 = { x: r1.left - canvasRect.left + (r1.width/2), y: r1.top - canvasRect.top + (r1.height/2) }; const p2 = { x: r2.left - canvasRect.left + (r2.width/2), y: r2.top - canvasRect.top + (r2.height/2) };
-                    const cpOffset = Math.abs(p2.x - p1.x) / 2; const d = `M ${p1.x} ${p1.y} C ${p1.x + cpOffset} ${p1.y}, ${p2.x - cpOffset} ${p2.y}, ${p2.x} ${p2.y}`;
-                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('d', d); path.setAttribute('stroke', '#0f172a'); path.setAttribute('stroke-width', '4'); path.setAttribute('fill', 'none'); path.setAttribute('stroke-linecap', 'round'); svg.appendChild(path);
-                }
-            });
-        };
-
-        // ==========================================
-        // 7. INSIDE PLANT (DATA CENTER)
-        // ==========================================
-        window.openInsidePlantView = function(node) {
-            const content = document.getElementById('diagram-content-isp'); document.getElementById('inside-plant-view').style.display = 'block';
-            content.innerHTML = `
-                <div class="isp-header"><div class="isp-logo-area"><button onclick="window.closeInsidePlantView()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white mr-2"><i class="fa-solid fa-arrow-left"></i></button><div class="leading-tight"><div class="font-bold flex items-center gap-1"><i class="fa-solid fa-wave-square"></i> RedeManager</div><div class="isp-title-sub">Gestão de Inside Plant</div></div><div class="h-6 w-px bg-slate-700 mx-4"></div><div class="isp-tab">${node.name} <button class="ml-2 text-slate-400 hover:text-white" onclick="window.closeInsidePlantView()"><i class="fa-solid fa-xmark text-xs"></i></button></div></div><div class="isp-header-actions"><button class="btn-isp-action" onclick="window.addDIOToNode('${node.id}')"><i class="fa-solid fa-plus text-[10px]"></i> NOVO DIO</button></div></div>
-                <div class="p-8">
-                    <div class="olt-card"><div class="olt-header"><div class="flex gap-4"><div class="olt-icon"><i class="fa-solid fa-server"></i></div><div><h2 class="text-xl font-black uppercase tracking-wide">HIOSO</h2><p class="text-xs font-bold text-indigo-300 uppercase tracking-widest mt-1">HUAWEI</p></div></div></div><div class="olt-grid"><div class="olt-info-box"><div class="olt-label">HOST</div><div class="olt-value font-mono">192.168.1.1:22</div></div><div class="olt-info-box"><div class="olt-label">CAPACIDADE</div><div class="olt-value">8 Portas PON</div></div></div><button class="w-full bg-white/10 hover:bg-white/20 py-2.5 rounded-lg font-bold text-sm transition text-center">Configurar Equipamento</button></div>
-                    ${node.internal && node.internal.hasDIO ? `<div class="dio-section mt-8"><div class="max-w-7xl mx-auto"><div class="dio-header"><div><div class="flex items-center gap-3 mb-4"><h2 class="text-4xl font-black tracking-tight">RACK PRINCIPAL</h2></div><div class="flex gap-2"><span class="dio-badge active">24 PORTAS</span><span class="dio-badge">PAINEL ATIVO</span></div></div></div><div class="mt-12"><div class="grid grid-cols-12 gap-3 text-center"><div class="bg-slate-800 border border-slate-700 p-4 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-700 transition"><span class="text-lg font-black text-slate-300">01</span><div class="w-full h-1 bg-green-500 rounded-full mt-1"></div></div><div class="bg-slate-800 border border-slate-700 p-4 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-700 transition"><span class="text-lg font-black text-slate-300">02</span><div class="w-full h-1 bg-green-500 rounded-full mt-1"></div></div></div></div></div></div>` : ''}
-                </div>
-            `;
-        };
+        window.endFusionDrag = async function(e, targetPortId) { if(!window.appState.isDraggingFusion) return; e.stopPropagation(); if(window.appState.fusionStartPort !== targetPortId) { const existing = window.appState.fusions.find(f => (f.nodeId === window.appState.selectedNodeId) && (f.from === targetPortId || f.to === targetPortId || f.from === window.appState.fusionStartPort || f.to === window.appState.fusionStartPort)); if(existing) { window.showToast('Fibra ocupada.', 'aviso'); } else { await window.saveFusionToFirebase({ nodeId: window.appState.selectedNodeId, from: window.appState.fusionStartPort, to: targetPortId }); window.showToast('Fusão salva!', 'sucesso'); } } window.appState.isDraggingFusion = false; document.getElementById('active-fusion-line').setAttribute('d', ''); };
+        
+        window.updateAllFusionLines = function() { const svg = document.getElementById('fusion-lines'); Array.from(svg.children).forEach(c => { if(c.id !== 'active-fusion-line') c.remove(); }); const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); window.appState.fusions.filter(f => f.nodeId === window.appState.selectedNodeId).forEach(fusion => { const p1El = document.getElementById(fusion.from); const p2El = document.getElementById(fusion.to); if(p1El && p2El) { const r1 = p1El.getBoundingClientRect(); const r2 = p2El.getBoundingClientRect(); const p1 = { x: r1.left - canvasRect.left + (r1.width/2), y: r1.top - canvasRect.top + (r1.height/2) }; const p2 = { x: r2.left - canvasRect.left + (r2.width/2), y: r2.top - canvasRect.top + (r2.height/2) }; const cpOffset = Math.abs(p2.x - p1.x) / 2; const d = `M ${p1.x} ${p1.y} C ${p1.x + cpOffset} ${p1.y}, ${p2.x - cpOffset} ${p2.y}, ${p2.x} ${p2.y}`; const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('d', d); path.setAttribute('stroke', '#0f172a'); path.setAttribute('stroke-width', '4'); path.setAttribute('fill', 'none'); path.setAttribute('stroke-linecap', 'round'); svg.appendChild(path); } }); };
+        
+        window.openInsidePlantView = function(node) { const content = document.getElementById('diagram-content-isp'); document.getElementById('inside-plant-view').style.display = 'block'; content.innerHTML = `<div class="isp-header"><div class="isp-logo-area"><button onclick="window.closeInsidePlantView()" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white mr-2"><i class="fa-solid fa-arrow-left"></i></button><div class="leading-tight"><div class="font-bold flex items-center gap-1"><i class="fa-solid fa-wave-square"></i> RedeManager</div><div class="isp-title-sub">Gestão de Inside Plant</div></div><div class="h-6 w-px bg-slate-700 mx-4"></div><div class="isp-tab">${node.name} <button class="ml-2 text-slate-400 hover:text-white" onclick="window.closeInsidePlantView()"><i class="fa-solid fa-xmark text-xs"></i></button></div></div><div class="isp-header-actions"><button class="btn-isp-action" onclick="window.addDIOToNode('${node.id}')"><i class="fa-solid fa-plus text-[10px]"></i> NOVO DIO</button></div></div><div class="p-8"><div class="olt-card"><div class="olt-header"><div class="flex gap-4"><div class="olt-icon"><i class="fa-solid fa-server"></i></div><div><h2 class="text-xl font-black uppercase tracking-wide">HIOSO</h2><p class="text-xs font-bold text-indigo-300 uppercase tracking-widest mt-1">HUAWEI</p></div></div></div><div class="olt-grid"><div class="olt-info-box"><div class="olt-label">HOST</div><div class="olt-value font-mono">192.168.1.1:22</div></div><div class="olt-info-box"><div class="olt-label">CAPACIDADE</div><div class="olt-value">8 Portas PON</div></div></div><button class="w-full bg-white/10 hover:bg-white/20 py-2.5 rounded-lg font-bold text-sm transition text-center">Configurar Equipamento</button></div>${node.internal && node.internal.hasDIO ? `<div class="dio-section mt-8"><div class="max-w-7xl mx-auto"><div class="dio-header"><div><div class="flex items-center gap-3 mb-4"><h2 class="text-4xl font-black tracking-tight">RACK PRINCIPAL</h2></div><div class="flex gap-2"><span class="dio-badge active">24 PORTAS</span><span class="dio-badge">PAINEL ATIVO</span></div></div></div><div class="mt-12"><div class="grid grid-cols-12 gap-3 text-center"><div class="bg-slate-800 border border-slate-700 p-4 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-700 transition"><span class="text-lg font-black text-slate-300">01</span><div class="w-full h-1 bg-green-500 rounded-full mt-1"></div></div><div class="bg-slate-800 border border-slate-700 p-4 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-700 transition"><span class="text-lg font-black text-slate-300">02</span><div class="w-full h-1 bg-green-500 rounded-full mt-1"></div></div></div></div></div></div>` : ''}</div>`; };
         window.closeInsidePlantView = function() { document.getElementById('inside-plant-view').style.display = 'none'; };
         window.addDIOToNode = async function(nodeId) { const node = window.appState.nodes.find(n => n.id === nodeId); if (node) { if(window.updateNodeInFirebase) { await window.updateNodeInFirebase(nodeId, { internal: { hasDIO: true, splitters: node.internal.splitters || [] } }); } else { const idx = window.appState.nodes.findIndex(n=>n.id===nodeId); window.appState.nodes[idx].internal.hasDIO = true; } window.showToast("DIO adicionado!", "sucesso"); window.openInsidePlantView(node); } };
 
-        // Start App
         initFirebase();
     </script>
 </body>
