@@ -576,13 +576,12 @@
             onSnapshot(getCollectionPath('projects'), (snapshot) => { window.appState.projects = []; snapshot.forEach(doc => { window.appState.projects.push({ id: doc.id, ...doc.data() }); }); if(window.renderProjectsList) window.renderProjectsList(); }, (e) => console.error(e));
             onSnapshot(getCollectionPath('nodes'), (snapshot) => { window.appState.nodes = []; snapshot.forEach(doc => { window.appState.nodes.push({ id: doc.id, ...doc.data() }); }); window.renderMap(); }, (e) => console.error(e));
             
-            // CORREÇÃO E ATUALIZAÇÃO NO CABO
+            // CORREÇÃO: Garante formato de array de arrays para as coordenadas, permitindo rastrear o drag de caixa
             onSnapshot(getCollectionPath('cables'), (snapshot) => { 
                 window.appState.cables = []; 
                 snapshot.forEach(doc => { 
                     const data = doc.data(); 
                     if (data.path && Array.isArray(data.path)) { 
-                        // GARANTE QUE O ARRAY DE COORDENADAS SEJA SEMPRE [lat, lng] PARA O MAPA NÃO PERDER O CABO
                         data.path = data.path.map(p => {
                             if (Array.isArray(p)) return [p[0], p[1]];
                             if (p && typeof p === 'object') return [p.lat, p.lng];
@@ -619,6 +618,7 @@
             catch(e) { const id = 'local_c_'+Date.now(); window.appState.cables.push({id, ...cableData}); window.renderMap(); return id; } 
         };
         
+        // CORREÇÃO: Transforma path em arrays compatíveis local/remoto para o arrasto de caixa
         window.updateCableInFirebase = async (id, cableData) => { 
             let localData = { ...cableData };
             if(localData.path && localData.path.length > 0) {
@@ -648,21 +648,43 @@
 
         window.saveOLTToFirebase = async (data) => { if(!db || !auth || !auth.currentUser) { window.appState.olts.push({id: 'local_olt_'+Date.now(), ...data}); window.openCanvasDiagram(); return; } try { await addDoc(getCollectionPath('olts'), data); } catch(e) {} };
         window.updateOLTInFirebase = async (id, data) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.olts.findIndex(s=>s.id===id); if(idx>-1) window.appState.olts[idx] = {...window.appState.olts[idx], ...data}; window.openCanvasDiagram(); return; } try { await updateDoc(getDocPath('olts', id), data); } catch(e) { } };
+        
         window.deleteOLT = async function(id) {
             if(confirm("Remover OLT? As fusões conectadas serão perdidas.")) {
-                if(db && auth && auth.currentUser && !id.startsWith('local_')) { await deleteDoc(getDocPath('olts', id)); const fusions = window.appState.fusions.filter(f => f.from.includes(id) || f.to.includes(id)); for(let f of fusions) await deleteDoc(getDocPath('fusions', f.id)); }
-                else { window.appState.olts = window.appState.olts.filter(s => s.id !== id); window.appState.fusions = window.appState.fusions.filter(f => !f.from.includes(id) && !f.to.includes(id)); window.openCanvasDiagram(); }
+                if(db && auth && auth.currentUser && !id.startsWith('local_')) { 
+                    try {
+                        await deleteDoc(getDocPath('olts', id)); 
+                        const fusions = window.appState.fusions.filter(f => f.from.includes(id) || f.to.includes(id)); 
+                        for(let f of fusions) await deleteDoc(getDocPath('fusions', f.id)); 
+                    } catch(e) { console.error(e); }
+                } else { 
+                    window.appState.olts = window.appState.olts.filter(s => s.id !== id); 
+                    window.appState.fusions = window.appState.fusions.filter(f => !f.from.includes(id) && !f.to.includes(id)); 
+                }
                 window.showToast('OLT removida.');
+                window.openCanvasDiagram();
+                window.calculateNetworkPower();
             }
         };
 
         window.saveDIOToFirebase = async (data) => { if(!db || !auth || !auth.currentUser) { window.appState.dios.push({id: 'local_dio_'+Date.now(), ...data}); window.openCanvasDiagram(); return; } try { await addDoc(getCollectionPath('dios'), data); } catch(e) {} };
         window.updateDIOInFirebase = async (id, data) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.dios.findIndex(s=>s.id===id); if(idx>-1) window.appState.dios[idx] = {...window.appState.dios[idx], ...data}; window.openCanvasDiagram(); return; } try { await updateDoc(getDocPath('dios', id), data); } catch(e) { } };
+        
         window.deleteDIO = async function(id) {
             if(confirm("Remover DIO? As fusões conectadas serão perdidas.")) {
-                if(db && auth && auth.currentUser && !id.startsWith('local_')) { await deleteDoc(getDocPath('dios', id)); const fusions = window.appState.fusions.filter(f => f.from.includes(id) || f.to.includes(id)); for(let f of fusions) await deleteDoc(getDocPath('fusions', f.id)); }
-                else { window.appState.dios = window.appState.dios.filter(s => s.id !== id); window.appState.fusions = window.appState.fusions.filter(f => !f.from.includes(id) && !f.to.includes(id)); window.openCanvasDiagram(); }
+                if(db && auth && auth.currentUser && !id.startsWith('local_')) { 
+                    try {
+                        await deleteDoc(getDocPath('dios', id)); 
+                        const fusions = window.appState.fusions.filter(f => f.from.includes(id) || f.to.includes(id)); 
+                        for(let f of fusions) await deleteDoc(getDocPath('fusions', f.id)); 
+                    } catch(e) { console.error(e); }
+                } else { 
+                    window.appState.dios = window.appState.dios.filter(s => s.id !== id); 
+                    window.appState.fusions = window.appState.fusions.filter(f => !f.from.includes(id) && !f.to.includes(id)); 
+                }
                 window.showToast('DIO removido.');
+                window.openCanvasDiagram();
+                window.calculateNetworkPower();
             }
         };
 
@@ -963,7 +985,7 @@
         // 6. MOTOR DO DIAGRAMA CANVAS OSP E LUZ
         // ==========================================
         
-        // NOVO: Botão Flutuante (Bolinha Azul) para Luz nas Fibras
+        // Botão Flutuante (Bolinha Azul) para Luz nas Fibras
         window.activePowerPort = null;
 
         window.showPowerCornerBtn = function(e, portId) {
@@ -1016,6 +1038,25 @@
             document.getElementById('diagram-canvas').style.transform = `scale(${window.appState.diagramZoom})`;
         };
 
+        // CORREÇÃO: Delete Splitter com Força Bruta Visual
+        window.deleteSplitter = async function(id) {
+            if(confirm('Deseja excluir este splitter e perder as conexões dele?')) {
+                if(db && auth && auth.currentUser && !id.startsWith('local_')) { 
+                    try {
+                        await deleteDoc(getDocPath('splitters', id)); 
+                        const connectedFusions = window.appState.fusions.filter(f => f.from.includes(id) || f.to.includes(id));
+                        for(let f of connectedFusions) { await deleteDoc(getDocPath('fusions', f.id)); }
+                    } catch(e) { console.error(e); }
+                } else { 
+                    window.appState.splitters = window.appState.splitters.filter(s => s.id !== id); 
+                    window.appState.fusions = window.appState.fusions.filter(f => !f.from.includes(id) && !f.to.includes(id)); 
+                }
+                window.showToast('Splitter removido.', 'sucesso');
+                window.openCanvasDiagram(); 
+                window.calculateNetworkPower(); 
+            }
+        };
+
         window.deletarFusao = async function(id) {
             if(confirm('Deseja excluir esta conexão?')) {
                 if(db && auth && auth.currentUser && !id.startsWith('local_')) { await deleteDoc(getDocPath('fusions', id)); } 
@@ -1034,6 +1075,31 @@
                 window.showToast("Potência atualizada!");
                 window.calculateNetworkPower();
             }
+        };
+
+        // CORREÇÃO: Força o Redraw em Rotação
+        window.rotateBlock = async function(type = window.activeContextMenuType, id = window.activeContextMenuId) {
+            let newRot;
+            if(type === 'splitter') {
+                const sp = window.appState.splitters.find(s => s.id === id); if(!sp) return;
+                newRot = (sp.rotation || 0) + 90; if(newRot >= 360) newRot = 0;
+                await window.updateSplitterInFirebase(id, { rotation: newRot });
+            } else if(type === 'cable') {
+                const cb = window.appState.cables.find(c => c.id === id); if(!cb) return;
+                let diag = cb.diagram || {}; let currentRot = diag[window.appState.selectedNodeId]?.rotation || 0;
+                newRot = currentRot + 90; if(newRot >= 360) newRot = 0;
+                diag[window.appState.selectedNodeId] = { ...diag[window.appState.selectedNodeId], rotation: newRot };
+                await window.updateCableInFirebase(id, { diagram: diag });
+            } else if(type === 'olt') {
+                const olt = window.appState.olts.find(s => s.id === id); if(!olt) return;
+                newRot = (olt.rotation || 0) + 90; if(newRot >= 360) newRot = 0;
+                await window.updateOLTInFirebase(id, { rotation: newRot });
+            } else if(type === 'dio') {
+                const dio = window.appState.dios.find(s => s.id === id); if(!dio) return;
+                newRot = (dio.rotation || 0) + 90; if(newRot >= 360) newRot = 0;
+                await window.updateDIOInFirebase(id, { rotation: newRot });
+            }
+            window.openCanvasDiagram();
         };
 
         window.toggleSide = async function() {
@@ -1091,6 +1157,16 @@
             const nextNode = window.appState.nodes.find(n => n.id === nextNodeId);
             if(nextNode) { window.closeCanvasDiagram(); setTimeout(() => { map.flyTo([nextNode.lat, nextNode.lng], 18); window.openInfoCard(nextNode); }, 100); } 
             else { window.showToast("Destino não encontrado.", "erro"); }
+        };
+
+        // CORREÇÃO: Adicionar Splitter e forçar atualização visual
+        window.addSplitterToDiagram = async function(type) {
+            if(!window.appState.selectedNodeId) return; 
+            window.showToast(`Adicionando Splitter ${type}...`);
+            const existingSp = window.appState.splitters.filter(s => s.nodeId === window.appState.selectedNodeId);
+            const newY = 150 + (existingSp.length * 90);
+            await window.saveSplitterToFirebase({ nodeId: window.appState.selectedNodeId, type: type, x: 450, y: newY, rotation: 0, flipped: false, sideFlipped: false });
+            window.openCanvasDiagram();
         };
 
         window.promptAddOLT = async function() {
@@ -1200,10 +1276,7 @@
                     let orig = el.getAttribute('data-orig-title') || el.getAttribute('title') || '';
                     if(!el.hasAttribute('data-orig-title')) el.setAttribute('data-orig-title', orig);
                     
-                    // Coloca a Luz no Balão do mouse para leitura rapida (se necessário)
                     el.setAttribute('title', `${orig.split(' |')[0]} | Luz: ${powers[portId].toFixed(2)} dBm`);
-                    
-                    // Acende o brilho da porta indicando que tem luz passando ali
                     el.style.boxShadow = '0 0 4px 1px rgba(34, 197, 94, 0.7)';
                 });
             }
@@ -1218,20 +1291,10 @@
             });
         };
 
-        // Adiciona Spacing (Off-set Y) Inteligente em Splitters novos
-        window.addSplitterToDiagram = async function(type) {
-            if(!window.appState.selectedNodeId) return; 
-            window.showToast(`Adicionando Splitter ${type}...`);
-            const existingSp = window.appState.splitters.filter(s => s.nodeId === window.appState.selectedNodeId);
-            const newY = 150 + (existingSp.length * 90);
-            await window.saveSplitterToFirebase({ nodeId: window.appState.selectedNodeId, type: type, x: 450, y: newY, rotation: 0, flipped: false, sideFlipped: false });
-        };
-
         window.openCanvasDiagram = function() { 
             const node = window.appState.nodes.find(n => n.id === window.appState.selectedNodeId); if(!node) return; 
             document.getElementById('diag-toolbar-title').innerText = node.name; document.getElementById('diag-center-name').innerText = node.name; 
             
-            // Botões OLT/DIO Visíveis apenas em POP/DC
             const isDC = (node.type === 'POP / DC' || node.type === 'DC');
             document.getElementById('btn-add-olt').style.display = isDC ? 'flex' : 'none';
             document.getElementById('btn-add-dio').style.display = isDC ? 'flex' : 'none';
@@ -1258,7 +1321,7 @@
             }); 
             
             const mySplitters = window.appState.splitters.filter(s => s.nodeId === node.id);
-            mySplitters.forEach((sp) => { window.createSplitterBlock(canvas, sp, sp.x || 450, sp.y || 150, sp.rotation || 0, sp.flipped || false, sp.sideFlipped || false); });
+            mySplitters.forEach((sp, index) => { window.createSplitterBlock(canvas, sp, sp.x || 450, sp.y || (100 + index * 100), sp.rotation || 0, sp.flipped || false, sp.sideFlipped || false); });
 
             const myOLTs = window.appState.olts.filter(o => o.nodeId === node.id);
             myOLTs.forEach((olt, index) => { window.createOLTBlock(canvas, olt, olt.x || 150, olt.y || (100 + index * 100), olt.rotation || 0, olt.flipped || false, olt.sideFlipped || false); });
