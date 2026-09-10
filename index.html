@@ -1380,13 +1380,8 @@
                 if (isVisible === undefined) isVisible = true;
 
                 if (isVisible) {
-                    const isBig = (n.type === 'POP / DC' || n.type === 'DC' || n.type === 'CEO');
-                    const size = isBig ? 32 : 16;
-                    const innerSize = isBig ? 26 : 12;
-                    const fontSize = isBig ? 13 : 8;
-                    const anchor = isBig ? 16 : 8;
                     const shape = (n.type === 'POP / DC' || n.type === 'DC') ? 'rounded-lg' : (n.type === 'CEO' ? 'rounded-full' : 'rounded');
-                    const iconHtml = L.divIcon({ html: `<div class="map-icon-wrapper ${shape}" style="width: ${size}px; height: ${size}px; border-color: ${n.color}; cursor: ${isMovable ? 'grab' : 'pointer'}"><div style="background-color: ${n.color}; width: ${innerSize}px; height: ${innerSize}px; display: flex; align-items: center; justify-content: center; color: white; font-size: ${fontSize}px;" class="${shape}"><i class="fa-solid ${n.icon}"></i></div></div>`, className: '', iconSize: [size, size], iconAnchor: [anchor, anchor] });
+                    const iconHtml = L.divIcon({ html: `<div class="map-icon-wrapper ${shape}" style="width: 32px; height: 32px; border-color: ${n.color}; cursor: ${isMovable ? 'grab' : 'pointer'}"><div style="background-color: ${n.color}; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px;" class="${shape}"><i class="fa-solid ${n.icon}"></i></div></div>`, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
                     const marker = L.marker([n.lat, n.lng], { icon: iconHtml, draggable: isMovable }).addTo(nodesLayer); 
                     marker.bindTooltip(`<div style="font-weight: 800; font-size: 11px; color: var(--text-primary); text-shadow: 1px 1px 0px var(--bg-card), -1px -1px 0px var(--bg-card), 1px -1px 0px var(--bg-card), -1px 1px 0px var(--bg-card);">${n.name}</div>`, { permanent: true, direction: 'bottom', className: 'transparent-tooltip', offset: [0, 5] }).openTooltip();
                     marker.on('click', (e) => { L.DomEvent.stopPropagation(e); window.handleNodeInteraction(n, 'click'); }); 
