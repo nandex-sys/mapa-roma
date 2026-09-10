@@ -108,7 +108,7 @@
         .modal-header h2 { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
         .modal-body { padding: 24px; max-height: 70vh; overflow-y: auto; }
         .input-label { display: block; font-size: 11px; font-weight: 700; color: #6b7280; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
-        .custom-input { width: 100%; padding: 12px 16px; border: 2px solid #0ea5e9; border-radius: 8px; font-size: 14px; font-weight: 600; color: #111827; outline: none; transition: border-color 0.2s; }
+        .custom-input { width: 100%; padding: 12px 16px; border: 2px solid #0ea5e9; border-radius: 8px; font-size: 14px; font-weight: 600; color: #111827; outline: none; transition: border-color 0.2s; margin-bottom: 16px; text-align: left;}
         .custom-input::placeholder { color: #94a3b8; font-weight: 500; }
         .structure-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
         .structure-btn { border: 1px solid #e2e8f0; background: white; border-radius: 8px; padding: 16px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font-size: 11px; font-weight: 700; color: #64748b; cursor: pointer; transition: all 0.2s; }
@@ -961,6 +961,7 @@
             const mySplitters = window.appState.splitters.filter(s => s.nodeId === node.id);
             
             if (node.type.includes('CTO') && mySplitters.length > 0) {
+                // CTO: puxar a potencia da porta de SAÍDA (OUT)
                 let maxOut = undefined;
                 for(let sp of mySplitters) {
                     let outs = parseInt(sp.type.split('x')[1]);
@@ -970,9 +971,11 @@
                     }
                 }
                 pwrValue = maxOut;
-            } else if (mySplitters.length > 0) {
+            } else if (node.type.includes('CEO') && mySplitters.length > 0) {
+                // CEO com splitter: puxar da porta de ENTRADA (IN) do splitter
                 pwrValue = window.appState.portPowers[`sp-${mySplitters[0].id}-in`];
             } else {
+                // CEO sem splitter, DC, POP, ou fallback: Puxar do cabo de entrada/passagem ou TX
                 const myOlts = window.appState.olts.filter(o => o.nodeId === node.id);
                 if (myOlts.length > 0) {
                     pwrValue = parseFloat(myOlts[0].tx);
@@ -1167,6 +1170,7 @@
             iconC.style.backgroundColor = node.color + '15'; 
             document.getElementById('card-icon').className = `fa-solid ${node.icon}`; 
 
+            // Mocks do print (podem ser ligados ao banco no futuro)
             document.getElementById('card-det-servico').innerText = 'Atendimento FTTH';
             document.getElementById('card-det-equip').innerText = 'Passivo';
             document.getElementById('card-det-dio').innerText = 'N/A';
@@ -1597,6 +1601,43 @@
             document.getElementById('btn-add-dio').style.display = isDC ? 'flex' : 'none';
 
             const incoming = window.appState.cables.filter(c => c.endNode === node.id); const outgoing = window.appState.cables.filter(c => c.startNode === node.id); 
+            
+            // ==========================================
+            // AUTO CURA DE PORTAS (LIMPA FUSÕES FANTASMAS)
+            // ==========================================
+            const validPorts = new Set();
+            validPorts.add('dead_end');
+            window.appState.splitters.filter(s => s.nodeId === node.id).forEach(sp => {
+                validPorts.add(`sp-${sp.id}-in`);
+                let outs = parseInt(sp.type.split('x')[1]);
+                for(let i=0; i<outs; i++) validPorts.add(`sp-${sp.id}-out-${i}`);
+            });
+            [...incoming, ...outgoing].forEach(c => {
+                for(let i=0; i<c.capacity; i++) validPorts.add(`port-${c.id}-${i}`);
+            });
+            window.appState.olts.filter(o => o.nodeId === node.id).forEach(o => {
+                for(let i=0; i<o.pons; i++) validPorts.add(`olt-${o.id}-pon-${i}`);
+            });
+            window.appState.dios.filter(d => d.nodeId === node.id).forEach(d => {
+                for(let i=0; i<d.ports; i++) { validPorts.add(`dio-${d.id}-in-${i}`); validPorts.add(`dio-${d.id}-out-${i}`); }
+            });
+
+            const fusionsToKeep = [];
+            window.appState.fusions.forEach(f => {
+                if(f.nodeId === node.id) {
+                    if(!validPorts.has(f.from) || !validPorts.has(f.to)) {
+                        if(typeof db !== 'undefined' && auth && auth.currentUser && !f.id.startsWith('local_')) {
+                            deleteDoc(getDocPath('fusions', f.id)).catch(e=>console.log(e));
+                        }
+                    } else {
+                        fusionsToKeep.push(f);
+                    }
+                } else {
+                    fusionsToKeep.push(f);
+                }
+            });
+            window.appState.fusions = fusionsToKeep;
+
             const canvas = document.getElementById('diagram-canvas'); 
             const blocks = canvas.querySelectorAll('.cable-block, .splitter-block, .splitter-tri, .olt-block, .dio-block'); blocks.forEach(b => b.remove()); 
             
