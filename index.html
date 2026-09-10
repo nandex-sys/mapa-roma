@@ -1165,11 +1165,25 @@
             if (window.appState.mode === 'placing_node') { 
                 const internalState = { hasDIO: false, splitters: [] }; 
                 if(window.appState.nodeSetup.type.includes('CTO') && window.appState.nodeSetup.splitter) internalState.splitters.push({ type: window.appState.nodeSetup.splitter, id: 'SPL001' }); 
+                let baseName = window.appState.nodeSetup.name;
+                while(window.appState.nodes.some(n => n.projectId === window.appState.currentProjectId && n.name.toLowerCase() === baseName.toLowerCase())) {
+                    const m = baseName.match(/^(.*? )(\d+)(.*)$/);
+                    if(m) { baseName = m[1] + String(parseInt(m[2], 10) + 1).padStart(m[2].length, '0') + m[3]; }
+                    else { baseName += " 2"; }
+                }
+                window.appState.nodeSetup.name = baseName;
+
                 const newId = await window.saveNodeToFirebase({ projectId: window.appState.currentProjectId, name: window.appState.nodeSetup.name, type: window.appState.nodeSetup.type, icon: window.appState.nodeSetup.icon, color: window.appState.nodeSetup.color, lat: e.latlng.lat, lng: e.latlng.lng, internal: internalState }); 
                 await window.checkAndSplitCable({ id: newId, lat: e.latlng.lat, lng: e.latlng.lng, name: window.appState.nodeSetup.name });
-                const match = window.appState.nodeSetup.name.match(/^(.*? )(\d+)(.*)$/); 
-                if (match) { window.appState.nodeSetup.name = match[1] + String(parseInt(match[2], 10) + 1).padStart(match[2].length, '0') + match[3]; } 
-                else { window.appState.nodeSetup.name += " 2"; } 
+                
+                let nextName = window.appState.nodeSetup.name;
+                do {
+                    const match = nextName.match(/^(.*? )(\d+)(.*)$/); 
+                    if (match) { nextName = match[1] + String(parseInt(match[2], 10) + 1).padStart(match[2].length, '0') + match[3]; } 
+                    else { nextName += " 2"; } 
+                } while(window.appState.nodes.some(n => n.projectId === window.appState.currentProjectId && n.name.toLowerCase() === nextName.toLowerCase()));
+                window.appState.nodeSetup.name = nextName;
+
                 document.getElementById('instruction-text').innerHTML = `Clique para inserir <b>${window.appState.nodeSetup.name}</b>.`; 
             } else if (window.appState.mode === 'drawing_cable') { 
                 if (window.appState.cableStartNodeId !== null && !window.appState.snapNodePos) { 
@@ -1419,10 +1433,20 @@
             
             if(window.appState.nodeSetup.type.includes('CTO')) {
                 window.appState.nodeSetup.color = '#a855f7'; window.appState.nodeSetup.splitter = '1x8';
-                document.querySelectorAll('.color-btn').forEach(b => { b.classList.remove('selected'); if(b.style.backgroundColor.includes('a855f7') || b.style.backgroundColor === 'rgb(168, 85, 247)') { b.classList.add('selected'); } });
                 document.querySelectorAll('.splitter-pill').forEach(p => p.classList.remove('selected'));
                 const pill1x8 = document.querySelector('.splitter-pill[data-val="1x8"]'); if(pill1x8) pill1x8.classList.add('selected');
+            } else if(window.appState.nodeSetup.type === 'POP / DC' || window.appState.nodeSetup.type === 'DC') {
+                window.appState.nodeSetup.color = '#000000'; window.appState.nodeSetup.splitter = null;
+            } else if(window.appState.nodeSetup.type === 'CEO') {
+                window.appState.nodeSetup.color = '#ef4444'; window.appState.nodeSetup.splitter = null;
+            } else if(window.appState.nodeSetup.type === 'Reserva') {
+                window.appState.nodeSetup.color = '#737373'; window.appState.nodeSetup.splitter = null;
+            } else {
+                window.appState.nodeSetup.splitter = null;
             }
+            
+            const p = document.getElementById('caixa-color-palette'); p.innerHTML = '';
+            THEME_COLORS.forEach(c => { const b = document.createElement('div'); b.className = `color-btn ${c === window.appState.nodeSetup.color ? 'selected' : ''}`; b.style.backgroundColor = c; b.onclick = () => { document.querySelectorAll('.color-btn').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); window.appState.nodeSetup.color = c; }; p.appendChild(b); });
 
             if(!window.appState.editingNodeId) {
                 const type = window.appState.nodeSetup.type;
