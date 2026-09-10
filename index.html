@@ -447,9 +447,22 @@
                 <div class="w-px h-6 bg-gray-200 mx-1"></div>
                 <button class="tool-btn" id="btn-mover" onclick="window.setMode('move')"><i class="fa-solid fa-arrows-up-down-left-right"></i> MOVER</button>
                 <button class="tool-btn" id="btn-mover" onclick="window.setMode('move')"><i class="fa-solid fa-arrows-up-down-left-right"></i> MOVER</button>
-                <!-- NOVO BOTÃO DE MEDIÇÃO -->
+                <!-- MENU DE MEDIÇÃO COM OPÇÕES -->
                 <div class="w-px h-6 bg-gray-200 mx-1"></div>
-                <button class="tool-btn" id="btn-medir" onclick="window.setMode('measure')"><i class="fa-solid fa-ruler"></i> MEDIR</button>
+                <div style="position: relative; display: inline-block;">
+                    <button class="tool-btn" id="btn-medir" onclick="document.getElementById('measure-menu').style.display = document.getElementById('measure-menu').style.display === 'flex' ? 'none' : 'flex';">
+                        <i class="fa-solid fa-ruler"></i> MEDIR <i class="fa-solid fa-chevron-down text-[10px] ml-1"></i>
+                    </button>
+                    <!-- Caixinha que desce -->
+                    <div id="measure-menu" style="display: none; position: absolute; top: 100%; left: 0; margin-top: 4px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); flex-direction: column; width: 170px; z-index: 2000; overflow: hidden;">
+                        <button class="tool-btn" style="width: 100%; border-radius: 0; border-bottom: 1px solid #f3f4f6; justify-content: flex-start;" onclick="document.getElementById('measure-menu').style.display='none'; window.setMode('measure_cable')">
+                            <i class="fa-solid fa-share-nodes text-blue-500"></i> Somar Cabos
+                        </button>
+                        <button class="tool-btn" style="width: 100%; border-radius: 0; justify-content: flex-start;" onclick="document.getElementById('measure-menu').style.display='none'; window.setMode('measure_map')">
+                            <i class="fa-solid fa-route text-orange-500"></i> Medir Distância
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
