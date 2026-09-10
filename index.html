@@ -94,7 +94,7 @@
         .rt-btn:hover { background: #f3f4f6; color: #111827; }
         .rt-btn.active { background: #2563eb; color: white; }
 
-        /* NOVO INFO CARD (MAPA) IDÊNTICO AO PRINT */
+        /* INFO CARD MODIFICADO DE ACORDO COM O PRINT */
         .info-card { position: absolute; top: 80px; left: 20px; background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); z-index: 1000; display: none; border: 1px solid #f3f4f6; padding: 0; overflow: hidden; width: 340px; }
         .action-buttons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
         .btn-primary-blue { background-color: #2563eb; color: white; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s; border: none; }
@@ -583,7 +583,6 @@
 
     <div id="inside-plant-view"><div id="diagram-content-isp"></div></div>
     <div id="toast-container"></div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -960,7 +959,18 @@
             let pwrValue = undefined;
 
             const mySplitters = window.appState.splitters.filter(s => s.nodeId === node.id);
-            if (mySplitters.length > 0) {
+            
+            if (node.type.includes('CTO') && mySplitters.length > 0) {
+                let maxOut = undefined;
+                for(let sp of mySplitters) {
+                    let outs = parseInt(sp.type.split('x')[1]);
+                    for(let i=0; i<outs; i++) {
+                        let pw = window.appState.portPowers[`sp-${sp.id}-out-${i}`];
+                        if(pw !== undefined && (maxOut === undefined || pw > maxOut)) maxOut = pw;
+                    }
+                }
+                pwrValue = maxOut;
+            } else if (mySplitters.length > 0) {
                 pwrValue = window.appState.portPowers[`sp-${mySplitters[0].id}-in`];
             } else {
                 const myOlts = window.appState.olts.filter(o => o.nodeId === node.id);
@@ -1067,7 +1077,8 @@
                 }
             }); 
         };
-window.openModal = function(type) { 
+
+        window.openModal = function(type) { 
             window.setMode('view'); 
             if(type === 'caixa') { 
                 window.appState.editingNodeId = null; document.getElementById('modal-caixa-title').innerHTML = '<i class="fa-solid fa-location-dot text-cyan-500 mr-1"></i> Nova Caixa/Prédio'; document.getElementById('btn-caixa-submit').innerText = 'Ancorar no Mapa'; 
@@ -1156,7 +1167,6 @@ window.openModal = function(type) {
             iconC.style.backgroundColor = node.color + '15'; 
             document.getElementById('card-icon').className = `fa-solid ${node.icon}`; 
 
-            // Dados da caixa pro info card
             document.getElementById('card-det-servico').innerText = 'Atendimento FTTH';
             document.getElementById('card-det-equip').innerText = 'Passivo';
             document.getElementById('card-det-dio').innerText = 'N/A';
@@ -1196,58 +1206,10 @@ window.openModal = function(type) {
         window.copyCoords = function() { navigator.clipboard.writeText(document.getElementById('card-coords').innerText); window.showToast("Copiado!"); };
         window.showToast = function(msg, type='info') { const c = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast-msg show'; t.innerHTML = `<i class="fa-solid fa-info-circle text-blue-400"></i> <span>${msg}</span>`; c.appendChild(t); setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 300); }, 3000); };
 
-        window.updateInfoCardPower = function(node) {
-            window.calculateNetworkPower();
-            let pwrValue = undefined;
-
-            const mySplitters = window.appState.splitters.filter(s => s.nodeId === node.id);
-            if (mySplitters.length > 0) {
-                pwrValue = window.appState.portPowers[`sp-${mySplitters[0].id}-in`];
-            } else {
-                const myOlts = window.appState.olts.filter(o => o.nodeId === node.id);
-                if (myOlts.length > 0) {
-                    pwrValue = parseFloat(myOlts[0].tx);
-                } else {
-                    const connectedCables = window.appState.cables.filter(c => c.endNode === node.id || c.startNode === node.id);
-                    for(let c of connectedCables) {
-                        for(let i=0; i<c.capacity; i++) {
-                            let pw = window.appState.portPowers[`port-${c.id}-${i}`];
-                            if(pw !== undefined && (pwrValue === undefined || pw > pwrValue)) pwrValue = pw;
-                        }
-                    }
-                }
-            }
-
-            let section = document.getElementById('card-power-section');
-            if (pwrValue !== undefined) {
-                let statusMsg = pwrValue > -25 ? "Sinal Excelente" : "Sinal Crítico";
-                let statusColor = pwrValue > -25 ? "text-[#34d399]" : "text-yellow-500";
-                
-                section.innerHTML = `
-                    <div class="bg-[#ecfdf5] border border-[#a7f3d0] rounded-xl p-4 flex justify-between items-center shadow-sm">
-                        <div>
-                            <div class="text-[10px] font-black text-[#059669] uppercase tracking-wider">Estimativa de Sinal</div>
-                            <div class="text-[10px] font-bold ${statusColor} mt-1">${statusMsg}</div>
-                        </div>
-                        <div class="text-xl font-black text-[#059669]">${pwrValue.toFixed(2)} dBm</div>
-                    </div>
-                `;
-            } else {
-                section.innerHTML = `
-                    <div class="bg-red-50 border border-red-200 rounded-xl p-4 flex justify-between items-center shadow-sm">
-                        <div>
-                            <div class="text-[10px] font-black text-red-600 uppercase tracking-wider">Estimativa de Sinal</div>
-                            <div class="text-[10px] font-bold text-red-400 mt-1">Sem Sinal / Rompido</div>
-                        </div>
-                        <div class="text-xl font-black text-red-600">-- dBm</div>
-                    </div>
-                `;
-            }
-        };
-
         // ==========================================
         // 6. MOTOR DO DIAGRAMA CANVAS OSP E LUZ
         // ==========================================
+        
         window.activePowerPort = null;
 
         window.showPowerCornerBtn = function(e, portId) {
