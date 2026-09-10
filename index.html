@@ -50,9 +50,10 @@
         .home-header { height: 90px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0; }
         .home-content { flex-grow: 1; display: flex; flex-direction: column; position: relative; padding: 40px; }
         #projects-grid { display: flex; flex-wrap: wrap; gap: 24px; width: 100%; justify-content: flex-start; align-items: flex-start; }
-        .project-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; width: 280px; height: 160px; padding: 24px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
-        .project-card:hover { border-color: var(--brand-green); transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
-        .project-card::before { content: ''; position: absolute; top: -50px; right: -50px; width: 120px; height: 120px; background-color: var(--bg-main); border-radius: 50%; z-index: 0; opacity: 0.5; }
+        .project-card { background: linear-gradient(145deg, var(--bg-card), var(--bg-main)); border: 1px solid var(--border-color); border-radius: 20px; width: 300px; padding: 24px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+        .project-card:hover { border-color: var(--brand-green); transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05); }
+        .project-card::before { content: ''; position: absolute; top: -30px; right: -30px; width: 140px; height: 140px; background: linear-gradient(135deg, var(--brand-green) 0%, transparent 100%); border-radius: 50%; z-index: 0; opacity: 0.15; transition: transform 0.4s ease; }
+        .project-card:hover::before { transform: scale(1.2); opacity: 0.25; }
         #empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 60vh; border: 2px dashed var(--border-color); border-radius: 16px; background-color: var(--bg-dashed); }
         .btn-green { background-color: var(--brand-green); color: white; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px; border: none; }
         .btn-green:hover { background-color: var(--brand-green-hover); }
@@ -985,13 +986,22 @@
             const grid = document.getElementById('projects-grid'); const empty = document.getElementById('empty-state'); if(!grid || !empty) return;
             if(window.appState.projects.length === 0) { grid.style.display = 'none'; empty.style.display = 'flex'; } else {
                 empty.style.display = 'none'; grid.style.display = 'flex';
-                grid.innerHTML = window.appState.projects.map(p => `
+                grid.innerHTML = window.appState.projects.map(p => {
+                    const date = new Date(p.createdAt || Date.now()).toLocaleDateString('pt-BR');
+                    return `
                     <div class="project-card" onclick="window.abrirProjeto('${p.id}', ${p.lat}, ${p.lng})">
-                        <button class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition" style="z-index: 20;" onclick="window.deletarProjeto('${p.id}', event)" title="Deletar Projeto"><i class="fa-solid fa-trash"></i></button>
-                        <div class="relative z-10"><i class="fa-solid fa-map-location-dot text-3xl mb-3" style="color: var(--brand-green);"></i><h3 class="proj-title leading-tight">${p.name}</h3></div>
-                        <div class="relative z-10 mt-4 flex items-center justify-between border-t pt-3" style="border-color: var(--border-color);"><span class="proj-sub font-bold">ABRIR ENGENHARIA</span><i class="fa-solid fa-arrow-right" style="color: var(--text-muted);"></i></div>
+                        <button class="absolute top-4 right-4 text-slate-400 hover:bg-red-50 hover:text-red-500 w-8 h-8 rounded-full flex items-center justify-center transition-all z-20" onclick="window.deletarProjeto('${p.id}', event)" title="Deletar Projeto"><i class="fa-solid fa-trash"></i></button>
+                        <div class="relative z-10 flex flex-col gap-2">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-2 shadow-sm" style="background-color: var(--brand-green); color: white;"><i class="fa-solid fa-map-location-dot text-2xl"></i></div>
+                            <h3 class="text-lg font-black leading-tight" style="color: var(--text-primary);">${p.name}</h3>
+                            <p class="text-[10px] font-bold uppercase tracking-widest" style="color: var(--text-muted);"><i class="fa-regular fa-calendar mr-1"></i> Criado em ${date}</p>
+                        </div>
+                        <div class="relative z-10 mt-6 flex items-center justify-between border-t pt-4" style="border-color: var(--border-color);">
+                            <span class="text-xs font-bold flex items-center gap-2" style="color: var(--brand-green);"><i class="fa-solid fa-diagram-project"></i> Acessar Engenharia</span>
+                            <div class="w-6 h-6 rounded-full flex items-center justify-center" style="background-color: var(--bg-hover); color: var(--brand-green);"><i class="fa-solid fa-arrow-right text-[10px]"></i></div>
+                        </div>
                     </div>
-                `).join('');
+                `}).join('');
             }
         };
 
@@ -1370,8 +1380,13 @@
                 if (isVisible === undefined) isVisible = true;
 
                 if (isVisible) {
+                    const isBig = (n.type === 'POP / DC' || n.type === 'DC' || n.type === 'CEO');
+                    const size = isBig ? 32 : 16;
+                    const innerSize = isBig ? 26 : 12;
+                    const fontSize = isBig ? 13 : 8;
+                    const anchor = isBig ? 16 : 8;
                     const shape = (n.type === 'POP / DC' || n.type === 'DC') ? 'rounded-lg' : (n.type === 'CEO' ? 'rounded-full' : 'rounded');
-                    const iconHtml = L.divIcon({ html: `<div class="map-icon-wrapper ${shape}" style="width: 32px; height: 32px; border-color: ${n.color}; cursor: ${isMovable ? 'grab' : 'pointer'}"><div style="background-color: ${n.color}; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px;" class="${shape}"><i class="fa-solid ${n.icon}"></i></div></div>`, className: '', iconSize: [32, 32], iconAnchor: [16, 16] });
+                    const iconHtml = L.divIcon({ html: `<div class="map-icon-wrapper ${shape}" style="width: ${size}px; height: ${size}px; border-color: ${n.color}; cursor: ${isMovable ? 'grab' : 'pointer'}"><div style="background-color: ${n.color}; width: ${innerSize}px; height: ${innerSize}px; display: flex; align-items: center; justify-content: center; color: white; font-size: ${fontSize}px;" class="${shape}"><i class="fa-solid ${n.icon}"></i></div></div>`, className: '', iconSize: [size, size], iconAnchor: [anchor, anchor] });
                     const marker = L.marker([n.lat, n.lng], { icon: iconHtml, draggable: isMovable }).addTo(nodesLayer); 
                     marker.bindTooltip(`<div style="font-weight: 800; font-size: 11px; color: var(--text-primary); text-shadow: 1px 1px 0px var(--bg-card), -1px -1px 0px var(--bg-card), 1px -1px 0px var(--bg-card), -1px 1px 0px var(--bg-card);">${n.name}</div>`, { permanent: true, direction: 'bottom', className: 'transparent-tooltip', offset: [0, 5] }).openTooltip();
                     marker.on('click', (e) => { L.DomEvent.stopPropagation(e); window.handleNodeInteraction(n, 'click'); }); 
