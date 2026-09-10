@@ -446,11 +446,40 @@
                 <button class="tool-btn" id="btn-cabo" onclick="window.openModal('cabo')"><i class="fa-solid fa-share-nodes"></i> CABO</button>
                 <div class="w-px h-6 bg-gray-200 mx-1"></div>
                 <button class="tool-btn" id="btn-mover" onclick="window.setMode('move')"><i class="fa-solid fa-arrows-up-down-left-right"></i> MOVER</button>
+                <button class="tool-btn" id="btn-mover" onclick="window.setMode('move')"><i class="fa-solid fa-arrows-up-down-left-right"></i> MOVER</button>
+                <!-- NOVO BOTÃO DE MEDIÇÃO -->
+                <div class="w-px h-6 bg-gray-200 mx-1"></div>
+                <button class="tool-btn" id="btn-medir" onclick="window.setMode('measure')"><i class="fa-solid fa-ruler"></i> MEDIR</button>
             </div>
         </div>
 
         <div class="right-toolbar"><button class="rt-btn" onclick="window.toggleMapLayer()" title="Alternar Mapa (Satélite / Rua)"><i class="fa-solid fa-earth-americas"></i></button></div>
         <div class="instruction-banner" id="instruction-banner"><i class="fa-solid fa-circle-info text-blue-400"></i><span id="instruction-text">Clique no mapa...</span><button class="ml-4 bg-white/20 hover:bg-white/30 px-3 py-1 rounded text-xs" onclick="window.setMode('view')">Cancelar</button></div>
+        <!-- PAINEL DA TRENA DIGITAL -->
+        <div id="measure-panel">
+            <i class="fa-solid fa-ruler"></i> Distância Total: <span id="measure-total">0 m</span>
+        </div>
+
+        <!-- NOVO BOTÃO LARANJA PARA CABO SELECIONADO NO MAPA -->
+        <div id="fixed-cable-btn" onclick="window.openCableInfoModal()">
+            <i class="fa-solid fa-share-nodes"></i>
+        </div>
+
+        <!-- NOVO MODAL PARA CABO SELECIONADO -->
+        <div class="generic-modal" id="cable-info-modal" style="z-index: 20015;">
+            <div class="generic-modal-box" style="width: 320px;">
+                <div class="w-16 h-16 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center text-3xl mx-auto mb-4"><i class="fa-solid fa-share-nodes"></i></div>
+                <div class="g-modal-title" id="ci-title">Nome do Cabo</div>
+                <div id="ci-details" class="text-left text-sm text-gray-600 mb-6 space-y-2 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <!-- Preenchido via JS -->
+                </div>
+                <div class="flex gap-2">
+                    <button class="g-btn-cancel" style="flex: 1;" onclick="document.getElementById('cable-info-modal').style.display='none'">Fechar</button>
+                    <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg font-bold transition" style="flex: 1;" onclick="window.promptEditSelectedCable()">Editar</button>
+                    <button class="bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg font-bold transition" style="flex: 1;" onclick="window.promptDeleteSelectedCable()">Excluir</button>
+                </div>
+            </div>
+        </div>
 
         <!-- INFO CARD MODIFICADO DE ACORDO COM O PRINT -->
         <div class="info-card" id="info-card" style="padding: 0; overflow: hidden; width: 340px;">
