@@ -1229,6 +1229,12 @@
                             document.getElementById('fixed-cable-btn').style.display = 'flex';
                             document.getElementById('fixed-cable-btn').style.backgroundColor = c.color;
                         } else if (window.appState.mode === 'measure') {
+                            // Evita somar o mesmo cabo duas vezes na mesma rota
+                            if (linhaCabo.options.color === '#ef4444') {
+                                window.showToast("Cabo já adicionado à medição!", "aviso");
+                                return;
+                            }
+
                             const pathLen = window.calculateCableLength(c.path);
                             window.appState.measureTotalLength = (window.appState.measureTotalLength || 0) + pathLen;
                             
@@ -1237,11 +1243,8 @@
                             
                             document.getElementById('measure-total').innerText = totalLenStr;
                             
-                            // Efeito visual: Cabo pisca para confirmar que foi somado
-                            linhaCabo.setStyle({color: '#f97316', weight: 8});
-                            setTimeout(() => {
-                                if(window.appState.mode === 'measure') linhaCabo.setStyle({color: c.color, weight: 5});
-                            }, 400);
+                            // Efeito visual: Cabo fica VERMELHO fixo para indicar que faz parte da rota
+                            linhaCabo.setStyle({color: '#ef4444', weight: 8});
 
                             window.showToast(`Cabo de ${(pathLen*1000).toFixed(1)}m adicionado!`, "sucesso");
                         }
