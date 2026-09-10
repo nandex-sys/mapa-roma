@@ -189,6 +189,20 @@
         .sp-port { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; cursor: crosshair; color: white; transition: transform 0.1s, box-shadow 0.2s; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
         .sp-port:hover { transform: scale(1.3); z-index: 10; box-shadow: 0 0 0 2px white inset, 0 2px 4px rgba(0,0,0,0.3) !important; }
 
+        /* Animação Tracejada na Base das Fibras (Estilo Foto) */
+        .fiber-port::before, .sp-port::before { content: ''; position: absolute; top: 50%; margin-top: -1px; width: 10px; height: 2px; background-image: linear-gradient(to right, var(--trace-color, #94a3b8) 50%, transparent 50%); background-size: 6px 2px; opacity: 0; pointer-events: none; z-index: -1; }
+        .cable-block:not(.side-flipped) .fiber-port::before, .splitter-tri:not(.side-flipped) .out::before, .splitter-tri.side-flipped .in::before, .olt-block:not(.side-flipped) .fiber-port::before, .dio-block:not(.side-flipped) .out::before, .dio-block.side-flipped .in::before { right: 100%; margin-right: 3px; }
+        .cable-block.side-flipped .fiber-port::before, .splitter-tri:not(.side-flipped) .in::before, .splitter-tri.side-flipped .out::before, .olt-block.side-flipped .fiber-port::before, .dio-block:not(.side-flipped) .in::before, .dio-block.side-flipped .out::before { left: 100%; margin-left: 3px; }
+        
+        .anim-flow-in::before, .anim-flow-out::before { opacity: 1 !important; }
+        
+        .cable-block:not(.side-flipped) .anim-flow-in::before, .splitter-tri:not(.side-flipped) .out.anim-flow-in::before, .splitter-tri.side-flipped .in.anim-flow-in::before, .olt-block:not(.side-flipped) .fiber-port.anim-flow-in::before, .dio-block:not(.side-flipped) .out.anim-flow-in::before, .dio-block.side-flipped .in.anim-flow-in::before, .cable-block.side-flipped .anim-flow-out::before, .splitter-tri:not(.side-flipped) .in.anim-flow-out::before, .splitter-tri.side-flipped .out.anim-flow-out::before, .olt-block.side-flipped .fiber-port.anim-flow-out::before, .dio-block:not(.side-flipped) .in.anim-flow-out::before, .dio-block.side-flipped .out.anim-flow-out::before { animation: flow-left 0.4s linear infinite; }
+        
+        .cable-block:not(.side-flipped) .anim-flow-out::before, .splitter-tri:not(.side-flipped) .out.anim-flow-out::before, .splitter-tri.side-flipped .in.anim-flow-out::before, .olt-block:not(.side-flipped) .fiber-port.anim-flow-out::before, .dio-block:not(.side-flipped) .out.anim-flow-out::before, .dio-block.side-flipped .in.anim-flow-out::before, .cable-block.side-flipped .anim-flow-in::before, .splitter-tri:not(.side-flipped) .in.anim-flow-in::before, .splitter-tri.side-flipped .out.anim-flow-in::before, .olt-block.side-flipped .fiber-port.anim-flow-in::before, .dio-block:not(.side-flipped) .in.anim-flow-in::before, .dio-block.side-flipped .out.anim-flow-in::before { animation: flow-right 0.4s linear infinite; }
+        
+        @keyframes flow-right { from { background-position: 0 0; } to { background-position: 6px 0; } }
+        @keyframes flow-left { from { background-position: 0 0; } to { background-position: -6px 0; } }
+
         /* OLT E DIO NO CANVAS */
         .olt-block { border: 2px solid #0284c7; }
         .dio-block .sp-body-svg div { background: #94a3b8 !important; border-top: 2px solid #334155 !important; border-bottom: 2px solid #334155 !important; }
@@ -1833,7 +1847,14 @@
             window.appState.portPowers = powers;
             window.appState.portTraces = traces;
 
-            // 3. Efeito Visual: Tooltip (Balão) nas portas e Brilho verde
+            // 3. Efeito Visual: Tooltip (Balão) nas portas, Brilho verde e Animação Tracejada
+            document.querySelectorAll('.anim-flow-in, .anim-flow-out').forEach(el => {
+                el.classList.remove('anim-flow-in', 'anim-flow-out');
+                el.style.boxShadow = '';
+                let orig = el.getAttribute('data-orig-title');
+                if (orig) el.setAttribute('title', orig);
+            });
+
             for(let portId in powers) {
                 let els = document.querySelectorAll('#' + portId);
                 els.forEach(el => {
@@ -1841,6 +1862,23 @@
                     if(!el.hasAttribute('data-orig-title')) el.setAttribute('data-orig-title', orig);
                     el.setAttribute('title', `${orig.split(' |')[0]} | Luz: ${powers[portId].toFixed(2)} dBm`);
                     el.style.boxShadow = '0 0 4px 1px rgba(34, 197, 94, 0.7)';
+                    
+                    let color = window.getPortColor(portId);
+                    el.style.setProperty('--trace-color', color);
+                    
+                    let flowDir = 'out';
+                    if (portId.includes('olt-')) flowDir = 'out';
+                    else if (portId.includes('-in')) flowDir = 'in';
+                    else if (portId.includes('-out-')) flowDir = 'out';
+                    else {
+                        let partnerFusion = window.appState.fusions.find(f => f.from === portId || f.to === portId);
+                        if (partnerFusion && partnerFusion.to !== 'dead_end') {
+                            let partnerId = partnerFusion.from === portId ? partnerFusion.to : partnerFusion.from;
+                            let partnerPwr = powers[partnerId];
+                            if (partnerPwr !== undefined && partnerPwr > powers[portId]) flowDir = 'in';
+                        }
+                    }
+                    el.classList.add('anim-flow-' + flowDir);
                 });
             }
             
