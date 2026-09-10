@@ -279,6 +279,20 @@
         #fixed-power-btn { position: fixed; top: 100px; right: 30px; width: 60px; height: 60px; background: #3b82f6; border-radius: 50%; color: white; display: none; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 10px 25px rgba(59,130,246,0.5); z-index: 10000; transition: transform 0.2s, background 0.2s; animation: pulse-blue 2s infinite; }
         #fixed-power-btn:hover { transform: scale(1.1); background: #2563eb; }
         @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
+        /* Evita bordas/quadrados do leaflet ao focar em paths (cabos) */
+        .leaflet-container :focus { outline: none !important; }
+        path.leaflet-interactive:focus { outline: none !important; }
+
+        /* Cursor da trena */
+        .mode-measure #map-container { cursor: crosshair !important; }
+
+        /* NOVO BOTÃO LARANJA PARA CABO SELECIONADO NO MAPA */
+        #fixed-cable-btn { position: fixed; bottom: 100px; right: 30px; width: 60px; height: 60px; background: #f97316; border-radius: 50%; color: white; display: none; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 10px 25px rgba(249,115,22,0.5); z-index: 10000; transition: transform 0.2s, background 0.2s; animation: pulse-orange 2s infinite; }
+        #fixed-cable-btn:hover { transform: scale(1.1); background: #ea580c; }
+        @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(249, 115, 22, 0); } 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); } }
+
+        /* PAINEL DA TRENA (MEDIDA TOTAL) */
+        #measure-panel { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #f97316; color: white; padding: 12px 24px; border-radius: 30px; font-weight: 800; font-size: 16px; box-shadow: 0 10px 25px -5px rgba(249,115,22, 0.4); display: none; align-items: center; gap: 10px; z-index: 10001; }
     </style>
 </head>
 <body class="theme-light" onclick="window.hideContextMenu()">
@@ -432,11 +446,39 @@
                 <button class="tool-btn" id="btn-cabo" onclick="window.openModal('cabo')"><i class="fa-solid fa-share-nodes"></i> CABO</button>
                 <div class="w-px h-6 bg-gray-200 mx-1"></div>
                 <button class="tool-btn" id="btn-mover" onclick="window.setMode('move')"><i class="fa-solid fa-arrows-up-down-left-right"></i> MOVER</button>
+                <!-- NOVO BOTÃO DE MEDIÇÃO -->
+                <div class="w-px h-6 bg-gray-200 mx-1"></div>
+                <button class="tool-btn" id="btn-medir" onclick="window.setMode('measure')"><i class="fa-solid fa-ruler"></i> MEDIR</button>
             </div>
         </div>
 
         <div class="right-toolbar"><button class="rt-btn" onclick="window.toggleMapLayer()" title="Alternar Mapa (Satélite / Rua)"><i class="fa-solid fa-earth-americas"></i></button></div>
         <div class="instruction-banner" id="instruction-banner"><i class="fa-solid fa-circle-info text-blue-400"></i><span id="instruction-text">Clique no mapa...</span><button class="ml-4 bg-white/20 hover:bg-white/30 px-3 py-1 rounded text-xs" onclick="window.setMode('view')">Cancelar</button></div>
+        <!-- PAINEL DA TRENA DIGITAL -->
+        <div id="measure-panel">
+            <i class="fa-solid fa-ruler"></i> Distância Total: <span id="measure-total">0 m</span>
+        </div>
+
+        <!-- NOVO BOTÃO LARANJA PARA CABO SELECIONADO NO MAPA -->
+        <div id="fixed-cable-btn" onclick="window.openCableInfoModal()">
+            <i class="fa-solid fa-share-nodes"></i>
+        </div>
+
+        <!-- NOVO MODAL PARA CABO SELECIONADO -->
+        <div class="generic-modal" id="cable-info-modal" style="z-index: 20015;">
+            <div class="generic-modal-box" style="width: 320px;">
+                <div class="w-16 h-16 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center text-3xl mx-auto mb-4"><i class="fa-solid fa-share-nodes"></i></div>
+                <div class="g-modal-title" id="ci-title">Nome do Cabo</div>
+                <div id="ci-details" class="text-left text-sm text-gray-600 mb-6 space-y-2 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <!-- Preenchido via JS -->
+                </div>
+                <div class="flex gap-2">
+                    <button class="g-btn-cancel" style="flex: 1;" onclick="document.getElementById('cable-info-modal').style.display='none'">Fechar</button>
+                    <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg font-bold transition" style="flex: 1;" onclick="window.promptEditSelectedCable()">Editar</button>
+                    <button class="bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg font-bold transition" style="flex: 1;" onclick="window.promptDeleteSelectedCable()">Excluir</button>
+                </div>
+            </div>
+        </div>
 
         <!-- INFO CARD MODIFICADO DE ACORDO COM O PRINT -->
         <div class="info-card" id="info-card" style="padding: 0; overflow: hidden; width: 340px;">
@@ -606,6 +648,65 @@
 
         const THEME_COLORS = ['#0ea5e9', '#1d4ed8', '#f97316', '#ef4444', '#22c55e', '#eab308', '#a855f7', '#ec4899', '#000000', '#737373', '#78350f'];
         const FIBER_COLORS = ['#22c55e', '#eab308', '#cbd5e1', '#3b82f6', '#ef4444', '#a855f7', '#78350f', '#ec4899', '#111827', '#64748b', '#f97316', '#06b6d4'];
+        // Fórmula de Haversine para cálculo de metragem no globo terrestre
+        window.calculateCableLength = function(path) {
+            if(!path || path.length < 2) return 0;
+            const R = 6371; // Raio da Terra em km
+            let d = 0;
+            for(let i = 0; i < path.length - 1; i++) {
+                let p1 = path[i]; let p2 = path[i+1];
+                let lat1 = (p1.lat !== undefined) ? p1.lat : p1[0]; let lon1 = (p1.lng !== undefined) ? p1.lng : p1[1];
+                let lat2 = (p2.lat !== undefined) ? p2.lat : p2[0]; let lon2 = (p2.lng !== undefined) ? p2.lng : p2[1];
+                let dLat = (lat2 - lat1) * Math.PI / 180;
+                let dLon = (lon2 - lon1) * Math.PI / 180;
+                let a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+                let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                d += R * c;
+            }
+            return d; // Retorna km
+        };
+
+        window.activeCablePolyline = null;
+        window.selectedCableForModal = null;
+
+        window.openCableInfoModal = function() {
+            if(!window.selectedCableForModal) return;
+            const c = window.selectedCableForModal;
+            document.getElementById('ci-title').innerText = c.name;
+            
+            let lengthKm = window.calculateCableLength(c.path);
+            let lengthStr = lengthKm < 1 ? (lengthKm*1000).toFixed(0) + ' m' : lengthKm.toFixed(2) + ' km';
+            
+            document.getElementById('ci-details').innerHTML = `
+                <p><b class="text-gray-900">Capacidade:</b> ${c.capacity} Fibras</p>
+                <p><b class="text-gray-900">Metragem Total:</b> ${lengthStr}</p>
+                <p><b class="text-gray-900">Padrão:</b> ABNT</p>
+            `;
+            
+            document.getElementById('cable-info-modal').style.display = 'flex';
+            document.getElementById('fixed-cable-btn').style.display = 'none';
+        };
+        
+        window.promptEditSelectedCable = function() {
+            const c = window.selectedCableForModal;
+            window.showPrompt("Editar Cabo", [{label: "Novo nome do cabo", val: c.name}], async (results) => {
+                if(results[0]) {
+                    await window.updateCableInFirebase(c.id, { name: results[0] });
+                    window.showToast("Cabo atualizado!");
+                    document.getElementById('cable-info-modal').style.display = 'none';
+                }
+            });
+        };
+        
+        window.promptDeleteSelectedCable = function() {
+            const c = window.selectedCableForModal;
+            window.showConfirm("Excluir Cabo", `Tem certeza que deseja excluir o cabo "${c.name}"?`, "Excluir Definitivamente", async () => {
+                await window.deleteCableFromFirebase(c.id);
+                window.showToast("Cabo excluído.", "sucesso");
+                document.getElementById('cable-info-modal').style.display = 'none';
+                if(document.getElementById('diagram-view').style.display === 'flex') window.openCanvasDiagram();
+            });
+        };
 
         // Fórmula de Haversine para cálculo de metragem no globo terrestre
         window.calculateCableLength = function(path) {
@@ -934,16 +1035,50 @@
             }
         };
 
-        window.setMode = function(newMode) {
+         window.setMode = function(newMode) {
             window.appState.mode = newMode; document.body.className = document.body.className.replace(/mode-\w+/g, ''); document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-            const banner = document.getElementById('instruction-banner'); drawLayer.clearLayers(); window.appState.cablePath = []; window.appState.cableStartNodeId = null; window.appState.tempPolyline = null;
-            if (newMode === 'placing_node' || newMode === 'drawing_cable') { document.getElementById('map-container').classList.add('node-anchorable'); } else { document.getElementById('map-container').classList.remove('node-anchorable'); }
-            if (newMode === 'view' || newMode === 'move') { document.getElementById(newMode === 'view' ? 'btn-navegar' : 'btn-mover').classList.add('active'); map.dragging.enable(); banner.style.display = 'none'; } else if (newMode === 'placing_node') { document.body.classList.add('mode-placing'); document.getElementById('btn-caixa').classList.add('active'); map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Inserir <b>${window.appState.nodeSetup.name}</b>.`; } else if (newMode === 'drawing_cable') { document.body.classList.add('mode-drawing'); document.getElementById('btn-cabo').classList.add('active'); map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Selecione a <b>Caixa Inicial</b>.`; }
+            const banner = document.getElementById('instruction-banner'); drawLayer.clearLayers(); 
+            window.appState.cablePath = []; window.appState.cableStartNodeId = null; window.appState.tempPolyline = null;
+            
+            // Limpa Trena e Cabo Selecionado
+            window.appState.measurePath = [];
+            if(window.appState.measureTooltip) { map.removeLayer(window.appState.measureTooltip); window.appState.measureTooltip = null; }
+            document.getElementById('measure-panel').style.display = 'none';
+            document.getElementById('fixed-cable-btn').style.display = 'none';
+            if(window.activeCablePolyline) { window.activeCablePolyline.setStyle({color: window.activeCablePolyline.defaultColor, weight: 5}); window.activeCablePolyline = null; }
+
+            if (newMode === 'placing_node' || newMode === 'drawing_cable' || newMode === 'measure') { document.getElementById('map-container').classList.add('node-anchorable'); } 
+            else { document.getElementById('map-container').classList.remove('node-anchorable'); }
+            
+            if (newMode === 'view' || newMode === 'move') { 
+                document.getElementById(newMode === 'view' ? 'btn-navegar' : 'btn-mover').classList.add('active'); 
+                map.dragging.enable(); banner.style.display = 'none'; 
+            } else if (newMode === 'placing_node') { 
+                document.body.classList.add('mode-placing'); document.getElementById('btn-caixa').classList.add('active'); 
+                map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Inserir <b>${window.appState.nodeSetup.name}</b>.`; 
+            } else if (newMode === 'drawing_cable') { 
+                document.body.classList.add('mode-drawing'); document.getElementById('btn-cabo').classList.add('active'); 
+                map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Selecione a <b>Caixa Inicial</b>.`; 
+            } else if (newMode === 'measure') {
+                document.body.classList.add('mode-measure'); document.getElementById('btn-medir').classList.add('active');
+                map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Clique nos cabos para <b>somar as metragens</b>. (ESC para sair)`;
+                document.getElementById('measure-panel').style.display = 'flex';
+                document.getElementById('measure-total').innerText = '0 m';
+            }
+
             document.onkeydown = function(evt) { if (evt.key === "Escape") { window.setMode('view'); } };
             if(window.appState.currentProjectId) window.renderMap();
         };
 
-        map.on('mousemove', function(e) { if (window.appState.mode === 'drawing_cable' && window.appState.cableStartNodeId !== null) { const endPos = window.appState.snapNodePos ? window.appState.snapNodePos : [e.latlng.lat, e.latlng.lng]; const dynamicPath = [...window.appState.cablePath, endPos]; if (!window.appState.tempPolyline) { window.appState.tempPolyline = L.polyline(dynamicPath, { color: window.appState.cableSetup.color, weight: 4, opacity: 0.8, className: 'preview-line-active' }).addTo(drawLayer); } else { window.appState.tempPolyline.setLatLngs(dynamicPath); } } });
+        map.on('mousemove', function(e) { 
+            if (window.appState.mode === 'drawing_cable' && window.appState.cableStartNodeId !== null) { 
+                const endPos = window.appState.snapNodePos ? window.appState.snapNodePos : [e.latlng.lat, e.latlng.lng]; 
+                const dynamicPath = [...window.appState.cablePath, endPos]; 
+                if (!window.appState.tempPolyline) { window.appState.tempPolyline = L.polyline(dynamicPath, { color: window.appState.cableSetup.color, weight: 4, opacity: 0.8, className: 'preview-line-active' }).addTo(drawLayer); } 
+                else { window.appState.tempPolyline.setLatLngs(dynamicPath); } 
+            } 
+        });
+
         map.on('click', async function(e) { 
             if (window.appState.mode === 'placing_node') { 
                 const internalState = { hasDIO: false, splitters: [] }; 
@@ -959,7 +1094,11 @@
                     window.appState.cablePath.push([e.latlng.lat, e.latlng.lng]); 
                     if (window.appState.tempPolyline) window.appState.tempPolyline.setLatLngs(window.appState.cablePath); 
                 } 
-            } else { window.closeInfoCard(); document.getElementById('inventory-panel').style.display = 'none'; } 
+            } else { 
+                window.closeInfoCard(); document.getElementById('inventory-panel').style.display = 'none';
+                if(window.activeCablePolyline) { window.activeCablePolyline.setStyle({color: window.activeCablePolyline.defaultColor, weight: 5}); window.activeCablePolyline = null; }
+                document.getElementById('fixed-cable-btn').style.display = 'none'; 
+            } 
         });
 
         window.handleNodeInteraction = async function(node, eventType) { 
@@ -980,6 +1119,7 @@
             } else if (eventType === 'mouseover' && window.appState.mode === 'drawing_cable' && window.appState.cableStartNodeId !== null) { 
                 if(node.id !== window.appState.cableStartNodeId) { window.appState.snapNodePos = [node.lat, node.lng]; } 
             } else if (eventType === 'mouseout' && window.appState.mode === 'drawing_cable') { window.appState.snapNodePos = null; } 
+        };
         };
 
         window.updateInfoCardPower = function(node) {
@@ -1076,24 +1216,39 @@
                     const linhaCabo = L.polyline(c.path, { color: c.color, weight: 5, opacity: 0.9 }).addTo(cablesLayer);
                     linhaCabo.bindTooltip(`<b>${c.name}</b>`, {sticky: true});
                     
-                    // Cálculo da Metragem Real e Modal Interativo para o Cabo
-                    let lengthKm = window.calculateCableLength(c.path);
-                    let lengthStr = lengthKm < 1 ? (lengthKm*1000).toFixed(0) + ' m' : lengthKm.toFixed(2) + ' km';
-                    
-                    let popupHtml = `
-                        <div style="min-width: 180px; padding: 4px;">
-                            <h3 style="font-weight: 800; font-size: 14px; margin-bottom: 5px; color: #0f172a;">${c.name}</h3>
-                            <div style="font-size: 12px; color: #64748b; margin-bottom: 12px;">
-                                <p><b>Capacidade:</b> ${c.capacity} FO</p>
-                                <p><b>Metragem:</b> ~${lengthStr}</p>
-                            </div>
-                            <div style="display: flex; gap: 8px;">
-                                <button onclick="window.promptEditCable('${c.id}')" style="flex:1; background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; border-radius:6px; font-size:11px; font-weight:bold; color:#475569; cursor:pointer;">Editar</button>
-                                <button onclick="window.promptDeleteCable('${c.id}', '${c.name}')" style="flex:1; background:#fee2e2; border:none; padding:6px; border-radius:6px; font-size:11px; font-weight:bold; color:#ef4444; cursor:pointer;">Excluir</button>
-                            </div>
-                        </div>
-                    `;
-                    linhaCabo.bindPopup(popupHtml);
+                    linhaCabo.defaultColor = c.color;
+                    linhaCabo.on('click', (e) => { 
+                        L.DomEvent.stopPropagation(e);
+                        if (window.appState.mode === 'view') {
+                            if(window.activeCablePolyline) window.activeCablePolyline.setStyle({color: window.activeCablePolyline.defaultColor, weight: 5});
+                            window.activeCablePolyline = linhaCabo;
+                            linhaCabo.setStyle({color: c.color, weight: 10}); // Fica mais grosso na própria cor original
+                            window.selectedCableForModal = c;
+                            document.getElementById('fixed-cable-btn').style.display = 'flex';
+                            document.getElementById('fixed-cable-btn').style.backgroundColor = c.color; // Botão acompanha cor
+                        } else if (window.appState.mode === 'measure') {
+                            // Soma a distância do cabo clicado na trena
+                            const pathLen = window.calculateCableLength(c.path);
+                            
+                            // Adiciona o cabo inteiro ao tracejado de medição
+                            if (window.appState.measurePath.length === 0) {
+                                window.appState.measurePath = [...c.path];
+                            } else {
+                                window.appState.measurePath.push(...c.path);
+                            }
+                            
+                            if (window.appState.tempPolyline) {
+                                window.appState.tempPolyline.setLatLngs(window.appState.measurePath);
+                            } else {
+                                window.appState.tempPolyline = L.polyline(window.appState.measurePath, { color: '#f97316', weight: 4, dashArray: '5, 10' }).addTo(drawLayer); 
+                            }
+                            
+                            const totalLen = window.calculateCableLength(window.appState.measurePath);
+                            const totalLenStr = totalLen < 1 ? (totalLen*1000).toFixed(1) + ' m' : totalLen.toFixed(3) + ' km';
+                            document.getElementById('measure-total').innerText = totalLenStr;
+                            window.showToast(`Cabo somado: ${(pathLen*1000).toFixed(1)}m`, "info");
+                        }
+                    });
 
                     if (isMovable) {
                         for(let i=1; i < c.path.length-1; i++) {
