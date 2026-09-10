@@ -1039,14 +1039,48 @@
 
         window.setMode = function(newMode) {
             window.appState.mode = newMode; document.body.className = document.body.className.replace(/mode-\w+/g, ''); document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-            const banner = document.getElementById('instruction-banner'); drawLayer.clearLayers(); window.appState.cablePath = []; window.appState.cableStartNodeId = null; window.appState.tempPolyline = null;
-            if (newMode === 'placing_node' || newMode === 'drawing_cable') { document.getElementById('map-container').classList.add('node-anchorable'); } else { document.getElementById('map-container').classList.remove('node-anchorable'); }
-            if (newMode === 'view' || newMode === 'move') { document.getElementById(newMode === 'view' ? 'btn-navegar' : 'btn-mover').classList.add('active'); map.dragging.enable(); banner.style.display = 'none'; } else if (newMode === 'placing_node') { document.body.classList.add('mode-placing'); document.getElementById('btn-caixa').classList.add('active'); map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Inserir <b>${window.appState.nodeSetup.name}</b>.`; } else if (newMode === 'drawing_cable') { document.body.classList.add('mode-drawing'); document.getElementById('btn-cabo').classList.add('active'); map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Selecione a <b>Caixa Inicial</b>.`; }
+            const banner = document.getElementById('instruction-banner'); drawLayer.clearLayers(); 
+            window.appState.cablePath = []; window.appState.cableStartNodeId = null; window.appState.tempPolyline = null;
+            
+            // Limpa Trena e Cabo Selecionado
+            window.appState.measurePath = [];
+            if(window.appState.measureTooltip) { map.removeLayer(window.appState.measureTooltip); window.appState.measureTooltip = null; }
+            document.getElementById('measure-panel').style.display = 'none';
+            document.getElementById('fixed-cable-btn').style.display = 'none';
+            if(window.activeCablePolyline) { window.activeCablePolyline.setStyle({color: window.activeCablePolyline.defaultColor, weight: 5}); window.activeCablePolyline = null; }
+
+            if (newMode === 'placing_node' || newMode === 'drawing_cable' || newMode === 'measure') { document.getElementById('map-container').classList.add('node-anchorable'); } 
+            else { document.getElementById('map-container').classList.remove('node-anchorable'); }
+            
+            if (newMode === 'view' || newMode === 'move') { 
+                document.getElementById(newMode === 'view' ? 'btn-navegar' : 'btn-mover').classList.add('active'); 
+                map.dragging.enable(); banner.style.display = 'none'; 
+            } else if (newMode === 'placing_node') { 
+                document.body.classList.add('mode-placing'); document.getElementById('btn-caixa').classList.add('active'); 
+                map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Inserir <b>${window.appState.nodeSetup.name}</b>.`; 
+            } else if (newMode === 'drawing_cable') { 
+                document.body.classList.add('mode-drawing'); document.getElementById('btn-cabo').classList.add('active'); 
+                map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Selecione a <b>Caixa Inicial</b>.`; 
+            } else if (newMode === 'measure') {
+                document.body.classList.add('mode-measure'); document.getElementById('btn-medir').classList.add('active');
+                map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Clique nos cabos para <b>somar as metragens</b>. (ESC para sair)`;
+                document.getElementById('measure-panel').style.display = 'flex';
+                document.getElementById('measure-total').innerText = '0 m';
+            }
+
             document.onkeydown = function(evt) { if (evt.key === "Escape") { window.setMode('view'); } };
             if(window.appState.currentProjectId) window.renderMap();
         };
 
-        map.on('mousemove', function(e) { if (window.appState.mode === 'drawing_cable' && window.appState.cableStartNodeId !== null) { const endPos = window.appState.snapNodePos ? window.appState.snapNodePos : [e.latlng.lat, e.latlng.lng]; const dynamicPath = [...window.appState.cablePath, endPos]; if (!window.appState.tempPolyline) { window.appState.tempPolyline = L.polyline(dynamicPath, { color: window.appState.cableSetup.color, weight: 4, opacity: 0.8, className: 'preview-line-active' }).addTo(drawLayer); } else { window.appState.tempPolyline.setLatLngs(dynamicPath); } } });
+        map.on('mousemove', function(e) { 
+            if (window.appState.mode === 'drawing_cable' && window.appState.cableStartNodeId !== null) { 
+                const endPos = window.appState.snapNodePos ? window.appState.snapNodePos : [e.latlng.lat, e.latlng.lng]; 
+                const dynamicPath = [...window.appState.cablePath, endPos]; 
+                if (!window.appState.tempPolyline) { window.appState.tempPolyline = L.polyline(dynamicPath, { color: window.appState.cableSetup.color, weight: 4, opacity: 0.8, className: 'preview-line-active' }).addTo(drawLayer); } 
+                else { window.appState.tempPolyline.setLatLngs(dynamicPath); } 
+            } 
+        });
+
         map.on('click', async function(e) { 
             if (window.appState.mode === 'placing_node') { 
                 const internalState = { hasDIO: false, splitters: [] }; 
@@ -1062,7 +1096,11 @@
                     window.appState.cablePath.push([e.latlng.lat, e.latlng.lng]); 
                     if (window.appState.tempPolyline) window.appState.tempPolyline.setLatLngs(window.appState.cablePath); 
                 } 
-            } else { window.closeInfoCard(); document.getElementById('inventory-panel').style.display = 'none'; } 
+            } else { 
+                window.closeInfoCard(); document.getElementById('inventory-panel').style.display = 'none';
+                if(window.activeCablePolyline) { window.activeCablePolyline.setStyle({color: window.activeCablePolyline.defaultColor, weight: 5}); window.activeCablePolyline = null; }
+                document.getElementById('fixed-cable-btn').style.display = 'none'; 
+            } 
         });
 
         window.handleNodeInteraction = async function(node, eventType) { 
@@ -1179,24 +1217,39 @@
                     const linhaCabo = L.polyline(c.path, { color: c.color, weight: 5, opacity: 0.9 }).addTo(cablesLayer);
                     linhaCabo.bindTooltip(`<b>${c.name}</b>`, {sticky: true});
                     
-                    // Cálculo da Metragem Real e Modal Interativo para o Cabo
-                    let lengthKm = window.calculateCableLength(c.path);
-                    let lengthStr = lengthKm < 1 ? (lengthKm*1000).toFixed(0) + ' m' : lengthKm.toFixed(2) + ' km';
-                    
-                    let popupHtml = `
-                        <div style="min-width: 180px; padding: 4px;">
-                            <h3 style="font-weight: 800; font-size: 14px; margin-bottom: 5px; color: #0f172a;">${c.name}</h3>
-                            <div style="font-size: 12px; color: #64748b; margin-bottom: 12px;">
-                                <p><b>Capacidade:</b> ${c.capacity} FO</p>
-                                <p><b>Metragem:</b> ~${lengthStr}</p>
-                            </div>
-                            <div style="display: flex; gap: 8px;">
-                                <button onclick="window.promptEditCable('${c.id}')" style="flex:1; background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; border-radius:6px; font-size:11px; font-weight:bold; color:#475569; cursor:pointer;">Editar</button>
-                                <button onclick="window.promptDeleteCable('${c.id}', '${c.name}')" style="flex:1; background:#fee2e2; border:none; padding:6px; border-radius:6px; font-size:11px; font-weight:bold; color:#ef4444; cursor:pointer;">Excluir</button>
-                            </div>
-                        </div>
-                    `;
-                    linhaCabo.bindPopup(popupHtml);
+                    linhaCabo.defaultColor = c.color;
+                    linhaCabo.on('click', (e) => { 
+                        L.DomEvent.stopPropagation(e);
+                        if (window.appState.mode === 'view') {
+                            if(window.activeCablePolyline) window.activeCablePolyline.setStyle({color: window.activeCablePolyline.defaultColor, weight: 5});
+                            window.activeCablePolyline = linhaCabo;
+                            linhaCabo.setStyle({color: c.color, weight: 10}); // Fica mais grosso na própria cor original
+                            window.selectedCableForModal = c;
+                            document.getElementById('fixed-cable-btn').style.display = 'flex';
+                            document.getElementById('fixed-cable-btn').style.backgroundColor = c.color; // Botão acompanha cor
+                        } else if (window.appState.mode === 'measure') {
+                            // Soma a distância do cabo clicado na trena
+                            const pathLen = window.calculateCableLength(c.path);
+                            
+                            // Adiciona o cabo inteiro ao tracejado de medição
+                            if (window.appState.measurePath.length === 0) {
+                                window.appState.measurePath = [...c.path];
+                            } else {
+                                window.appState.measurePath.push(...c.path);
+                            }
+                            
+                            if (window.appState.tempPolyline) {
+                                window.appState.tempPolyline.setLatLngs(window.appState.measurePath);
+                            } else {
+                                window.appState.tempPolyline = L.polyline(window.appState.measurePath, { color: '#f97316', weight: 4, dashArray: '5, 10' }).addTo(drawLayer); 
+                            }
+                            
+                            const totalLen = window.calculateCableLength(window.appState.measurePath);
+                            const totalLenStr = totalLen < 1 ? (totalLen*1000).toFixed(1) + ' m' : totalLen.toFixed(3) + ' km';
+                            document.getElementById('measure-total').innerText = totalLenStr;
+                            window.showToast(`Cabo somado: ${(pathLen*1000).toFixed(1)}m`, "info");
+                        }
+                    });
 
                     if (isMovable) {
                         for(let i=1; i < c.path.length-1; i++) {
