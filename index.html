@@ -589,11 +589,11 @@
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
-        // 1. ESTADO GLOBAL
+        // 1. ESTADO GLOBAL E CÁLCULO DE METRAGEM
         // ==========================================
         window.appState = {
             currentProjectId: null, projects: [], mode: 'view', nodes: [], cables: [], fusions: [], splitters: [], olts: [], dios: [], 
-            portPowers: {}, portTraces: {}, // Rastreio da luz e timeline
+            portPowers: {}, portTraces: {}, 
             selectedNodeId: null, editingNodeId: null,
             nodeSetup: { name: 'CEO 01', type: 'CEO', icon: 'fa-layer-group', color: '#f97316', splitter: null },
             cableSetup: { name: '', capacity: 12, color: '#3b82f6' },
@@ -606,6 +606,24 @@
 
         const THEME_COLORS = ['#0ea5e9', '#1d4ed8', '#f97316', '#ef4444', '#22c55e', '#eab308', '#a855f7', '#ec4899', '#000000', '#737373', '#78350f'];
         const FIBER_COLORS = ['#22c55e', '#eab308', '#cbd5e1', '#3b82f6', '#ef4444', '#a855f7', '#78350f', '#ec4899', '#111827', '#64748b', '#f97316', '#06b6d4'];
+
+        // Fórmula de Haversine para cálculo de metragem no globo terrestre
+        window.calculateCableLength = function(path) {
+            if(!path || path.length < 2) return 0;
+            const R = 6371; // Raio da Terra em km
+            let d = 0;
+            for(let i = 0; i < path.length - 1; i++) {
+                let p1 = path[i]; let p2 = path[i+1];
+                let lat1 = (p1.lat !== undefined) ? p1.lat : p1[0]; let lon1 = (p1.lng !== undefined) ? p1.lng : p1[1];
+                let lat2 = (p2.lat !== undefined) ? p2.lat : p2[0]; let lon2 = (p2.lng !== undefined) ? p2.lng : p2[1];
+                let dLat = (lat2 - lat1) * Math.PI / 180;
+                let dLon = (lon2 - lon1) * Math.PI / 180;
+                let a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+                let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                d += R * c;
+            }
+            return d; // Retorna km
+        };
 
         // ==========================================
         // UI MODALS - NATIVOS SUBSTITUÍDOS
@@ -765,6 +783,16 @@
         
         window.saveFusionToFirebase = async (fusionData) => { if(!db || !auth || !auth.currentUser) { window.appState.fusions.push({id: 'local_'+Date.now(), ...fusionData}); window.updateAllFusionLines(); window.calculateNetworkPower(); return; } try { await addDoc(getCollectionPath('fusions'), fusionData); } catch(e) { window.appState.fusions.push({id: 'local_'+Date.now(), ...fusionData}); window.updateAllFusionLines(); window.calculateNetworkPower(); } };
         
+        // Atualiza a fusão no firebase para persistir o Tubete clicado
+        window.updateFusionInFirebase = async (id, data) => { 
+            if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { 
+                const idx = window.appState.fusions.findIndex(f=>f.id===id); 
+                if(idx>-1) window.appState.fusions[idx] = {...window.appState.fusions[idx], ...data}; 
+                window.updateAllFusionLines(); window.calculateNetworkPower(); return; 
+            } 
+            try { await updateDoc(getDocPath('fusions', id), data); } catch(e) { } 
+        };
+
         window.saveSplitterToFirebase = async (data) => { if(!db || !auth || !auth.currentUser) { window.appState.splitters.push({id: 'local_sp_'+Date.now(), ...data}); window.openCanvasDiagram(); return; } try { await addDoc(getCollectionPath('splitters'), data); } catch(e) { window.appState.splitters.push({id: 'local_sp_'+Date.now(), ...data}); window.openCanvasDiagram(); } };
         window.updateSplitterInFirebase = async (id, data) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.splitters.findIndex(s=>s.id===id); if(idx>-1) window.appState.splitters[idx] = {...window.appState.splitters[idx], ...data}; window.openCanvasDiagram(); return; } try { await updateDoc(getDocPath('splitters', id), data); } catch(e) { } };
 
@@ -1017,6 +1045,25 @@
             }
         };
 
+        window.promptEditCable = function(id) {
+            const c = window.appState.cables.find(x => x.id === id);
+            if(!c) return;
+            window.showPrompt("Editar Cabo", [{label: "Novo nome do cabo", val: c.name}], async (results) => {
+                if(results[0]) {
+                    await window.updateCableInFirebase(id, { name: results[0] });
+                    window.showToast("Cabo atualizado!");
+                }
+            });
+        };
+
+        window.promptDeleteCable = function(id, name) {
+            window.showConfirm("Excluir Cabo", `Tem certeza que deseja excluir o cabo "${name}"?`, "Excluir Definitivamente", async () => {
+                await window.deleteCableFromFirebase(id);
+                window.showToast("Cabo excluído.", "sucesso");
+                if(document.getElementById('diagram-view').style.display === 'flex') window.openCanvasDiagram();
+            });
+        };
+
         window.renderMap = function() { 
             if(!window.appState.currentProjectId) return;
             nodesLayer.clearLayers(); cablesLayer.clearLayers(); 
@@ -1028,13 +1075,26 @@
                 currentCables.forEach(c => { 
                     const linhaCabo = L.polyline(c.path, { color: c.color, weight: 5, opacity: 0.9 }).addTo(cablesLayer);
                     linhaCabo.bindTooltip(`<b>${c.name}</b>`, {sticky: true});
-                    linhaCabo.on('click', () => { 
-                        if (window.appState.mode === 'view') { 
-                            window.showConfirm("Excluir Cabo", `Excluir o cabo "${c.name}"?`, "Excluir", () => {
-                                window.deleteCableFromFirebase(c.id); window.showToast('Excluído.', 'sucesso');
-                            });
-                        } 
-                    });
+                    
+                    // Cálculo da Metragem Real e Modal Interativo para o Cabo
+                    let lengthKm = window.calculateCableLength(c.path);
+                    let lengthStr = lengthKm < 1 ? (lengthKm*1000).toFixed(0) + ' m' : lengthKm.toFixed(2) + ' km';
+                    
+                    let popupHtml = `
+                        <div style="min-width: 180px; padding: 4px;">
+                            <h3 style="font-weight: 800; font-size: 14px; margin-bottom: 5px; color: #0f172a;">${c.name}</h3>
+                            <div style="font-size: 12px; color: #64748b; margin-bottom: 12px;">
+                                <p><b>Capacidade:</b> ${c.capacity} FO</p>
+                                <p><b>Metragem:</b> ~${lengthStr}</p>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button onclick="window.promptEditCable('${c.id}')" style="flex:1; background:#f1f5f9; border:1px solid #cbd5e1; padding:6px; border-radius:6px; font-size:11px; font-weight:bold; color:#475569; cursor:pointer;">Editar</button>
+                                <button onclick="window.promptDeleteCable('${c.id}', '${c.name}')" style="flex:1; background:#fee2e2; border:none; padding:6px; border-radius:6px; font-size:11px; font-weight:bold; color:#ef4444; cursor:pointer;">Excluir</button>
+                            </div>
+                        </div>
+                    `;
+                    linhaCabo.bindPopup(popupHtml);
+
                     if (isMovable) {
                         for(let i=1; i < c.path.length-1; i++) {
                             const iconMid = L.divIcon({ html: `<div style="width:12px; height:12px; background:white; border:3px solid ${c.color}; border-radius:50%; box-shadow:0 0 4px rgba(0,0,0,0.5);"></div>`, className: '', iconSize: [12,12], iconAnchor: [6,6] });
@@ -1170,7 +1230,6 @@
             iconC.style.backgroundColor = node.color + '15'; 
             document.getElementById('card-icon').className = `fa-solid ${node.icon}`; 
 
-            // Mocks do print (podem ser ligados ao banco no futuro)
             document.getElementById('card-det-servico').innerText = 'Atendimento FTTH';
             document.getElementById('card-det-equip').innerText = 'Passivo';
             document.getElementById('card-det-dio').innerText = 'N/A';
@@ -1209,6 +1268,30 @@
         window.renderInventoryList = function(filter) { const container = document.getElementById('inventory-list-content'); container.innerHTML = ''; let items = []; if(filter === 'all' || filter === 'nodes') { window.appState.nodes.forEach(n => items.push({ type: 'node', data: n, name: n.name, sub: n.type, icon: n.icon, color: n.color })); } if(filter === 'all' || filter === 'cables') { window.appState.cables.forEach(c => items.push({ type: 'cable', data: c, name: c.name, sub: `${c.capacity} Fibras`, icon: 'fa-share-nodes', color: c.color })); } if(items.length === 0) { container.innerHTML = '<p class="text-sm text-gray-400 text-center p-4">Vazio.</p>'; return; } items.forEach(item => { const el = document.createElement('div'); el.className = 'inv-item'; el.innerHTML = `<div class="flex items-center gap-3"><div class="w-8 h-8 rounded flex items-center justify-center text-white text-xs" style="background-color: ${item.color}"><i class="fa-solid ${item.icon}"></i></div><div><p class="text-sm font-bold text-gray-800 leading-tight">${item.name}</p><p class="text-[10px] text-gray-500 uppercase">${item.sub}</p></div></div><button class="text-gray-400 hover:text-blue-500"><i class="fa-solid fa-crosshairs"></i></button>`; el.onclick = () => { if(item.type === 'node') { map.flyTo([item.data.lat, item.data.lng], 18); window.openInfoCard(item.data); } else if (item.type === 'cable') { map.flyToBounds(L.polyline(item.data.path).getBounds()); } }; container.appendChild(el); }); };
         window.copyCoords = function() { navigator.clipboard.writeText(document.getElementById('card-coords').innerText); window.showToast("Copiado!"); };
         window.showToast = function(msg, type='info') { const c = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast-msg show'; t.innerHTML = `<i class="fa-solid fa-info-circle text-blue-400"></i> <span>${msg}</span>`; c.appendChild(t); setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 300); }, 3000); };
+
+        window.toggleTubete = async function(id, event) {
+            if(event) event.stopPropagation();
+            const fusion = window.appState.fusions.find(f => f.id === id);
+            if(fusion) {
+                const newVal = !fusion.hasTubete;
+                if(typeof db !== 'undefined' && auth && auth.currentUser && !id.startsWith('local_')) {
+                    await window.updateFusionInFirebase(id, { hasTubete: newVal });
+                } else {
+                    fusion.hasTubete = newVal;
+                    window.updateAllFusionLines();
+                    window.calculateNetworkPower();
+                }
+            }
+        };
+
+        window.updateFusionInFirebase = async (id, data) => { 
+            if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { 
+                const idx = window.appState.fusions.findIndex(f=>f.id===id); 
+                if(idx>-1) window.appState.fusions[idx] = {...window.appState.fusions[idx], ...data}; 
+                window.updateAllFusionLines(); window.calculateNetworkPower(); return; 
+            } 
+            try { await updateDoc(getDocPath('fusions', id), data); } catch(e) { } 
+        };
 
         // ==========================================
         // 6. MOTOR DO DIAGRAMA CANVAS OSP E LUZ
@@ -1496,13 +1579,13 @@
                 let pwr = powers[curr];
                 let currTrace = traces[curr] || [];
 
-                // Atravessar Fusões (Perda Alterada para 0dB)
+                // Atravessar Fusões
                 window.appState.fusions.forEach(f => {
                     if(f.from === curr || f.to === curr) {
                         let next = f.from === curr ? f.to : f.from;
                         if(next === 'dead_end') return;
                         
-                        let fusionLoss = 0.0; 
+                        let fusionLoss = f.hasTubete ? 0.1 : 0.0; // Aplica 0.1dB SE tiver tubete
                         let nextPwr = pwr - fusionLoss;
 
                         if(powers[next] === undefined || powers[next] < nextPwr) { 
@@ -1906,6 +1989,7 @@
             window.calculateNetworkPower(); // Recalcula Luz ao completar fusão
         };
 
+        // CORREÇÃO E INJEÇÃO DO BOTÃO "TUBETE" NAS FUSÕES
         window.updateAllFusionLines = function() {
             const svg = document.getElementById('fusion-lines'); 
             Array.from(svg.children).forEach(c => { if(c.id !== 'active-fusion-line' && c.tagName !== 'defs') c.remove(); }); 
@@ -1939,14 +2023,45 @@
                     defs.appendChild(grad);
                 }
 
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); 
                 path.setAttribute('d', d); path.setAttribute('stroke', `url(#${gradId})`); path.setAttribute('stroke-width', '4'); path.setAttribute('fill', 'none'); path.setAttribute('stroke-linecap', 'round'); 
                 path.classList.add('fusion-line-clickable');
                 path.onmousemove = function(e) { let trash = document.getElementById('floating-trash'); if(!trash) { trash = document.createElement('div'); trash.id = 'floating-trash'; trash.innerHTML = '<i class="fa-solid fa-trash"></i>'; trash.style = 'position:fixed; background:#ef4444; color:white; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; cursor:pointer; z-index:99999; box-shadow:0 4px 6px rgba(0,0,0,0.3);'; document.body.appendChild(trash); } trash.style.display = 'flex'; trash.style.left = (e.clientX + 15) + 'px'; trash.style.top = (e.clientY - 15) + 'px'; trash.onmouseleave = () => trash.style.display = 'none'; trash.onclick = () => { trash.style.display = 'none'; window.deletarFusao(fusion.id); }; };
                 path.onmouseleave = function(e) { setTimeout(() => { const trash = document.getElementById('floating-trash'); if(trash && !trash.matches(':hover')) trash.style.display = 'none'; }, 100); };
                 
-                if(isDeadEnd) { const deadLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text'); deadLabel.setAttribute('x', p2X + 5); deadLabel.setAttribute('y', p2Y + 4); deadLabel.setAttribute('fill', '#ef4444'); deadLabel.setAttribute('font-size', '10px'); deadLabel.setAttribute('font-weight', 'bold'); deadLabel.textContent = 'MORTA'; const cross = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); cross.setAttribute('cx', p2X); cross.setAttribute('cy', p2Y); cross.setAttribute('r', '4'); cross.setAttribute('fill', '#ef4444'); const g = document.createElementNS('http://www.w3.org/2000/svg', 'g'); g.appendChild(path); g.appendChild(cross); g.appendChild(deadLabel); svg.appendChild(g); } 
-                else { svg.appendChild(path); }
+                g.appendChild(path);
+
+                if(isDeadEnd) { 
+                    const deadLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text'); deadLabel.setAttribute('x', p2X + 5); deadLabel.setAttribute('y', p2Y + 4); deadLabel.setAttribute('fill', '#ef4444'); deadLabel.setAttribute('font-size', '10px'); deadLabel.setAttribute('font-weight', 'bold'); deadLabel.textContent = 'MORTA'; const cross = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); cross.setAttribute('cx', p2X); cross.setAttribute('cy', p2Y); cross.setAttribute('r', '4'); cross.setAttribute('fill', '#ef4444'); g.appendChild(cross); g.appendChild(deadLabel); 
+                } else {
+                    // ADIÇÃO: TUBETE DE FUSÃO NO MEIO DA LINHA DE BÉZIER
+                    const midX = 0.125 * p1X + 0.375 * cp1X + 0.375 * cp2X + 0.125 * p2X;
+                    const midY = 0.125 * p1Y + 0.375 * cp1Y + 0.375 * cp2Y + 0.125 * p2Y;
+                    
+                    const tubete = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    tubete.setAttribute('x', midX - 6);
+                    tubete.setAttribute('y', midY - 12);
+                    tubete.setAttribute('width', '12');
+                    tubete.setAttribute('height', '24');
+                    tubete.setAttribute('rx', '4');
+                    tubete.setAttribute('fill', fusion.hasTubete ? '#22c55e' : '#cbd5e1'); // Verde se ativo, Cinza se inativo
+                    tubete.setAttribute('stroke', '#ffffff');
+                    tubete.setAttribute('stroke-width', '2');
+                    tubete.style.cursor = 'pointer';
+                    tubete.style.pointerEvents = 'all';
+                    tubete.onclick = (e) => window.toggleTubete(fusion.id, e);
+                    
+                    // Tooltip nativo no Tubete
+                    const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+                    title.textContent = fusion.hasTubete ? 'Fusão Inserida (-0.1dB)' : 'Clique para inserir Tubete de Fusão';
+                    tubete.appendChild(title);
+
+                    g.appendChild(tubete);
+                }
+
+                svg.appendChild(g);
             });
         };
 
