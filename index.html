@@ -641,6 +641,7 @@
             nodeSetup: { name: 'CEO 01', type: 'CEO', icon: 'fa-layer-group', color: '#f97316', splitter: null },
             cableSetup: { name: '', capacity: 12, color: '#3b82f6' },
             cablePath: [], cableStartNodeId: null, tempPolyline: null, snapNodePos: null,
+            measurePath: [], measureTooltip: null, // Ferramenta de medição
             isDraggingFusion: false, fusionStartPort: null, fusionStartCoords: {x:0, y:0},
             mapLayerType: 'street',
             visibleLayers: { 'CTO': true, 'CEO': true, 'POP / DC': true, 'CABOS': true, 'Prédio': true, 'Poste': true, 'Cliente': true, 'CTO AP': true, 'Problema': true, 'Reserva': true },
@@ -649,6 +650,65 @@
 
         const THEME_COLORS = ['#0ea5e9', '#1d4ed8', '#f97316', '#ef4444', '#22c55e', '#eab308', '#a855f7', '#ec4899', '#000000', '#737373', '#78350f'];
         const FIBER_COLORS = ['#22c55e', '#eab308', '#cbd5e1', '#3b82f6', '#ef4444', '#a855f7', '#78350f', '#ec4899', '#111827', '#64748b', '#f97316', '#06b6d4'];
+    // Fórmula de Haversine para cálculo de metragem no globo terrestre
+        window.calculateCableLength = function(path) {
+            if(!path || path.length < 2) return 0;
+            const R = 6371; // Raio da Terra em km
+            let d = 0;
+            for(let i = 0; i < path.length - 1; i++) {
+                let p1 = path[i]; let p2 = path[i+1];
+                let lat1 = (p1.lat !== undefined) ? p1.lat : p1[0]; let lon1 = (p1.lng !== undefined) ? p1.lng : p1[1];
+                let lat2 = (p2.lat !== undefined) ? p2.lat : p2[0]; let lon2 = (p2.lng !== undefined) ? p2.lng : p2[1];
+                let dLat = (lat2 - lat1) * Math.PI / 180;
+                let dLon = (lon2 - lon1) * Math.PI / 180;
+                let a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+                let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                d += R * c;
+            }
+            return d; // Retorna km
+        };
+
+        window.activeCablePolyline = null;
+        window.selectedCableForModal = null;
+
+        window.openCableInfoModal = function() {
+            if(!window.selectedCableForModal) return;
+            const c = window.selectedCableForModal;
+            document.getElementById('ci-title').innerText = c.name;
+            
+            let lengthKm = window.calculateCableLength(c.path);
+            let lengthStr = lengthKm < 1 ? (lengthKm*1000).toFixed(0) + ' m' : lengthKm.toFixed(2) + ' km';
+            
+            document.getElementById('ci-details').innerHTML = `
+                <p><b class="text-gray-900">Capacidade:</b> ${c.capacity} Fibras</p>
+                <p><b class="text-gray-900">Metragem Total:</b> ${lengthStr}</p>
+                <p><b class="text-gray-900">Padrão:</b> ABNT</p>
+            `;
+            
+            document.getElementById('cable-info-modal').style.display = 'flex';
+            document.getElementById('fixed-cable-btn').style.display = 'none';
+        };
+        
+        window.promptEditSelectedCable = function() {
+            const c = window.selectedCableForModal;
+            window.showPrompt("Editar Cabo", [{label: "Novo nome do cabo", val: c.name}], async (results) => {
+                if(results[0]) {
+                    await window.updateCableInFirebase(c.id, { name: results[0] });
+                    window.showToast("Cabo atualizado!");
+                    document.getElementById('cable-info-modal').style.display = 'none';
+                }
+            });
+        };
+        
+        window.promptDeleteSelectedCable = function() {
+            const c = window.selectedCableForModal;
+            window.showConfirm("Excluir Cabo", `Tem certeza que deseja excluir o cabo "${c.name}"?`, "Excluir Definitivamente", async () => {
+                await window.deleteCableFromFirebase(c.id);
+                window.showToast("Cabo excluído.", "sucesso");
+                document.getElementById('cable-info-modal').style.display = 'none';
+                if(document.getElementById('diagram-view').style.display === 'flex') window.openCanvasDiagram();
+            });
+        };
 
         // Fórmula de Haversine para cálculo de metragem no globo terrestre
         window.calculateCableLength = function(path) {
