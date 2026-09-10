@@ -647,6 +647,7 @@
                 <button class="diag-btn font-bold text-blue-600" onclick="window.addSplitterToDiagram('1x4')"><i class="fa-solid fa-sitemap"></i> 1x4</button>
                 <button class="diag-btn font-bold text-blue-600" onclick="window.addSplitterToDiagram('1x8')"><i class="fa-solid fa-sitemap"></i> 1x8</button>
                 <button class="diag-btn font-bold text-blue-600" onclick="window.addSplitterToDiagram('1x16')"><i class="fa-solid fa-sitemap"></i> 1x16</button>
+                <button class="diag-btn font-bold text-purple-600" id="btn-toggle-line-mode" onclick="window.toggleLineMode()"><i class="fa-solid fa-bezier-curve"></i> Linhas Retas</button>
                 <button class="diag-btn-primary" onclick="window.showToast('Salvo!', 'sucesso')"><i class="fa-solid fa-floppy-disk"></i></button>
             </div>
         </div>
@@ -692,7 +693,19 @@
             isDraggingFusion: false, fusionStartPort: null, fusionStartCoords: {x:0, y:0},
             mapLayerType: 'street',
             visibleLayers: { 'CTO': true, 'CEO': true, 'POP / DC': true, 'CABOS': true, 'Prédio': true, 'Poste': true, 'Cliente': true, 'CTO AP': true, 'Problema': true, 'Reserva': true },
-            diagramZoom: 1 
+            diagramZoom: 1,
+            diagramLineMode: 'curve'
+        };
+        
+        window.toggleLineMode = function() {
+            window.appState.diagramLineMode = window.appState.diagramLineMode === 'curve' ? 'straight' : 'curve';
+            const btn = document.getElementById('btn-toggle-line-mode');
+            if(window.appState.diagramLineMode === 'straight') {
+                btn.innerHTML = '<i class="fa-solid fa-wave-square"></i> Linhas Curvas';
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-bezier-curve"></i> Linhas Retas';
+            }
+            window.updateAllFusionLines();
         };
 
         const THEME_COLORS = ['#0ea5e9', '#1d4ed8', '#f97316', '#ef4444', '#22c55e', '#eab308', '#a855f7', '#ec4899', '#000000', '#737373', '#78350f'];
@@ -2304,7 +2317,17 @@
             const cp1X = p1X + v1.x * offset; const cp1Y = p1Y + v1.y * offset;
             const cp2X = p2X - v1.x * offset; const cp2Y = p2Y - v1.y * offset;
             
-            const d = `M ${p1X} ${p1Y} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${p2X} ${p2Y}`; 
+            let d = '';
+            if (window.appState.diagramLineMode === 'straight') {
+                const midX2 = (cp1X + cp2X) / 2; const midY2 = (cp1Y + cp2Y) / 2;
+                if (Math.abs(cp1X - cp2X) > Math.abs(cp1Y - cp2Y)) {
+                    d = `M ${p1X} ${p1Y} L ${cp1X} ${cp1Y} L ${midX2} ${cp1Y} L ${midX2} ${cp2Y} L ${cp2X} ${cp2Y} L ${p2X} ${p2Y}`;
+                } else {
+                    d = `M ${p1X} ${p1Y} L ${cp1X} ${cp1Y} L ${cp1X} ${midY2} L ${cp2X} ${midY2} L ${cp2X} ${cp2Y} L ${p2X} ${p2Y}`;
+                }
+            } else {
+                d = `M ${p1X} ${p1Y} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${p2X} ${p2Y}`;
+            }
             document.getElementById('active-fusion-line').setAttribute('d', d); 
         };
         
@@ -2355,7 +2378,25 @@
                 const dist = Math.hypot(p2X - p1X, p2Y - p1Y); const offset = Math.max(120, dist / 2); 
                 const cp1X = p1X + v1.x * offset; const cp1Y = p1Y + v1.y * offset;
                 const cp2X = p2X + v2.x * offset; const cp2Y = p2Y + v2.y * offset;
-                const d = `M ${p1X} ${p1Y} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${p2X} ${p2Y}`;
+                
+                let d = ''; let midX, midY, angle;
+                if (window.appState.diagramLineMode === 'straight') {
+                    const midX2 = (cp1X + cp2X) / 2; const midY2 = (cp1Y + cp2Y) / 2;
+                    if (Math.abs(cp1X - cp2X) > Math.abs(cp1Y - cp2Y)) {
+                        d = `M ${p1X} ${p1Y} L ${cp1X} ${cp1Y} L ${midX2} ${cp1Y} L ${midX2} ${cp2Y} L ${cp2X} ${cp2Y} L ${p2X} ${p2Y}`;
+                        midX = midX2; midY = midY2; angle = 90;
+                    } else {
+                        d = `M ${p1X} ${p1Y} L ${cp1X} ${cp1Y} L ${cp1X} ${midY2} L ${cp2X} ${midY2} L ${cp2X} ${cp2Y} L ${p2X} ${p2Y}`;
+                        midX = midX2; midY = midY2; angle = 0;
+                    }
+                } else {
+                    d = `M ${p1X} ${p1Y} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${p2X} ${p2Y}`;
+                    midX = 0.125 * p1X + 0.375 * cp1X + 0.375 * cp2X + 0.125 * p2X;
+                    midY = 0.125 * p1Y + 0.375 * cp1Y + 0.375 * cp2Y + 0.125 * p2Y;
+                    const dX = 3 * 0.25 * (cp1X - p1X) + 3 * 0.5 * (cp2X - cp1X) + 3 * 0.25 * (p2X - cp2X);
+                    const dY = 3 * 0.25 * (cp1Y - p1Y) + 3 * 0.5 * (cp2Y - cp1Y) + 3 * 0.25 * (p2Y - cp2Y);
+                    angle = Math.atan2(dY, dX) * (180 / Math.PI);
+                }
                 
                 const color1 = window.getPortColor(fusion.from); const color2 = isDeadEnd ? '#ef4444' : window.getPortColor(fusion.to);
                 const gradId = `grad-${fusion.id}`;
@@ -2381,35 +2422,29 @@
                 if(isDeadEnd) { 
                     const deadLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text'); deadLabel.setAttribute('x', p2X + 5); deadLabel.setAttribute('y', p2Y + 4); deadLabel.setAttribute('fill', '#ef4444'); deadLabel.setAttribute('font-size', '10px'); deadLabel.setAttribute('font-weight', 'bold'); deadLabel.textContent = 'MORTA'; const cross = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); cross.setAttribute('cx', p2X); cross.setAttribute('cy', p2Y); cross.setAttribute('r', '4'); cross.setAttribute('fill', '#ef4444'); g.appendChild(cross); g.appendChild(deadLabel); 
                 } else {
-                    // ADIÇÃO: TUBETE DE FUSÃO NO MEIO DA LINHA DE BÉZIER
-                    const midX = 0.125 * p1X + 0.375 * cp1X + 0.375 * cp2X + 0.125 * p2X;
-                    const midY = 0.125 * p1Y + 0.375 * cp1Y + 0.375 * cp2Y + 0.125 * p2Y;
-                    
-                    // Cálculo da inclinação (tangente) para alinhar o tubete com a curvatura da fibra
-                    const dX = 3 * 0.25 * (cp1X - p1X) + 3 * 0.5 * (cp2X - cp1X) + 3 * 0.25 * (p2X - cp2X);
-                    const dY = 3 * 0.25 * (cp1Y - p1Y) + 3 * 0.5 * (cp2Y - cp1Y) + 3 * 0.25 * (p2Y - cp2Y);
-                    const angle = Math.atan2(dY, dX) * (180 / Math.PI);
-                    
+                    // ADIÇÃO: TUBETE DE FUSÃO NO MEIO DA LINHA
                     const fusionGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                     fusionGroup.setAttribute('transform', `translate(${midX}, ${midY}) rotate(${angle})`);
                     fusionGroup.style.cursor = 'pointer';
                     fusionGroup.style.pointerEvents = 'all';
                     fusionGroup.onclick = (e) => window.toggleTubete(fusion.id, e);
                     
-                    // Bolinha esquerda (Fibra de Origem)
+                    const tubeteColor = fusion.hasTubete ? '#22c55e' : '#cbd5e1';
+                    
+                    // Bolinha esquerda (Fibra de Origem - Agora usa a cor do tubete)
                     const leftDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                     leftDot.setAttribute('cx', '-7'); leftDot.setAttribute('cy', '0'); leftDot.setAttribute('r', '3.5');
-                    leftDot.setAttribute('fill', color1); leftDot.setAttribute('stroke', '#1e293b'); leftDot.setAttribute('stroke-width', '1.5');
+                    leftDot.setAttribute('fill', tubeteColor); leftDot.setAttribute('stroke', '#1e293b'); leftDot.setAttribute('stroke-width', '1.5');
                     
-                    // Bolinha direita (Fibra de Destino)
+                    // Bolinha direita (Fibra de Destino - Agora usa a cor do tubete)
                     const rightDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                     rightDot.setAttribute('cx', '7'); rightDot.setAttribute('cy', '0'); rightDot.setAttribute('r', '3.5');
-                    rightDot.setAttribute('fill', color2); rightDot.setAttribute('stroke', '#1e293b'); rightDot.setAttribute('stroke-width', '1.5');
+                    rightDot.setAttribute('fill', tubeteColor); rightDot.setAttribute('stroke', '#1e293b'); rightDot.setAttribute('stroke-width', '1.5');
                     
                     // Tubete central (Protetor de Emenda)
                     const centerTubete = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                     centerTubete.setAttribute('cx', '0'); centerTubete.setAttribute('cy', '0'); centerTubete.setAttribute('r', '5');
-                    centerTubete.setAttribute('fill', fusion.hasTubete ? '#22c55e' : '#cbd5e1'); // Verde se ativo, Cinza se desativo
+                    centerTubete.setAttribute('fill', tubeteColor); // Verde se ativo, Cinza se desativo
                     centerTubete.setAttribute('stroke', '#1e293b'); centerTubete.setAttribute('stroke-width', '1.5');
                     
                     // Tooltip nativo no Tubete
@@ -2423,6 +2458,8 @@
                     
                     g.appendChild(fusionGroup);
                 }
+
+                svg.appendChild(g);
 
                 svg.appendChild(g);
             });
