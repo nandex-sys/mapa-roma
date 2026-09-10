@@ -42,7 +42,6 @@
             --input-bg: #111827;
         }
 
-        /* STREAMING_CHUNK:Configurando fontes e variaveis globais do CSS... */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; overflow: hidden; background-color: var(--bg-main); margin: 0; padding: 0; }
         
@@ -206,7 +205,7 @@
         .cm-item.danger { color: #ef4444; border-bottom: 1px solid #f1f5f9; margin-bottom: 4px; padding-bottom: 10px; }
         .cm-item.danger:hover { background: #fef2f2; color: #dc2626; }
         
-        /* BOLINHA DE LUZ E MODAL (MANTIDO 100%) */
+        /* BOLINHA DE LUZ (MANTIDA) */
         #fixed-power-btn {
             position: fixed; top: 100px; right: 30px; width: 60px; height: 60px; background: #3b82f6; 
             border-radius: 50%; color: white; display: none; align-items: center; justify-content: center; 
@@ -216,15 +215,46 @@
         }
         #fixed-power-btn:hover { transform: scale(1.1); background: #2563eb; }
         @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
+
+        /* NOVOS MODAIS NATIVOS (PROMPT/CONFIRM SUBSTITUTOS) E ANÁLISE DE POTÊNCIA */
+        .generic-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 20005; display: none; align-items: center; justify-content: center; }
+        .generic-modal-box { background: white; border-radius: 20px; width: 360px; padding: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); text-align: center; }
+        .g-modal-title { font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 12px; }
+        .g-modal-text { font-size: 14px; font-weight: 500; color: #64748b; margin-bottom: 24px; line-height: 1.5; }
+        .g-modal-input { width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-weight: 600; color: #111827; outline: none; transition: border-color 0.2s; margin-bottom: 16px; text-align: left;}
+        .g-modal-input:focus { border-color: #3b82f6; }
+        .g-modal-actions { display: flex; gap: 12px; }
+        .g-btn-cancel { flex: 1; padding: 12px; background: white; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 700; color: #475569; cursor: pointer; transition: background 0.2s; }
+        .g-btn-cancel:hover { background: #f1f5f9; }
+        .g-btn-confirm { flex: 1; padding: 12px; background: #ef4444; border: none; border-radius: 8px; font-weight: 700; color: white; cursor: pointer; transition: background 0.2s; }
+        .g-btn-confirm:hover { background: #dc2626; }
+        .g-btn-confirm-blue { flex: 1; padding: 12px; background: #3b82f6; border: none; border-radius: 8px; font-weight: 700; color: white; cursor: pointer; transition: background 0.2s; }
+        .g-btn-confirm-blue:hover { background: #2563eb; }
+
+        /* ESTILO DO MODAL DE ANÁLISE DE POTÊNCIA (TIPO O PRINT) */
+        #power-analysis-modal { position: fixed; top: 0; right: 0; height: 100vh; width: 420px; background: white; box-shadow: -10px 0 25px rgba(0,0,0,0.1); z-index: 20010; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; border-left: 1px solid #e2e8f0; }
+        #power-analysis-modal.open { transform: translateX(0); }
+        .pa-header { padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: white; }
+        .pa-body { flex-grow: 1; overflow-y: auto; padding: 24px; background: #f8fafc; }
+        .pa-origin-card { background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 16px; padding: 20px; color: white; margin-bottom: 24px; box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.3); }
+        .pa-origin-title { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; }
+        .pa-origin-val { font-size: 16px; font-weight: 800; color: white; margin-top: 2px; }
+        .pa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+        .pa-label { font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+        .pa-val { font-size: 13px; font-weight: 700; color: #cbd5e1; }
+        .pa-val-highlight { color: #10b981; font-weight: 800; font-size: 14px; }
         
-        #power-modal {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.6); 
-            backdrop-filter: blur(4px); z-index: 20001; display: none; align-items: center; justify-content: center;
-        }
-        .power-modal-content {
-            background: white; border-radius: 24px; width: 320px; padding: 32px; text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative;
-        }
+        .pa-timeline { position: relative; margin-left: 12px; padding-left: 24px; border-left: 2px dashed #cbd5e1; padding-bottom: 24px; }
+        .pa-step-dot { position: absolute; left: -9px; top: 0; width: 16px; height: 16px; background: #3b82f6; border: 4px solid #f8fafc; border-radius: 50%; }
+        .pa-step-dot.end { background: #a855f7; border-color: #f3e8ff; box-shadow: 0 0 0 4px #a855f720; }
+        .pa-step-title { font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .pa-step-pwr { background: #fee2e2; color: #b91c1c; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; }
+        .pa-step-box { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; margin-bottom: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .pa-step-box-item { font-size: 11px; font-weight: 600; color: #475569; display: flex; flex-direction: column; gap: 4px; }
+        .pa-loss-tag { display: inline-block; background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; width: max-content; }
+        
+        .pa-footer-card { background: #fefce8; border: 2px solid #fef08a; border-radius: 16px; padding: 20px; text-align: center; margin-top: 10px; }
+        .pa-footer-pwr { font-size: 32px; font-weight: 900; color: #a16207; line-height: 1; margin: 8px 0; }
 
         /* 12 Cores Oficiais das Fibras */
         .fiber-bg-1 { background-color: #22c55e; color: #ffffff; } /* Verde */
@@ -263,6 +293,45 @@
     </style>
 </head>
 <body class="theme-light" onclick="window.hideContextMenu()">
+
+    <!-- MODAIS GENÉRICOS (NOVOS) -->
+    <div class="generic-modal" id="custom-confirm-modal">
+        <div class="generic-modal-box">
+            <div class="w-16 h-16 rounded-full bg-red-50 text-red-500 flex items-center justify-center text-3xl mx-auto mb-4"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="g-modal-title" id="cc-title">Confirmação</div>
+            <div class="g-modal-text" id="cc-text">Deseja realmente continuar?</div>
+            <div class="g-modal-actions">
+                <button class="g-btn-cancel" id="cc-btn-cancel">Cancelar</button>
+                <button class="g-btn-confirm" id="cc-btn-confirm">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="generic-modal" id="custom-prompt-modal">
+        <div class="generic-modal-box" style="width: 400px;">
+            <div class="w-16 h-16 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center text-3xl mx-auto mb-4"><i class="fa-solid fa-pen-to-square"></i></div>
+            <div class="g-modal-title" id="cp-title">Configurar</div>
+            <div id="cp-fields"></div>
+            <div class="g-modal-actions mt-6">
+                <button class="g-btn-cancel" id="cp-btn-cancel">Cancelar</button>
+                <button class="g-btn-confirm-blue" id="cp-btn-confirm">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ANÁLISE DE POTÊNCIA (TIPO PRINT) -->
+    <div id="power-analysis-modal">
+        <div class="pa-header">
+            <h2 class="text-sm font-black flex items-center gap-2 text-indigo-900"><i class="fa-solid fa-satellite-dish text-purple-600 text-lg"></i> ANÁLISE DE POTÊNCIA</h2>
+            <div class="flex gap-3">
+                <button class="text-gray-400 hover:text-blue-600"><i class="fa-regular fa-copy"></i></button>
+                <button class="text-gray-400 hover:text-red-500" onclick="document.getElementById('power-analysis-modal').classList.remove('open')"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+        </div>
+        <div class="pa-body" id="pa-body-content">
+            <!-- Preenchido via JS -->
+        </div>
+    </div>
 
     <div id="regions-screen">
         <div class="home-sidebar">
@@ -464,7 +533,6 @@
                 <button class="diag-btn font-bold text-blue-800" id="btn-add-dio" style="display:none;" onclick="window.promptAddDIO()"><i class="fa-solid fa-server"></i> DIO</button>
                 <button class="diag-btn font-bold text-blue-800" id="btn-add-olt" style="display:none;" onclick="window.promptAddOLT()"><i class="fa-solid fa-network-wired"></i> OLT</button>
                 
-                <button class="diag-btn"><i class="fa-solid fa-bolt text-purple-500"></i> Potência</button>
                 <button class="diag-btn font-bold text-blue-600" onclick="window.addSplitterToDiagram('1x2')"><i class="fa-solid fa-sitemap"></i> 1x2</button>
                 <button class="diag-btn font-bold text-blue-600" onclick="window.addSplitterToDiagram('1x4')"><i class="fa-solid fa-sitemap"></i> 1x4</button>
                 <button class="diag-btn font-bold text-blue-600" onclick="window.addSplitterToDiagram('1x8')"><i class="fa-solid fa-sitemap"></i> 1x8</button>
@@ -486,6 +554,11 @@
             <button class="p-3 border-b border-gray-100 hover:bg-gray-50 font-bold" onclick="window.zoomDiagram('out')"><i class="fa-solid fa-minus text-gray-600"></i></button>
             <button class="p-3 hover:bg-gray-50" onclick="window.zoomDiagram('reset')"><i class="fa-solid fa-house text-gray-800"></i></button>
         </div>
+        
+        <!-- BOLINHA DE LUZ (MANTIDA) -->
+        <div id="fixed-power-btn">
+            <i class="fa-solid fa-bolt"></i>
+        </div>
     </div>
 
     <div id="inside-plant-view"><div id="diagram-content-isp"></div></div>
@@ -501,7 +574,7 @@
         // ==========================================
         window.appState = {
             currentProjectId: null, projects: [], mode: 'view', nodes: [], cables: [], fusions: [], splitters: [], olts: [], dios: [], 
-            portPowers: {}, // Armazena o calculo da luz por porta
+            portPowers: {}, portTraces: {}, // NOVO: Armazena o rastreio da luz
             selectedNodeId: null, editingNodeId: null,
             nodeSetup: { name: 'CEO 01', type: 'CEO', icon: 'fa-layer-group', color: '#f97316', splitter: null },
             cableSetup: { name: '', capacity: 12, color: '#3b82f6' },
@@ -514,6 +587,38 @@
 
         const THEME_COLORS = ['#0ea5e9', '#1d4ed8', '#f97316', '#ef4444', '#22c55e', '#eab308', '#a855f7', '#ec4899', '#000000', '#737373', '#78350f'];
         const FIBER_COLORS = ['#22c55e', '#eab308', '#cbd5e1', '#3b82f6', '#ef4444', '#a855f7', '#78350f', '#ec4899', '#111827', '#64748b', '#f97316', '#06b6d4'];
+
+        // ==========================================
+        // UI MODALS - NATIVOS SUBSTITUÍDOS
+        // ==========================================
+        window.showConfirm = function(title, text, confirmText, callback) {
+            let m = document.getElementById('custom-confirm-modal');
+            document.getElementById('cc-title').innerText = title;
+            document.getElementById('cc-text').innerText = text;
+            document.getElementById('cc-btn-confirm').innerText = confirmText;
+            document.getElementById('cc-btn-confirm').onclick = () => { m.style.display='none'; callback(); };
+            document.getElementById('cc-btn-cancel').onclick = () => { m.style.display='none'; };
+            m.style.display = 'flex';
+        };
+
+        window.showPrompt = function(title, fields, callback) {
+            let m = document.getElementById('custom-prompt-modal');
+            document.getElementById('cp-title').innerText = title;
+            let container = document.getElementById('cp-fields');
+            container.innerHTML = fields.map((f, i) => `
+                <div class="mb-4 text-left">
+                    <label class="input-label">${f.label}</label>
+                    <input type="text" id="cp-input-${i}" class="custom-input" value="${f.val}">
+                </div>
+            `).join('');
+            document.getElementById('cp-btn-confirm').onclick = () => { 
+                m.style.display='none'; 
+                let results = fields.map((f, i) => document.getElementById(`cp-input-${i}`).value);
+                callback(results);
+            };
+            document.getElementById('cp-btn-cancel').onclick = () => { m.style.display='none'; };
+            m.style.display = 'flex';
+        };
 
         window.getPortColor = function(portId) {
             if(portId.startsWith('port-')) { const parts = portId.split('-'); return FIBER_COLORS[parseInt(parts[parts.length-1]) % 12]; } 
@@ -576,7 +681,6 @@
             onSnapshot(getCollectionPath('projects'), (snapshot) => { window.appState.projects = []; snapshot.forEach(doc => { window.appState.projects.push({ id: doc.id, ...doc.data() }); }); if(window.renderProjectsList) window.renderProjectsList(); }, (e) => console.error(e));
             onSnapshot(getCollectionPath('nodes'), (snapshot) => { window.appState.nodes = []; snapshot.forEach(doc => { window.appState.nodes.push({ id: doc.id, ...doc.data() }); }); window.renderMap(); }, (e) => console.error(e));
             
-            // CORREÇÃO: Garante formato de array de arrays para as coordenadas, permitindo rastrear o drag de caixa
             onSnapshot(getCollectionPath('cables'), (snapshot) => { 
                 window.appState.cables = []; 
                 snapshot.forEach(doc => { 
@@ -618,7 +722,6 @@
             catch(e) { const id = 'local_c_'+Date.now(); window.appState.cables.push({id, ...cableData}); window.renderMap(); return id; } 
         };
         
-        // CORREÇÃO: Transforma path em arrays compatíveis local/remoto para o arrasto de caixa
         window.updateCableInFirebase = async (id, cableData) => { 
             let localData = { ...cableData };
             if(localData.path && localData.path.length > 0) {
@@ -648,9 +751,8 @@
 
         window.saveOLTToFirebase = async (data) => { if(!db || !auth || !auth.currentUser) { window.appState.olts.push({id: 'local_olt_'+Date.now(), ...data}); window.openCanvasDiagram(); return; } try { await addDoc(getCollectionPath('olts'), data); } catch(e) {} };
         window.updateOLTInFirebase = async (id, data) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.olts.findIndex(s=>s.id===id); if(idx>-1) window.appState.olts[idx] = {...window.appState.olts[idx], ...data}; window.openCanvasDiagram(); return; } try { await updateDoc(getDocPath('olts', id), data); } catch(e) { } };
-        
         window.deleteOLT = async function(id) {
-            if(confirm("Remover OLT? As fusões conectadas serão perdidas.")) {
+            window.showConfirm("Remover OLT", "As fusões conectadas serão perdidas. Continuar?", "Excluir OLT", async () => {
                 if(db && auth && auth.currentUser && !id.startsWith('local_')) { 
                     try {
                         await deleteDoc(getDocPath('olts', id)); 
@@ -661,17 +763,16 @@
                     window.appState.olts = window.appState.olts.filter(s => s.id !== id); 
                     window.appState.fusions = window.appState.fusions.filter(f => !f.from.includes(id) && !f.to.includes(id)); 
                 }
-                window.showToast('OLT removida.');
+                window.showToast('OLT removida.', 'sucesso');
                 window.openCanvasDiagram();
                 window.calculateNetworkPower();
-            }
+            });
         };
 
         window.saveDIOToFirebase = async (data) => { if(!db || !auth || !auth.currentUser) { window.appState.dios.push({id: 'local_dio_'+Date.now(), ...data}); window.openCanvasDiagram(); return; } try { await addDoc(getCollectionPath('dios'), data); } catch(e) {} };
         window.updateDIOInFirebase = async (id, data) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.dios.findIndex(s=>s.id===id); if(idx>-1) window.appState.dios[idx] = {...window.appState.dios[idx], ...data}; window.openCanvasDiagram(); return; } try { await updateDoc(getDocPath('dios', id), data); } catch(e) { } };
-        
         window.deleteDIO = async function(id) {
-            if(confirm("Remover DIO? As fusões conectadas serão perdidas.")) {
+            window.showConfirm("Remover DIO", "As fusões conectadas serão perdidas. Continuar?", "Excluir DIO", async () => {
                 if(db && auth && auth.currentUser && !id.startsWith('local_')) { 
                     try {
                         await deleteDoc(getDocPath('dios', id)); 
@@ -682,10 +783,10 @@
                     window.appState.dios = window.appState.dios.filter(s => s.id !== id); 
                     window.appState.fusions = window.appState.fusions.filter(f => !f.from.includes(id) && !f.to.includes(id)); 
                 }
-                window.showToast('DIO removido.');
+                window.showToast('DIO removido.', 'sucesso');
                 window.openCanvasDiagram();
                 window.calculateNetworkPower();
-            }
+            });
         };
 
         window.renderProjectsList = function() {
@@ -704,14 +805,14 @@
 
         window.deletarProjeto = async (id, event) => {
             event.stopPropagation();
-            if(confirm('Tem certeza que deseja excluir este projeto e todos os seus elementos?')) {
+            window.showConfirm("Excluir Projeto", "Tem certeza que deseja excluir este projeto e todos os seus elementos?", "Excluir Definitivamente", async () => {
                 if(db && auth && auth.currentUser) {
                     await deleteDoc(getDocPath('projects', id));
                     window.appState.nodes.filter(n => n.projectId === id).forEach(n => deleteDoc(getDocPath('nodes', n.id)));
                     window.appState.cables.filter(c => c.projectId === id).forEach(c => deleteDoc(getDocPath('cables', c.id)));
                     window.showToast('Projeto deletado com sucesso.', 'sucesso');
                 } else { window.showToast('Erro: Não conectado na nuvem.', 'erro'); }
-            }
+            });
         };
 
         window.abrirModalNovoProjeto = () => {
@@ -844,7 +945,13 @@
                 currentCables.forEach(c => { 
                     const linhaCabo = L.polyline(c.path, { color: c.color, weight: 5, opacity: 0.9 }).addTo(cablesLayer);
                     linhaCabo.bindTooltip(`<b>${c.name}</b>`, {sticky: true});
-                    linhaCabo.on('click', () => { if (window.appState.mode === 'view' && confirm(`Excluir o cabo "${c.name}"?`)) { window.deleteCableFromFirebase(c.id); window.showToast('Excluído.', 'sucesso'); } });
+                    linhaCabo.on('click', () => { 
+                        if (window.appState.mode === 'view') { 
+                            window.showConfirm("Excluir Cabo", `Excluir o cabo "${c.name}"?`, "Excluir", () => {
+                                window.deleteCableFromFirebase(c.id); window.showToast('Excluído.', 'sucesso');
+                            });
+                        } 
+                    });
                     if (isMovable) {
                         for(let i=1; i < c.path.length-1; i++) {
                             const iconMid = L.divIcon({ html: `<div style="width:12px; height:12px; background:white; border:3px solid ${c.color}; border-radius:50%; box-shadow:0 0 4px rgba(0,0,0,0.5);"></div>`, className: '', iconSize: [12,12], iconAnchor: [6,6] });
@@ -882,7 +989,6 @@
                             let newPath = [...c.path]; 
                             if(c.startNode === n.id) newPath[0] = [pos.lat, pos.lng]; 
                             if(c.endNode === n.id) newPath[newPath.length-1] = [pos.lat, pos.lng]; 
-                            // FORTE CORREÇÃO NO MAP - Garante que objetos no Array não voltem como indefinidos no Firebase
                             await window.updateCableInFirebase(c.id, { path: newPath.map(p => Array.isArray(p) ? {lat: p[0], lng: p[1]} : {lat: p.lat, lng: p.lng}) }); 
                         } 
                         window.showToast('Caixa movida e Rotas Salvas!', 'sucesso'); 
@@ -974,7 +1080,17 @@
             window.appState.selectedNodeId = node.id; const card = document.getElementById('info-card'); document.getElementById('card-title').innerText = node.name; document.getElementById('card-subtitle').innerText = node.type.toUpperCase(); document.getElementById('card-coords').innerText = `${node.lat.toFixed(5)}, ${node.lng.toFixed(5)}`; document.getElementById('card-icon').className = `fa-solid ${node.icon}`; const iconC = document.getElementById('card-icon-container'); iconC.style.color = node.color; iconC.style.backgroundColor = node.color + '15'; iconC.style.borderColor = node.color + '40'; const btnAction = document.getElementById('btn-card-type-action'); if (node.type === 'POP / DC' || node.type === 'DC') { btnAction.style.display = 'flex'; } else { btnAction.style.display = 'none'; } card.style.display = 'block'; 
         };
         window.closeInfoCard = function() { document.getElementById('info-card').style.display = 'none'; window.appState.selectedNodeId = null; };
-        window.deleteSelectedNode = async function() { const nId = window.appState.selectedNodeId; if (!nId) return; const connectedCables = window.appState.cables.filter(c => c.startNode === nId || c.endNode === nId); for(let c of connectedCables) { await window.deleteCableFromFirebase(c.id); } await window.deleteNodeFromFirebase(nId); window.closeInfoCard(); window.showToast('Excluído do banco.', 'sucesso'); };
+        
+        window.deleteSelectedNode = async function() { 
+            window.showConfirm("Excluir Caixa", "Deseja remover esta caixa e todos os cabos conectados a ela?", "Excluir Definitivamente", async () => {
+                const nId = window.appState.selectedNodeId; if (!nId) return; 
+                const connectedCables = window.appState.cables.filter(c => c.startNode === nId || c.endNode === nId); 
+                for(let c of connectedCables) { await window.deleteCableFromFirebase(c.id); } 
+                await window.deleteNodeFromFirebase(nId); 
+                window.closeInfoCard(); window.showToast('Excluído do banco.', 'sucesso');
+            });
+        };
+
         window.handleCardAction = function() { const node = window.appState.nodes.find(n => n.id === window.appState.selectedNodeId); if (!node) return; if (node.type === 'POP / DC' || node.type === 'DC') { window.openInsidePlantView(node); } };
         window.toggleInventory = function() { const p = document.getElementById('inventory-panel'); p.style.display = (p.style.display === 'flex') ? 'none' : 'flex'; if(p.style.display === 'flex') window.renderInventoryList('all'); };
         window.renderInventoryList = function(filter) { const container = document.getElementById('inventory-list-content'); container.innerHTML = ''; let items = []; if(filter === 'all' || filter === 'nodes') { window.appState.nodes.forEach(n => items.push({ type: 'node', data: n, name: n.name, sub: n.type, icon: n.icon, color: n.color })); } if(filter === 'all' || filter === 'cables') { window.appState.cables.forEach(c => items.push({ type: 'cable', data: c, name: c.name, sub: `${c.capacity} Fibras`, icon: 'fa-share-nodes', color: c.color })); } if(items.length === 0) { container.innerHTML = '<p class="text-sm text-gray-400 text-center p-4">Vazio.</p>'; return; } items.forEach(item => { const el = document.createElement('div'); el.className = 'inv-item'; el.innerHTML = `<div class="flex items-center gap-3"><div class="w-8 h-8 rounded flex items-center justify-center text-white text-xs" style="background-color: ${item.color}"><i class="fa-solid ${item.icon}"></i></div><div><p class="text-sm font-bold text-gray-800 leading-tight">${item.name}</p><p class="text-[10px] text-gray-500 uppercase">${item.sub}</p></div></div><button class="text-gray-400 hover:text-blue-500"><i class="fa-solid fa-crosshairs"></i></button>`; el.onclick = () => { if(item.type === 'node') { map.flyTo([item.data.lat, item.data.lng], 18); window.openInfoCard(item.data); } else if (item.type === 'cable') { map.flyToBounds(L.polyline(item.data.path).getBounds()); } }; container.appendChild(el); }); };
@@ -985,7 +1101,6 @@
         // 6. MOTOR DO DIAGRAMA CANVAS OSP E LUZ
         // ==========================================
         
-        // Botão Flutuante (Bolinha Azul) para Luz nas Fibras
         window.activePowerPort = null;
 
         window.showPowerCornerBtn = function(e, portId) {
@@ -1006,29 +1121,70 @@
             if(!window.activePowerPort) return;
             let power = window.appState.portPowers[window.activePowerPort];
             let displayPower = power === undefined ? "Sem Sinal" : power.toFixed(2) + " dBm";
-            let colorClass = power === undefined ? "text-red-500" : "text-green-500";
+            let colorClass = power === undefined ? "text-red-500 bg-red-50 border-red-100" : "text-green-600 bg-green-50 border-green-100";
             let iconClass = power === undefined ? "fa-circle-xmark" : "fa-check-circle";
 
-            let modal = document.getElementById('power-modal');
-            if(!modal) {
-                modal = document.createElement('div');
-                modal.id = 'power-modal';
-                document.body.appendChild(modal);
-            }
+            let trace = window.appState.portTraces[window.activePowerPort] || [];
+
+            let modal = document.getElementById('power-analysis-modal');
+            let content = document.getElementById('pa-body-content');
             
-            modal.innerHTML = `
-                <div class="power-modal-content">
-                    <button class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-slate-200" onclick="document.getElementById('power-modal').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
-                    <div class="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-4 border-4 border-slate-100 shadow-inner">
-                        <i class="fa-solid fa-lightbulb text-3xl text-blue-500"></i>
+            // Build the Origin Header
+            let originNode = "DESCONHECIDO";
+            let originEquip = "N/A";
+            let originPower = "N/A";
+            
+            if(trace.length > 0) {
+                originNode = trace[0].nodeName;
+                originEquip = trace[0].equipment;
+                originPower = (trace[0].power > 0 ? '+' : '') + trace[0].power.toFixed(2) + ' dBm';
+            }
+
+            let html = `
+                <div class="pa-origin-card">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 text-lg"><i class="fa-solid fa-server"></i></div>
+                        <div>
+                            <div class="pa-origin-title">Origem do Sinal</div>
+                            <div class="pa-origin-val">${originNode}</div>
+                        </div>
                     </div>
-                    <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Status da Porta</h3>
-                    <h2 class="text-4xl font-black text-gray-800 mb-2 font-mono">${displayPower}</h2>
-                    <div class="flex items-center justify-center gap-2 text-sm font-bold ${colorClass} bg-slate-50 border border-slate-100 py-3 rounded-xl mt-4"><i class="fa-solid ${iconClass}"></i> ${power === undefined ? 'Fibra Apagada / Rompida' : 'Sinal Ativo e Estável'}</div>
+                    <div class="pa-grid">
+                        <div><div class="pa-label">Equipamento</div><div class="pa-val">${originEquip}</div></div>
+                        <div><div class="pa-label">Potência Inicial</div><div class="pa-val pa-val-highlight">${originPower}</div></div>
+                    </div>
                 </div>
             `;
-            modal.style.display = 'flex';
-            document.getElementById('fixed-power-btn').style.display = 'none'; // Esconde a bolinha
+
+            // Build Timeline
+            if(trace.length > 1) {
+                html += `<div class="pa-timeline">`;
+                for(let i=1; i<trace.length; i++) {
+                    let step = trace[i];
+                    let isLast = (i === trace.length - 1);
+                    
+                    html += `
+                        <div class="pa-step-dot ${isLast ? 'end' : ''}"></div>
+                        <div class="pa-step-title">${step.label} <span class="pa-step-pwr">${step.power.toFixed(2)} dBm</span></div>
+                        <div class="pa-step-box">
+                            <div class="pa-step-box-item"><i class="fa-solid fa-turn-down text-gray-300"></i> ${step.type.toUpperCase()}<span class="pa-loss-tag">Perda: -${step.loss}dB</span></div>
+                        </div>
+                    `;
+                }
+                html += `</div>`;
+            }
+
+            html += `
+                <div class="pa-footer-card">
+                    <div class="text-[10px] font-black uppercase text-gray-500 tracking-widest">Leitura na Porta Atual</div>
+                    <div class="pa-footer-pwr ${power === undefined ? 'text-red-500' : ''}">${displayPower}</div>
+                    <div class="text-xs font-bold mt-2 ${colorClass} py-1.5 rounded-lg border inline-block px-4"><i class="fa-solid ${iconClass}"></i> ${power === undefined ? 'Sem Sinal Óptico' : 'Sinal Ativo'}</div>
+                </div>
+            `;
+
+            content.innerHTML = html;
+            modal.classList.add('open');
+            document.getElementById('fixed-power-btn').style.display = 'none'; 
         };
 
         window.zoomDiagram = function(action) {
@@ -1038,9 +1194,8 @@
             document.getElementById('diagram-canvas').style.transform = `scale(${window.appState.diagramZoom})`;
         };
 
-        // CORREÇÃO: Delete Splitter com Força Bruta Visual
         window.deleteSplitter = async function(id) {
-            if(confirm('Deseja excluir este splitter e perder as conexões dele?')) {
+            window.showConfirm("Excluir Splitter", "Deseja excluir este splitter e perder as conexões dele?", "Excluir", async () => {
                 if(db && auth && auth.currentUser && !id.startsWith('local_')) { 
                     try {
                         await deleteDoc(getDocPath('splitters', id)); 
@@ -1054,30 +1209,32 @@
                 window.showToast('Splitter removido.', 'sucesso');
                 window.openCanvasDiagram(); 
                 window.calculateNetworkPower(); 
-            }
+            });
         };
 
         window.deletarFusao = async function(id) {
-            if(confirm('Deseja excluir esta conexão?')) {
+            window.showConfirm("Excluir Fusão", "Deseja romper esta conexão de fibra?", "Romper Fibra", async () => {
                 if(db && auth && auth.currentUser && !id.startsWith('local_')) { await deleteDoc(getDocPath('fusions', id)); } 
-                else { window.appState.fusions = window.appState.fusions.filter(f => f.id !== id); window.updateAllFusionLines(); }
+                else { window.appState.fusions = window.appState.fusions.filter(f => f.id !== id); }
                 window.showToast('Conexão excluída.', 'sucesso');
+                window.updateAllFusionLines();
                 window.calculateNetworkPower();
-            }
+            });
         };
 
         window.promptEditOLTPower = async function(id) {
             const olt = window.appState.olts.find(o => o.id === id);
             if(!olt) return;
-            let tx = prompt("Nova potência TX da OLT (ex: +2.5 ou +9):", olt.tx);
-            if(tx !== null) {
-                await window.updateOLTInFirebase(id, { tx: tx });
-                window.showToast("Potência atualizada!");
-                window.calculateNetworkPower();
-            }
+            window.showPrompt("Editar OLT", [{label: "Nova potência TX da OLT (ex: +2.5)", val: olt.tx}], async (results) => {
+                let tx = results[0];
+                if(tx) {
+                    await window.updateOLTInFirebase(id, { tx: tx });
+                    window.showToast("Potência atualizada!");
+                    window.calculateNetworkPower();
+                }
+            });
         };
 
-        // CORREÇÃO: Força o Redraw em Rotação
         window.rotateBlock = async function(type = window.activeContextMenuType, id = window.activeContextMenuId) {
             let newRot;
             if(type === 'splitter') {
@@ -1143,7 +1300,9 @@
         window.removeBlock = async function() {
             if(window.activeContextMenuType === 'splitter') { window.deleteSplitter(window.activeContextMenuId); } 
             else if (window.activeContextMenuType === 'cable') {
-                if(confirm('Isso excluirá o cabo de todo o sistema. Continuar?')) { await window.deleteCableFromFirebase(window.activeContextMenuId); window.openCanvasDiagram(); }
+                window.showConfirm("Remover Cabo do Diagrama", "Isso excluirá o cabo de todo o sistema. Continuar?", "Remover Definitivamente", async () => {
+                    await window.deleteCableFromFirebase(window.activeContextMenuId); window.openCanvasDiagram();
+                });
             } else if (window.activeContextMenuType === 'olt') {
                 window.deleteOLT(window.activeContextMenuId);
             } else if (window.activeContextMenuType === 'dio') {
@@ -1159,25 +1318,26 @@
             else { window.showToast("Destino não encontrado.", "erro"); }
         };
 
-        // CORREÇÃO: Adicionar Splitter e forçar atualização visual
-        window.addSplitterToDiagram = async function(type) {
-            if(!window.appState.selectedNodeId) return; 
-            window.showToast(`Adicionando Splitter ${type}...`);
-            const existingSp = window.appState.splitters.filter(s => s.nodeId === window.appState.selectedNodeId);
-            const newY = 150 + (existingSp.length * 90);
-            await window.saveSplitterToFirebase({ nodeId: window.appState.selectedNodeId, type: type, x: 450, y: newY, rotation: 0, flipped: false, sideFlipped: false });
-            window.openCanvasDiagram();
-        };
-
         window.promptAddOLT = async function() {
-            let pons = prompt("Quantas portas PON na OLT? (Ex: 4, 8, 16)"); if(!pons) return;
-            let tx = prompt("Qual a potência TX da PON? (Ex: +2.5 ou +9)"); if(!tx) tx = '+2.5';
-            await window.saveOLTToFirebase({ nodeId: window.appState.selectedNodeId, pons: parseInt(pons), tx: tx, x: 200, y: 200, rotation: 0, flipped: false, sideFlipped: false });
+            window.showPrompt("Adicionar OLT", [
+                {label: "Quantas portas PON? (Ex: 4, 8, 16)", val: "4"},
+                {label: "Potência TX da PON (Ex: +2.5 ou +9)", val: "+2.5"}
+            ], async (results) => {
+                let pons = parseInt(results[0]);
+                let tx = results[1];
+                if(pons) {
+                    await window.saveOLTToFirebase({ nodeId: window.appState.selectedNodeId, pons: pons, tx: tx, x: 200, y: 200, rotation: 0, flipped: false, sideFlipped: false });
+                }
+            });
         };
         
         window.promptAddDIO = async function() {
-            let ports = prompt("Quantas portas no DIO? (Ex: 12, 24, 36)"); if(!ports) return;
-            await window.saveDIOToFirebase({ nodeId: window.appState.selectedNodeId, ports: parseInt(ports), x: 300, y: 200, rotation: 0, flipped: false, sideFlipped: false });
+            window.showPrompt("Adicionar DIO", [{label: "Quantas portas no DIO? (Ex: 12, 24, 36)", val: "24"}], async (results) => {
+                let ports = parseInt(results[0]);
+                if(ports) {
+                    await window.saveDIOToFirebase({ nodeId: window.appState.selectedNodeId, ports: ports, x: 300, y: 200, rotation: 0, flipped: false, sideFlipped: false });
+                }
+            });
         };
 
         window.getPortVector = function(portId, p1X, p1Y, p2X, p2Y) {
@@ -1199,15 +1359,18 @@
             return { x: baseV.x * Math.cos(rad) - baseV.y * Math.sin(rad), y: baseV.x * Math.sin(rad) + baseV.y * Math.cos(rad) };
         };
 
-        // MATEMÁTICA E PROPAGAÇÃO DE LUZ
         window.calculateNetworkPower = function() {
             let powers = {};
+            let traces = {};
             
             // 1. Iniciando o fluxo na OLT (Gênese da Luz)
             window.appState.olts.forEach(olt => {
                 let tx = parseFloat(olt.tx) || 0;
+                let node = window.appState.nodes.find(n => n.id === olt.nodeId);
                 for(let i=0; i<olt.pons; i++) {
-                    powers[`olt-${olt.id}-pon-${i}`] = tx;
+                    let portId = `olt-${olt.id}-pon-${i}`;
+                    powers[portId] = tx;
+                    traces[portId] = [{ type: 'origin', nodeName: node ? node.name : 'Data Center', equipment: `OLT PON ${i+1}`, power: tx }];
                 }
             });
 
@@ -1218,14 +1381,25 @@
             while(queue.length > 0) {
                 let curr = queue.shift();
                 let pwr = powers[curr];
+                let currTrace = traces[curr] || [];
 
                 // Atravessar Fusões
                 window.appState.fusions.forEach(f => {
                     if(f.from === curr || f.to === curr) {
                         let next = f.from === curr ? f.to : f.from;
                         if(next === 'dead_end') return;
-                        if(powers[next] === undefined || powers[next] < pwr) { 
-                            powers[next] = pwr;
+                        
+                        let fusionLoss = 0.1; 
+                        let nextPwr = pwr - fusionLoss;
+
+                        if(powers[next] === undefined || powers[next] < nextPwr) { 
+                            powers[next] = nextPwr;
+                            
+                            let nodeName = 'Emenda';
+                            let node = window.appState.nodes.find(n => n.id === f.nodeId);
+                            if(node) nodeName = node.name;
+
+                            traces[next] = [...currTrace, { type: 'fusion', label: `Fusão (${nodeName})`, loss: fusionLoss, power: nextPwr }];
                             queue.push(next);
                         }
                     }
@@ -1237,11 +1411,12 @@
                     let other = `dio-${parts[1]}-${parts[2]==='in'?'out':'in'}-${parts[3]}`;
                     if(powers[other] === undefined) {
                         powers[other] = pwr;
+                        traces[other] = [...currTrace]; 
                         queue.push(other);
                     }
                 }
 
-                // Atravessar Splitter (Matemática da Perda)
+                // Atravessar Splitter
                 if(curr.startsWith('sp-') && curr.includes('-in')) {
                     let spId = curr.split('-')[1];
                     let sp = window.appState.splitters.find(s => s.id === spId);
@@ -1249,17 +1424,21 @@
                         let loss = splitterLoss[sp.type] || 3.7;
                         let outPwr = pwr - loss;
                         
-                        // Atualiza a etiqueta do Splitter VISUALMENTE
                         let lbl = document.getElementById(`sp-lbl-${spId}`);
                         if(lbl) {
                             lbl.innerHTML = `${sp.type} APC<br><span style="color:#059669; font-size:9px;">IN: ${pwr.toFixed(1)} | OUT: ${outPwr.toFixed(1)}</span>`;
                         }
+
+                        let nodeName = 'Caixa';
+                        let node = window.appState.nodes.find(n => n.id === sp.nodeId);
+                        if(node) nodeName = node.name;
 
                         let outs = parseInt(sp.type.split('x')[1]);
                         for(let i=0; i<outs; i++) {
                             let outPort = `sp-${spId}-out-${i}`;
                             if(powers[outPort] === undefined) {
                                 powers[outPort] = outPwr;
+                                traces[outPort] = [...currTrace, { type: 'splitter', label: `Splitter ${sp.type} (${nodeName})`, loss: loss, power: outPwr }];
                                 queue.push(outPort);
                             }
                         }
@@ -1268,6 +1447,7 @@
             }
 
             window.appState.portPowers = powers;
+            window.appState.portTraces = traces;
 
             // 3. Efeito Visual: Tooltip (Balão) nas portas e Brilho verde
             for(let portId in powers) {
@@ -1275,7 +1455,6 @@
                 els.forEach(el => {
                     let orig = el.getAttribute('data-orig-title') || el.getAttribute('title') || '';
                     if(!el.hasAttribute('data-orig-title')) el.setAttribute('data-orig-title', orig);
-                    
                     el.setAttribute('title', `${orig.split(' |')[0]} | Luz: ${powers[portId].toFixed(2)} dBm`);
                     el.style.boxShadow = '0 0 4px 1px rgba(34, 197, 94, 0.7)';
                 });
@@ -1289,6 +1468,15 @@
                     if(lbl) lbl.innerHTML = `${sp.type} APC<br><span style="color:#ef4444; font-size:9px;">Sem Sinal</span>`;
                 }
             });
+        };
+
+        window.addSplitterToDiagram = async function(type) {
+            if(!window.appState.selectedNodeId) return; 
+            window.showToast(`Adicionando Splitter ${type}...`);
+            const existingSp = window.appState.splitters.filter(s => s.nodeId === window.appState.selectedNodeId);
+            const newY = 150 + (existingSp.length * 90);
+            await window.saveSplitterToFirebase({ nodeId: window.appState.selectedNodeId, type: type, x: 450, y: newY, rotation: 0, flipped: false, sideFlipped: false });
+            window.openCanvasDiagram();
         };
 
         window.openCanvasDiagram = function() { 
@@ -1321,7 +1509,7 @@
             }); 
             
             const mySplitters = window.appState.splitters.filter(s => s.nodeId === node.id);
-            mySplitters.forEach((sp, index) => { window.createSplitterBlock(canvas, sp, sp.x || 450, sp.y || (100 + index * 100), sp.rotation || 0, sp.flipped || false, sp.sideFlipped || false); });
+            mySplitters.forEach((sp) => { window.createSplitterBlock(canvas, sp, sp.x || 450, sp.y || 150, sp.rotation || 0, sp.flipped || false, sp.sideFlipped || false); });
 
             const myOLTs = window.appState.olts.filter(o => o.nodeId === node.id);
             myOLTs.forEach((olt, index) => { window.createOLTBlock(canvas, olt, olt.x || 150, olt.y || (100 + index * 100), olt.rotation || 0, olt.flipped || false, olt.sideFlipped || false); });
@@ -1331,7 +1519,7 @@
 
             setTimeout(() => { 
                 window.updateAllFusionLines(); 
-                window.calculateNetworkPower(); // Aciona a Luz após carregar!
+                window.calculateNetworkPower();
             }, 100); 
             document.getElementById('diagram-view').style.display = 'flex'; 
         };
