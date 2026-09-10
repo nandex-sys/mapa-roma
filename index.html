@@ -2385,25 +2385,43 @@
                     const midX = 0.125 * p1X + 0.375 * cp1X + 0.375 * cp2X + 0.125 * p2X;
                     const midY = 0.125 * p1Y + 0.375 * cp1Y + 0.375 * cp2Y + 0.125 * p2Y;
                     
-                    const tubete = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                    tubete.setAttribute('x', midX - 6);
-                    tubete.setAttribute('y', midY - 12);
-                    tubete.setAttribute('width', '12');
-                    tubete.setAttribute('height', '24');
-                    tubete.setAttribute('rx', '4');
-                    tubete.setAttribute('fill', fusion.hasTubete ? '#22c55e' : '#cbd5e1'); // Verde se ativo, Cinza se inativo
-                    tubete.setAttribute('stroke', '#ffffff');
-                    tubete.setAttribute('stroke-width', '2');
-                    tubete.style.cursor = 'pointer';
-                    tubete.style.pointerEvents = 'all';
-                    tubete.onclick = (e) => window.toggleTubete(fusion.id, e);
+                    // Cálculo da inclinação (tangente) para alinhar o tubete com a curvatura da fibra
+                    const dX = 3 * 0.25 * (cp1X - p1X) + 3 * 0.5 * (cp2X - cp1X) + 3 * 0.25 * (p2X - cp2X);
+                    const dY = 3 * 0.25 * (cp1Y - p1Y) + 3 * 0.5 * (cp2Y - cp1Y) + 3 * 0.25 * (p2Y - cp2Y);
+                    const angle = Math.atan2(dY, dX) * (180 / Math.PI);
+                    
+                    const fusionGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    fusionGroup.setAttribute('transform', `translate(${midX}, ${midY}) rotate(${angle})`);
+                    fusionGroup.style.cursor = 'pointer';
+                    fusionGroup.style.pointerEvents = 'all';
+                    fusionGroup.onclick = (e) => window.toggleTubete(fusion.id, e);
+                    
+                    // Bolinha esquerda (Fibra de Origem)
+                    const leftDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    leftDot.setAttribute('cx', '-7'); leftDot.setAttribute('cy', '0'); leftDot.setAttribute('r', '3.5');
+                    leftDot.setAttribute('fill', color1); leftDot.setAttribute('stroke', '#1e293b'); leftDot.setAttribute('stroke-width', '1.5');
+                    
+                    // Bolinha direita (Fibra de Destino)
+                    const rightDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    rightDot.setAttribute('cx', '7'); rightDot.setAttribute('cy', '0'); rightDot.setAttribute('r', '3.5');
+                    rightDot.setAttribute('fill', color2); rightDot.setAttribute('stroke', '#1e293b'); rightDot.setAttribute('stroke-width', '1.5');
+                    
+                    // Tubete central (Protetor de Emenda)
+                    const centerTubete = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    centerTubete.setAttribute('cx', '0'); centerTubete.setAttribute('cy', '0'); centerTubete.setAttribute('r', '5');
+                    centerTubete.setAttribute('fill', fusion.hasTubete ? '#22c55e' : '#cbd5e1'); // Verde se ativo, Cinza se desativo
+                    centerTubete.setAttribute('stroke', '#1e293b'); centerTubete.setAttribute('stroke-width', '1.5');
                     
                     // Tooltip nativo no Tubete
                     const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
                     title.textContent = fusion.hasTubete ? 'Fusão Inserida (-0.1dB)' : 'Clique para inserir Tubete de Fusão';
-                    tubete.appendChild(title);
-
-                    g.appendChild(tubete);
+                    fusionGroup.appendChild(title);
+                    
+                    fusionGroup.appendChild(leftDot);
+                    fusionGroup.appendChild(rightDot);
+                    fusionGroup.appendChild(centerTubete);
+                    
+                    g.appendChild(fusionGroup);
                 }
 
                 svg.appendChild(g);
