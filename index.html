@@ -1065,13 +1065,36 @@
                         const name1 = `${cable.capacity} FO - ${nodeA ? nodeA.name : 'Origem'} sentido ${node.name}`;
                         const name2 = `${cable.capacity} FO - ${node.name} sentido ${nodeB ? nodeB.name : 'Destino'}`;
                         
-                        const c1Data = { projectId: cable.projectId, name: name1, capacity: cable.capacity, color: cable.color, startNode: cable.startNode, endNode: node.id, path: path1.map(p => ({lat: p[0], lng: p[1]})), diagram: { [node.id]: { x: 300, y: 300, rotation: 0, sideFlipped: false } } };
-                        const c2Data = { projectId: cable.projectId, name: name2, capacity: cable.capacity, color: cable.color, startNode: node.id, endNode: cable.endNode, path: path2.map(p => ({lat: p[0], lng: p[1]})), diagram: { [node.id]: { x: 800, y: 300, rotation: 0, sideFlipped: true } } };
+                        // Preserva o diagrama das pontas antigas
+                        let diag1 = {}; if(cable.diagram && cable.diagram[cable.startNode]) diag1[cable.startNode] = cable.diagram[cable.startNode];
+                        diag1[node.id] = { x: 300, y: 300, rotation: 0, sideFlipped: false };
+                        
+                        let diag2 = {}; if(cable.diagram && cable.diagram[cable.endNode]) diag2[cable.endNode] = cable.diagram[cable.endNode];
+                        diag2[node.id] = { x: 800, y: 300, rotation: 0, sideFlipped: true };
+                        
+                        const c1Data = { projectId: cable.projectId, name: name1, capacity: cable.capacity, color: cable.color, startNode: cable.startNode, endNode: node.id, path: path1.map(p => ({lat: p[0], lng: p[1]})), diagram: diag1 };
+                        const c2Data = { projectId: cable.projectId, name: name2, capacity: cable.capacity, color: cable.color, startNode: node.id, endNode: cable.endNode, path: path2.map(p => ({lat: p[0], lng: p[1]})), diagram: diag2 };
                         
                         await window.deleteCableFromFirebase(cable.id);
                         const c1Id = await window.saveCableToFirebase(c1Data); const c2Id = await window.saveCableToFirebase(c2Data);
                         
                         for(let f=0; f < cable.capacity; f++) { await window.saveFusionToFirebase({ nodeId: node.id, from: `port-${c1Id}-${f}`, to: `port-${c2Id}-${f}` }); }
+                        
+                        // CORREÇÃO BUG 1: Atualiza fusões antigas nas extremidades do cabo original
+                        const oldFusions = window.appState.fusions.filter(f => f.from.includes(`port-${cable.id}-`) || f.to.includes(`port-${cable.id}-`));
+                        for(let f of oldFusions) {
+                            let updates = {};
+                            if(f.from.includes(`port-${cable.id}-`)) {
+                                let portNum = f.from.split('-').pop();
+                                updates.from = f.nodeId === cable.startNode ? `port-${c1Id}-${portNum}` : `port-${c2Id}-${portNum}`;
+                            }
+                            if(f.to.includes(`port-${cable.id}-`)) {
+                                let portNum = f.to.split('-').pop();
+                                updates.to = f.nodeId === cable.startNode ? `port-${c1Id}-${portNum}` : `port-${c2Id}-${portNum}`;
+                            }
+                            await window.updateFusionInFirebase(f.id, updates);
+                        }
+                        
                         window.showToast("Sangria realizada com sucesso!", "sucesso"); return; 
                     }
                 }
@@ -1470,10 +1493,43 @@
         window.closeInfoCard = function() { document.getElementById('info-card').style.display = 'none'; window.appState.selectedNodeId = null; };
         
         window.deleteSelectedNode = async function() { 
-            window.showConfirm("Excluir Caixa", "Deseja remover esta caixa e todos os cabos conectados a ela?", "Excluir Definitivamente", async () => {
+            window.showConfirm("Excluir Caixa", "Deseja remover esta caixa?", "Excluir", async () => {
                 const nId = window.appState.selectedNodeId; if (!nId) return; 
                 const connectedCables = window.appState.cables.filter(c => c.startNode === nId || c.endNode === nId); 
-                for(let c of connectedCables) { await window.deleteCableFromFirebase(c.id); } 
+                
+                // CORREÇÃO BUG 2: Cura de Sangria (Junta cabos ao deletar a caixa)
+                if(connectedCables.length === 2 && connectedCables[0].capacity === connectedCables[1].capacity) {
+                    let c1 = connectedCables[0], c2 = connectedCables[1];
+                    if(c1.startNode === nId && c2.endNode === nId) { let temp = c1; c1 = c2; c2 = temp; }
+                    
+                    if(c1.endNode === nId && c2.startNode === nId) {
+                        window.showToast('Restaurando cabo contínuo no mapa...');
+                        let newPath = [...c1.path]; newPath.pop(); newPath = newPath.concat(c2.path);
+                        
+                        let diag = {};
+                        if(c1.diagram && c1.diagram[c1.startNode]) diag[c1.startNode] = c1.diagram[c1.startNode];
+                        if(c2.diagram && c2.diagram[c2.endNode]) diag[c2.endNode] = c2.diagram[c2.endNode];
+                        
+                        const nodeA = window.appState.nodes.find(n => n.id === c1.startNode); const nodeB = window.appState.nodes.find(n => n.id === c2.endNode);
+                        const mergedName = `${c1.capacity} FO - ${nodeA ? nodeA.name : 'Origem'} sentido ${nodeB ? nodeB.name : 'Destino'}`;
+                        const mergedCableData = { projectId: c1.projectId, name: mergedName, capacity: c1.capacity, color: c1.color, startNode: c1.startNode, endNode: c2.endNode, path: newPath.map(p => ({lat: p[0], lng: p[1]})), diagram: diag };
+                        
+                        const newCableId = await window.saveCableToFirebase(mergedCableData);
+                        
+                        const oldFusions = window.appState.fusions.filter(f => f.from.includes(`port-${c1.id}-`) || f.to.includes(`port-${c1.id}-`) || f.from.includes(`port-${c2.id}-`) || f.to.includes(`port-${c2.id}-`));
+                        for(let f of oldFusions) {
+                            if(f.nodeId === nId) continue; // Ignora as fusões que serão apagadas com a caixa
+                            let updates = {};
+                            if(f.from.includes(`port-${c1.id}-`) || f.from.includes(`port-${c2.id}-`)) { let portNum = f.from.split('-').pop(); updates.from = `port-${newCableId}-${portNum}`; }
+                            if(f.to.includes(`port-${c1.id}-`) || f.to.includes(`port-${c2.id}-`)) { let portNum = f.to.split('-').pop(); updates.to = `port-${newCableId}-${portNum}`; }
+                            await window.updateFusionInFirebase(f.id, updates);
+                        }
+                        await window.deleteCableFromFirebase(c1.id); await window.deleteCableFromFirebase(c2.id);
+                    } else { for(let c of connectedCables) { await window.deleteCableFromFirebase(c.id); } }
+                } else {
+                    for(let c of connectedCables) { await window.deleteCableFromFirebase(c.id); } 
+                }
+                
                 await window.deleteNodeFromFirebase(nId); 
                 window.closeInfoCard(); window.showToast('Excluído do banco.', 'sucesso');
             });
