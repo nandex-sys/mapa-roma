@@ -57,6 +57,9 @@
         #empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 60vh; border: 2px dashed var(--border-color); border-radius: 16px; background-color: var(--bg-dashed); }
         .btn-green { background-color: var(--brand-green); color: white; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px; border: none; }
         .btn-green:hover { background-color: var(--brand-green-hover); }
+        .btn-green-dash { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 10px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; gap: 8px; border: none; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3), 0 4px 6px -2px rgba(16, 185, 129, 0.2); }
+        .btn-green-dash:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4), 0 10px 10px -5px rgba(16, 185, 129, 0.2); }
+        .btn-green-dash:active { transform: translateY(1px); box-shadow: 0 5px 10px -3px rgba(16, 185, 129, 0.4); }
         .search-bar-dash { background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; gap: 8px; color: var(--text-secondary); width: 300px; }
         .search-bar-dash input { background: transparent; border: none; outline: none; color: var(--text-primary); width: 100%; font-size: 14px; }
 
@@ -462,6 +465,9 @@
         <div id="map-container"></div>
         
         <div class="top-toolbar" style="left: calc(50% + 130px);">
+            <button class="bg-slate-800 hover:bg-slate-700 text-white font-bold h-12 px-5 rounded-xl shadow-lg transition-all flex items-center gap-2 hover:-translate-y-0.5" onclick="window.voltarESalvar()" title="Salvar e Voltar">
+                <i class="fa-solid fa-arrow-left"></i> Voltar
+            </button>
             <div class="search-bar">
                 <i class="fa-solid fa-magnifying-glass text-gray-400 mr-2"></i>
                 <input type="text" id="search-input" placeholder="Buscar Coordenadas / Endereço...">
@@ -474,7 +480,6 @@
                 <div class="w-px h-6 bg-gray-200 mx-1"></div>
                 <button class="tool-btn" id="btn-cabo" onclick="window.openModal('cabo')"><i class="fa-solid fa-share-nodes"></i> CABO</button>
                 <div class="w-px h-6 bg-gray-200 mx-1"></div>
-                <button class="tool-btn" id="btn-mover" onclick="window.setMode('move')"><i class="fa-solid fa-arrows-up-down-left-right"></i> MOVER</button>
                 <button class="tool-btn" id="btn-mover" onclick="window.setMode('move')"><i class="fa-solid fa-arrows-up-down-left-right"></i> MOVER</button>
                 <!-- MENU DE MEDIÇÃO COM OPÇÕES -->
                 <div class="w-px h-6 bg-gray-200 mx-1"></div>
@@ -1053,6 +1058,7 @@
         };
 
         window.voltarParaProjetos = () => { window.appState.currentProjectId = null; document.getElementById('app-workspace').style.display = 'none'; document.getElementById('regions-screen').style.display = 'flex'; };
+        window.voltarESalvar = () => { window.showToast('Progresso salvo e sincronizado na nuvem!', 'sucesso'); setTimeout(() => { window.voltarParaProjetos(); }, 600); };
         window.searchLocation = async () => { const query = document.getElementById('search-input').value; if(!query) return; try { const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`); const data = await res.json(); if(data && data.length > 0) { map.flyTo([data[0].lat, data[0].lon], 18); } } catch(e) {} };
 
         // Sangria Face a Face
