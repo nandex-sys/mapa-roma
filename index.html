@@ -195,19 +195,23 @@
         /* Animação Tracejada na Base das Fibras (Estilo Foto) */
         .fiber-port::before, .sp-port::before { content: ''; position: absolute; top: 50%; margin-top: -1px; width: 12px; height: 2px; background-image: linear-gradient(to right, var(--trace-color, #94a3b8) 50%, transparent 50%); background-size: 6px 2px; opacity: 0; pointer-events: none; z-index: -1; }
         
-        /* Portas no lado ESQUERDO do bloco (Tracejado vai para a esquerda) */
-        .cable-block.side-flipped .fiber-port::before, .olt-block.side-flipped .fiber-port::before, .splitter-tri:not(.side-flipped) .in::before, .splitter-tri.side-flipped .out::before, .dio-block:not(.side-flipped) .in::before, .dio-block.side-flipped .out::before { right: 100%; margin-right: 3px; }
+        /* Portas no lado ESQUERDO do bloco (Tracejado vai para DENTRO, ou seja, para a DIREITA) */
+        .cable-block.side-flipped .fiber-port::before, .olt-block.side-flipped .fiber-port::before, .splitter-tri:not(.side-flipped) .in::before, .splitter-tri.side-flipped .out::before, .dio-block:not(.side-flipped) .in::before, .dio-block.side-flipped .out::before { left: 100%; margin-left: 3px; }
         
-        /* Portas no lado DIREITO do bloco (Tracejado vai para a direita) */
-        .cable-block:not(.side-flipped) .fiber-port::before, .olt-block:not(.side-flipped) .fiber-port::before, .splitter-tri:not(.side-flipped) .out::before, .splitter-tri.side-flipped .in::before, .dio-block:not(.side-flipped) .out::before, .dio-block.side-flipped .in::before { left: 100%; margin-left: 3px; }
+        /* Portas no lado DIREITO do bloco (Tracejado vai para DENTRO, ou seja, para a ESQUERDA) */
+        .cable-block:not(.side-flipped) .fiber-port::before, .olt-block:not(.side-flipped) .fiber-port::before, .splitter-tri:not(.side-flipped) .out::before, .splitter-tri.side-flipped .in::before, .dio-block:not(.side-flipped) .out::before, .dio-block.side-flipped .in::before { right: 100%; margin-right: 3px; }
         
         .anim-flow-in::before, .anim-flow-out::before { opacity: 1 !important; }
         
-        /* Movimento para a DIREITA */
-        .cable-block.side-flipped .anim-flow-in::before, .olt-block.side-flipped .anim-flow-in::before, .splitter-tri:not(.side-flipped) .in.anim-flow-in::before, .splitter-tri.side-flipped .out.anim-flow-in::before, .dio-block:not(.side-flipped) .in.anim-flow-in::before, .dio-block.side-flipped .out.anim-flow-in::before, .cable-block:not(.side-flipped) .anim-flow-out::before, .olt-block:not(.side-flipped) .anim-flow-out::before, .splitter-tri:not(.side-flipped) .out.anim-flow-out::before, .splitter-tri.side-flipped .in.anim-flow-out::before, .dio-block:not(.side-flipped) .out.anim-flow-out::before, .dio-block.side-flipped .in.anim-flow-out::before { animation: flow-right 0.4s linear infinite; }
+        /* Movimento para a DIREITA (flow-right) */
+        /* Aplicado quando: Porta na esquerda recebendo luz (IN) OU Porta na direita enviando luz (OUT) */
+        .cable-block.side-flipped .anim-flow-in::before, .olt-block.side-flipped .anim-flow-in::before, .splitter-tri:not(.side-flipped) .in.anim-flow-in::before, .splitter-tri.side-flipped .out.anim-flow-in::before, .dio-block:not(.side-flipped) .in.anim-flow-in::before, .dio-block.side-flipped .out.anim-flow-in::before, 
+        .cable-block:not(.side-flipped) .anim-flow-out::before, .olt-block:not(.side-flipped) .anim-flow-out::before, .splitter-tri:not(.side-flipped) .out.anim-flow-out::before, .splitter-tri.side-flipped .in.anim-flow-out::before, .dio-block:not(.side-flipped) .out.anim-flow-out::before, .dio-block.side-flipped .in.anim-flow-out::before { animation: flow-right 0.4s linear infinite; }
         
-        /* Movimento para a ESQUERDA */
-        .cable-block.side-flipped .anim-flow-out::before, .olt-block.side-flipped .anim-flow-out::before, .splitter-tri:not(.side-flipped) .in.anim-flow-out::before, .splitter-tri.side-flipped .out.anim-flow-out::before, .dio-block:not(.side-flipped) .in.anim-flow-out::before, .dio-block.side-flipped .out.anim-flow-out::before, .cable-block:not(.side-flipped) .anim-flow-in::before, .olt-block:not(.side-flipped) .anim-flow-in::before, .splitter-tri:not(.side-flipped) .out.anim-flow-in::before, .splitter-tri.side-flipped .in.anim-flow-in::before, .dio-block:not(.side-flipped) .out.anim-flow-in::before, .dio-block.side-flipped .in.anim-flow-in::before { animation: flow-left 0.4s linear infinite; }
+        /* Movimento para a ESQUERDA (flow-left) */
+        /* Aplicado quando: Porta na direita recebendo luz (IN) OU Porta na esquerda enviando luz (OUT) */
+        .cable-block:not(.side-flipped) .anim-flow-in::before, .olt-block:not(.side-flipped) .anim-flow-in::before, .splitter-tri:not(.side-flipped) .out.anim-flow-in::before, .splitter-tri.side-flipped .in.anim-flow-in::before, .dio-block:not(.side-flipped) .out.anim-flow-in::before, .dio-block.side-flipped .in.anim-flow-in::before, 
+        .cable-block.side-flipped .anim-flow-out::before, .olt-block.side-flipped .anim-flow-out::before, .splitter-tri:not(.side-flipped) .in.anim-flow-out::before, .splitter-tri.side-flipped .out.anim-flow-out::before, .dio-block:not(.side-flipped) .in.anim-flow-out::before, .dio-block.side-flipped .out.anim-flow-out::before { animation: flow-left 0.4s linear infinite; }
         
         @keyframes flow-right { from { background-position: 0 0; } to { background-position: 6px 0; } }
         @keyframes flow-left { from { background-position: 0 0; } to { background-position: -6px 0; } }
