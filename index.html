@@ -1055,7 +1055,7 @@
             const banner = document.getElementById('instruction-banner'); drawLayer.clearLayers(); 
             window.appState.cablePath = []; window.appState.cableStartNodeId = null; window.appState.tempPolyline = null;
             
-           // Limpa Trena e Cabo Selecionado
+            // Limpa Trena e Cabo Selecionado
             window.appState.measurePath = [];
             window.appState.measureTotalLength = 0; // INICIANDO O SOMATÓRIO ZERADO
             if(window.appState.measureTooltip) { map.removeLayer(window.appState.measureTooltip); window.appState.measureTooltip = null; }
@@ -1063,7 +1063,7 @@
             document.getElementById('fixed-cable-btn').style.display = 'none';
             if(window.activeCablePolyline) { window.activeCablePolyline.setStyle({color: window.activeCablePolyline.defaultColor, weight: 5}); window.activeCablePolyline = null; }
 
-            if (newMode === 'placing_node' || newMode === 'drawing_cable' || newMode === 'measure') { document.getElementById('map-container').classList.add('node-anchorable'); } 
+            if (newMode === 'placing_node' || newMode === 'drawing_cable' || newMode === 'measure_cable' || newMode === 'measure_map') { document.getElementById('map-container').classList.add('node-anchorable'); } 
             else { document.getElementById('map-container').classList.remove('node-anchorable'); }
             
             if (newMode === 'view' || newMode === 'move') { 
@@ -1075,9 +1075,14 @@
             } else if (newMode === 'drawing_cable') { 
                 document.body.classList.add('mode-drawing'); document.getElementById('btn-cabo').classList.add('active'); 
                 map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Selecione a <b>Caixa Inicial</b>.`; 
-            } else if (newMode === 'measure') {
+            } else if (newMode === 'measure_cable') {
                 document.body.classList.add('mode-measure'); document.getElementById('btn-medir').classList.add('active');
                 map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Clique nos cabos para <b>somar as metragens</b>. (ESC para sair)`;
+                document.getElementById('measure-panel').style.display = 'flex';
+                document.getElementById('measure-total').innerText = '0 m';
+            } else if (newMode === 'measure_map') {
+                document.body.classList.add('mode-measure'); document.getElementById('btn-medir').classList.add('active');
+                map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Clique no mapa para <b>traçar distâncias</b>. (ESC para sair)`;
                 document.getElementById('measure-panel').style.display = 'flex';
                 document.getElementById('measure-total').innerText = '0 m';
             }
@@ -1092,7 +1097,17 @@
                 const dynamicPath = [...window.appState.cablePath, endPos]; 
                 if (!window.appState.tempPolyline) { window.appState.tempPolyline = L.polyline(dynamicPath, { color: window.appState.cableSetup.color, weight: 4, opacity: 0.8, className: 'preview-line-active' }).addTo(drawLayer); } 
                 else { window.appState.tempPolyline.setLatLngs(dynamicPath); } 
-            } 
+            } else if (window.appState.mode === 'measure_map' && window.appState.measurePath.length > 0) {
+                const dynamicPath = [...window.appState.measurePath, [e.latlng.lat, e.latlng.lng]];
+                if (!window.appState.tempPolyline) { 
+                    window.appState.tempPolyline = L.polyline(dynamicPath, { color: '#f97316', weight: 4, dashArray: '5, 10' }).addTo(drawLayer); 
+                } else { 
+                    window.appState.tempPolyline.setLatLngs(dynamicPath); 
+                }
+                const len = window.calculateCableLength(dynamicPath);
+                const lenStr = len < 1 ? (len*1000).toFixed(1) + ' m' : len.toFixed(3) + ' km';
+                document.getElementById('measure-total').innerText = lenStr;
+            }
         });
 
         map.on('click', async function(e) { 
@@ -1110,13 +1125,18 @@
                     window.appState.cablePath.push([e.latlng.lat, e.latlng.lng]); 
                     if (window.appState.tempPolyline) window.appState.tempPolyline.setLatLngs(window.appState.cablePath); 
                 } 
+            } else if (window.appState.mode === 'measure_map') {
+                window.appState.measurePath.push([e.latlng.lat, e.latlng.lng]);
+                if (window.appState.tempPolyline) window.appState.tempPolyline.setLatLngs(window.appState.measurePath);
+                const len = window.calculateCableLength(window.appState.measurePath);
+                const lenStr = len < 1 ? (len*1000).toFixed(1) + ' m' : len.toFixed(3) + ' km';
+                document.getElementById('measure-total').innerText = lenStr;
             } else { 
                 window.closeInfoCard(); document.getElementById('inventory-panel').style.display = 'none';
                 if(window.activeCablePolyline) { window.activeCablePolyline.setStyle({color: window.activeCablePolyline.defaultColor, weight: 5}); window.activeCablePolyline = null; }
                 document.getElementById('fixed-cable-btn').style.display = 'none'; 
             } 
         });
-
         window.handleNodeInteraction = async function(node, eventType) { 
             if (eventType === 'click') { 
                 if (window.appState.mode === 'view') { window.openInfoCard(node); } 
@@ -1241,7 +1261,7 @@
                             window.selectedCableForModal = c;
                             document.getElementById('fixed-cable-btn').style.display = 'flex';
                             document.getElementById('fixed-cable-btn').style.backgroundColor = c.color;
-                        } else if (window.appState.mode === 'measure') {
+                        } else if (window.appState.mode === 'measure_cable') {
                             // Evita somar o mesmo cabo duas vezes na mesma rota
                             if (linhaCabo.options.color === '#ef4444') {
                                 window.showToast("Cabo já adicionado à medição!", "aviso");
