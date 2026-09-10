@@ -1042,8 +1042,9 @@
             const banner = document.getElementById('instruction-banner'); drawLayer.clearLayers(); 
             window.appState.cablePath = []; window.appState.cableStartNodeId = null; window.appState.tempPolyline = null;
             
-            // Limpa Trena e Cabo Selecionado
+           // Limpa Trena e Cabo Selecionado
             window.appState.measurePath = [];
+            window.appState.measureTotalLength = 0; // INICIANDO O SOMATÓRIO ZERADO
             if(window.appState.measureTooltip) { map.removeLayer(window.appState.measureTooltip); window.appState.measureTooltip = null; }
             document.getElementById('measure-panel').style.display = 'none';
             document.getElementById('fixed-cable-btn').style.display = 'none';
@@ -1217,37 +1218,32 @@
                     const linhaCabo = L.polyline(c.path, { color: c.color, weight: 5, opacity: 0.9 }).addTo(cablesLayer);
                     linhaCabo.bindTooltip(`<b>${c.name}</b>`, {sticky: true});
                     
-                    linhaCabo.defaultColor = c.color;
+                   linhaCabo.defaultColor = c.color;
                     linhaCabo.on('click', (e) => { 
                         L.DomEvent.stopPropagation(e);
                         if (window.appState.mode === 'view') {
                             if(window.activeCablePolyline) window.activeCablePolyline.setStyle({color: window.activeCablePolyline.defaultColor, weight: 5});
                             window.activeCablePolyline = linhaCabo;
-                            linhaCabo.setStyle({color: c.color, weight: 10}); // Fica mais grosso na própria cor original
+                            linhaCabo.setStyle({color: c.color, weight: 10}); 
                             window.selectedCableForModal = c;
                             document.getElementById('fixed-cable-btn').style.display = 'flex';
-                            document.getElementById('fixed-cable-btn').style.backgroundColor = c.color; // Botão acompanha cor
+                            document.getElementById('fixed-cable-btn').style.backgroundColor = c.color;
                         } else if (window.appState.mode === 'measure') {
-                            // Soma a distância do cabo clicado na trena
                             const pathLen = window.calculateCableLength(c.path);
+                            window.appState.measureTotalLength = (window.appState.measureTotalLength || 0) + pathLen;
                             
-                            // Adiciona o cabo inteiro ao tracejado de medição
-                            if (window.appState.measurePath.length === 0) {
-                                window.appState.measurePath = [...c.path];
-                            } else {
-                                window.appState.measurePath.push(...c.path);
-                            }
-                            
-                            if (window.appState.tempPolyline) {
-                                window.appState.tempPolyline.setLatLngs(window.appState.measurePath);
-                            } else {
-                                window.appState.tempPolyline = L.polyline(window.appState.measurePath, { color: '#f97316', weight: 4, dashArray: '5, 10' }).addTo(drawLayer); 
-                            }
-                            
-                            const totalLen = window.calculateCableLength(window.appState.measurePath);
+                            const totalLen = window.appState.measureTotalLength;
                             const totalLenStr = totalLen < 1 ? (totalLen*1000).toFixed(1) + ' m' : totalLen.toFixed(3) + ' km';
+                            
                             document.getElementById('measure-total').innerText = totalLenStr;
-                            window.showToast(`Cabo somado: ${(pathLen*1000).toFixed(1)}m`, "info");
+                            
+                            // Efeito visual: Cabo pisca para confirmar que foi somado
+                            linhaCabo.setStyle({color: '#f97316', weight: 8});
+                            setTimeout(() => {
+                                if(window.appState.mode === 'measure') linhaCabo.setStyle({color: c.color, weight: 5});
+                            }, 400);
+
+                            window.showToast(`Cabo de ${(pathLen*1000).toFixed(1)}m adicionado!`, "sucesso");
                         }
                     });
 
