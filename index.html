@@ -80,9 +80,6 @@
         .leaflet-control-zoom { display: none !important; }
         .mode-placing #map-container { cursor: crosshair !important; }
         .mode-drawing #map-container { cursor: crosshair !important; }
-        
-        /* NOVO: Cursor da ferramenta de medir */
-        .mode-measure #map-container { cursor: crosshair !important; }
 
         .top-toolbar { position: absolute; top: 20px; left: calc(50% + 130px); transform: translateX(-50%); z-index: 1000; display: flex; gap: 12px; align-items: center; background: transparent; width: 98%; max-width: 1400px; }
         .search-bar { background: white; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; align-items: center; padding: 8px 16px; flex-grow: 1; max-width: 350px; height: 48px; }
@@ -97,6 +94,7 @@
         .rt-btn:hover { background: #f3f4f6; color: #111827; }
         .rt-btn.active { background: #2563eb; color: white; }
 
+        /* INFO CARD MODIFICADO DE ACORDO COM O PRINT */
         .info-card { position: absolute; top: 80px; left: 20px; background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); z-index: 1000; display: none; border: 1px solid #f3f4f6; padding: 0; overflow: hidden; width: 340px; }
         .action-buttons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
         .btn-primary-blue { background-color: #2563eb; color: white; border-radius: 8px; padding: 10px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s; border: none; }
@@ -277,15 +275,10 @@
         .dio-badge { background-color: #334155; color: #94a3b8; font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
         .dio-badge.active { background-color: #1e3a8a; color: #60a5fa; }
         
-        /* BOLINHA DE LUZ E CABO ANIMADA */
+        /* BOLINHA DE LUZ ANIMADA */
         #fixed-power-btn { position: fixed; top: 100px; right: 30px; width: 60px; height: 60px; background: #3b82f6; border-radius: 50%; color: white; display: none; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 10px 25px rgba(59,130,246,0.5); z-index: 10000; transition: transform 0.2s, background 0.2s; animation: pulse-blue 2s infinite; }
         #fixed-power-btn:hover { transform: scale(1.1); background: #2563eb; }
         @keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
-
-        /* NOVO BOTÃO LARANJA PARA CABO SELECIONADO NO MAPA */
-        #fixed-cable-btn { position: fixed; bottom: 100px; right: 30px; width: 60px; height: 60px; background: #f97316; border-radius: 50%; color: white; display: none; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 10px 25px rgba(249,115,22,0.5); z-index: 10000; transition: transform 0.2s, background 0.2s; animation: pulse-orange 2s infinite; }
-        #fixed-cable-btn:hover { transform: scale(1.1); background: #ea580c; }
-        @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(249, 115, 22, 0); } 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); } }
     </style>
 </head>
 <body class="theme-light" onclick="window.hideContextMenu()">
@@ -311,22 +304,6 @@
             <div class="g-modal-actions mt-6">
                 <button class="g-btn-cancel" id="cp-btn-cancel">Cancelar</button>
                 <button class="g-btn-confirm-blue" id="cp-btn-confirm">Salvar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- NOVO MODAL PARA CABO SELECIONADO -->
-    <div class="generic-modal" id="cable-info-modal">
-        <div class="generic-modal-box" style="width: 320px;">
-            <div class="w-16 h-16 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center text-3xl mx-auto mb-4"><i class="fa-solid fa-share-nodes"></i></div>
-            <div class="g-modal-title" id="ci-title">Nome do Cabo</div>
-            <div id="ci-details" class="text-left text-sm text-gray-600 mb-6 space-y-2 bg-gray-50 p-4 rounded-lg border border-gray-100">
-                <!-- Preenchido via JS -->
-            </div>
-            <div class="flex gap-2">
-                <button class="g-btn-cancel" style="flex: 1;" onclick="document.getElementById('cable-info-modal').style.display='none'">Fechar</button>
-                <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg font-bold transition" style="flex: 1;" onclick="window.promptEditSelectedCable()">Editar</button>
-                <button class="bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg font-bold transition" style="flex: 1;" onclick="window.promptDeleteSelectedCable()">Excluir</button>
             </div>
         </div>
     </div>
@@ -455,9 +432,6 @@
                 <button class="tool-btn" id="btn-cabo" onclick="window.openModal('cabo')"><i class="fa-solid fa-share-nodes"></i> CABO</button>
                 <div class="w-px h-6 bg-gray-200 mx-1"></div>
                 <button class="tool-btn" id="btn-mover" onclick="window.setMode('move')"><i class="fa-solid fa-arrows-up-down-left-right"></i> MOVER</button>
-                <!-- NOVO BOTÃO DE MEDIÇÃO -->
-                <div class="w-px h-6 bg-gray-200 mx-1"></div>
-                <button class="tool-btn" id="btn-medir" onclick="window.setMode('measure')"><i class="fa-solid fa-ruler"></i> MEDIR</button>
             </div>
         </div>
 
@@ -517,11 +491,6 @@
                     <button class="text-gray-400 hover:text-blue-500" onclick="window.copyCoords()"><i class="fa-regular fa-copy"></i></button>
                 </div>
             </div>
-        </div>
-        
-        <!-- NOVO BOTÃO LARANJA PARA CABO SELECIONADO NO MAPA -->
-        <div id="fixed-cable-btn" onclick="window.openCableInfoModal()">
-            <i class="fa-solid fa-share-nodes"></i>
         </div>
     </div>
 
@@ -606,7 +575,7 @@
             <button class="p-3 hover:bg-gray-50" onclick="window.zoomDiagram('reset')"><i class="fa-solid fa-house text-gray-800"></i></button>
         </div>
         
-        <!-- BOLINHA DE LUZ FLUTUANTE DO DIAGRAMA -->
+        <!-- BOLINHA DE LUZ FLUTUANTE -->
         <div id="fixed-power-btn" onclick="window.openPowerModal()">
             <i class="fa-solid fa-bolt"></i>
         </div>
@@ -620,16 +589,15 @@
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
-        // 1. ESTADO GLOBAL E CÁLCULO DE METRAGEM
+        // 1. ESTADO GLOBAL
         // ==========================================
         window.appState = {
             currentProjectId: null, projects: [], mode: 'view', nodes: [], cables: [], fusions: [], splitters: [], olts: [], dios: [], 
-            portPowers: {}, portTraces: {}, 
+            portPowers: {}, portTraces: {}, // Rastreio da luz e timeline
             selectedNodeId: null, editingNodeId: null,
             nodeSetup: { name: 'CEO 01', type: 'CEO', icon: 'fa-layer-group', color: '#f97316', splitter: null },
             cableSetup: { name: '', capacity: 12, color: '#3b82f6' },
             cablePath: [], cableStartNodeId: null, tempPolyline: null, snapNodePos: null,
-            measurePath: [], measureTooltip: null, // Ferramenta de medição
             isDraggingFusion: false, fusionStartPort: null, fusionStartCoords: {x:0, y:0},
             mapLayerType: 'street',
             visibleLayers: { 'CTO': true, 'CEO': true, 'POP / DC': true, 'CABOS': true, 'Prédio': true, 'Poste': true, 'Cliente': true, 'CTO AP': true, 'Problema': true, 'Reserva': true },
@@ -638,24 +606,6 @@
 
         const THEME_COLORS = ['#0ea5e9', '#1d4ed8', '#f97316', '#ef4444', '#22c55e', '#eab308', '#a855f7', '#ec4899', '#000000', '#737373', '#78350f'];
         const FIBER_COLORS = ['#22c55e', '#eab308', '#cbd5e1', '#3b82f6', '#ef4444', '#a855f7', '#78350f', '#ec4899', '#111827', '#64748b', '#f97316', '#06b6d4'];
-
-        // Fórmula de Haversine para cálculo de metragem no globo terrestre
-        window.calculateCableLength = function(path) {
-            if(!path || path.length < 2) return 0;
-            const R = 6371; // Raio da Terra em km
-            let d = 0;
-            for(let i = 0; i < path.length - 1; i++) {
-                let p1 = path[i]; let p2 = path[i+1];
-                let lat1 = (p1.lat !== undefined) ? p1.lat : p1[0]; let lon1 = (p1.lng !== undefined) ? p1.lng : p1[1];
-                let lat2 = (p2.lat !== undefined) ? p2.lat : p2[0]; let lon2 = (p2.lng !== undefined) ? p2.lng : p2[1];
-                let dLat = (lat2 - lat1) * Math.PI / 180;
-                let dLon = (lon2 - lon1) * Math.PI / 180;
-                let a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-                let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                d += R * c;
-            }
-            return d; // Retorna km
-        };
 
         // ==========================================
         // UI MODALS - NATIVOS SUBSTITUÍDOS
@@ -815,16 +765,6 @@
         
         window.saveFusionToFirebase = async (fusionData) => { if(!db || !auth || !auth.currentUser) { window.appState.fusions.push({id: 'local_'+Date.now(), ...fusionData}); window.updateAllFusionLines(); window.calculateNetworkPower(); return; } try { await addDoc(getCollectionPath('fusions'), fusionData); } catch(e) { window.appState.fusions.push({id: 'local_'+Date.now(), ...fusionData}); window.updateAllFusionLines(); window.calculateNetworkPower(); } };
         
-        // Atualiza a fusão no firebase para persistir o Tubete clicado
-        window.updateFusionInFirebase = async (id, data) => { 
-            if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { 
-                const idx = window.appState.fusions.findIndex(f=>f.id===id); 
-                if(idx>-1) window.appState.fusions[idx] = {...window.appState.fusions[idx], ...data}; 
-                window.updateAllFusionLines(); window.calculateNetworkPower(); return; 
-            } 
-            try { await updateDoc(getDocPath('fusions', id), data); } catch(e) { } 
-        };
-
         window.saveSplitterToFirebase = async (data) => { if(!db || !auth || !auth.currentUser) { window.appState.splitters.push({id: 'local_sp_'+Date.now(), ...data}); window.openCanvasDiagram(); return; } try { await addDoc(getCollectionPath('splitters'), data); } catch(e) { window.appState.splitters.push({id: 'local_sp_'+Date.now(), ...data}); window.openCanvasDiagram(); } };
         window.updateSplitterInFirebase = async (id, data) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.splitters.findIndex(s=>s.id===id); if(idx>-1) window.appState.splitters[idx] = {...window.appState.splitters[idx], ...data}; window.openCanvasDiagram(); return; } try { await updateDoc(getDocPath('splitters', id), data); } catch(e) { } };
 
@@ -968,62 +908,14 @@
 
         window.setMode = function(newMode) {
             window.appState.mode = newMode; document.body.className = document.body.className.replace(/mode-\w+/g, ''); document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-            const banner = document.getElementById('instruction-banner'); drawLayer.clearLayers(); 
-            window.appState.cablePath = []; window.appState.cableStartNodeId = null; window.appState.tempPolyline = null;
-            
-            // Limpa Trena
-            window.appState.measurePath = [];
-            if(window.appState.measureTooltip) { map.removeLayer(window.appState.measureTooltip); window.appState.measureTooltip = null; }
-
-            // Esconde botão do cabo laranja
-            document.getElementById('fixed-cable-btn').style.display = 'none';
-            if(window.activeCablePolyline) { window.activeCablePolyline.setStyle({color: window.activeCablePolyline.defaultColor, weight: 5}); window.activeCablePolyline = null; }
-
-            if (newMode === 'placing_node' || newMode === 'drawing_cable' || newMode === 'measure') { document.getElementById('map-container').classList.add('node-anchorable'); } 
-            else { document.getElementById('map-container').classList.remove('node-anchorable'); }
-            
-            if (newMode === 'view' || newMode === 'move') { 
-                document.getElementById(newMode === 'view' ? 'btn-navegar' : 'btn-mover').classList.add('active'); 
-                map.dragging.enable(); banner.style.display = 'none'; 
-            } else if (newMode === 'placing_node') { 
-                document.body.classList.add('mode-placing'); document.getElementById('btn-caixa').classList.add('active'); 
-                map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Inserir <b>${window.appState.nodeSetup.name}</b>.`; 
-            } else if (newMode === 'drawing_cable') { 
-                document.body.classList.add('mode-drawing'); document.getElementById('btn-cabo').classList.add('active'); 
-                map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Selecione a <b>Caixa Inicial</b>.`; 
-            } else if (newMode === 'measure') {
-                document.body.classList.add('mode-measure'); document.getElementById('btn-medir').classList.add('active');
-                map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Clique no mapa para <b>medir distância</b>. (ESC para sair)`;
-            }
-
+            const banner = document.getElementById('instruction-banner'); drawLayer.clearLayers(); window.appState.cablePath = []; window.appState.cableStartNodeId = null; window.appState.tempPolyline = null;
+            if (newMode === 'placing_node' || newMode === 'drawing_cable') { document.getElementById('map-container').classList.add('node-anchorable'); } else { document.getElementById('map-container').classList.remove('node-anchorable'); }
+            if (newMode === 'view' || newMode === 'move') { document.getElementById(newMode === 'view' ? 'btn-navegar' : 'btn-mover').classList.add('active'); map.dragging.enable(); banner.style.display = 'none'; } else if (newMode === 'placing_node') { document.body.classList.add('mode-placing'); document.getElementById('btn-caixa').classList.add('active'); map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Inserir <b>${window.appState.nodeSetup.name}</b>.`; } else if (newMode === 'drawing_cable') { document.body.classList.add('mode-drawing'); document.getElementById('btn-cabo').classList.add('active'); map.dragging.disable(); banner.style.display = 'flex'; document.getElementById('instruction-text').innerHTML = `Selecione a <b>Caixa Inicial</b>.`; }
             document.onkeydown = function(evt) { if (evt.key === "Escape") { window.setMode('view'); } };
             if(window.appState.currentProjectId) window.renderMap();
         };
 
-        map.on('mousemove', function(e) { 
-            if (window.appState.mode === 'drawing_cable' && window.appState.cableStartNodeId !== null) { 
-                const endPos = window.appState.snapNodePos ? window.appState.snapNodePos : [e.latlng.lat, e.latlng.lng]; 
-                const dynamicPath = [...window.appState.cablePath, endPos]; 
-                if (!window.appState.tempPolyline) { window.appState.tempPolyline = L.polyline(dynamicPath, { color: window.appState.cableSetup.color, weight: 4, opacity: 0.8, className: 'preview-line-active' }).addTo(drawLayer); } 
-                else { window.appState.tempPolyline.setLatLngs(dynamicPath); } 
-            } else if (window.appState.mode === 'measure' && window.appState.measurePath.length > 0) {
-                const dynamicPath = [...window.appState.measurePath, [e.latlng.lat, e.latlng.lng]];
-                if (!window.appState.tempPolyline) { 
-                    window.appState.tempPolyline = L.polyline(dynamicPath, { color: '#f97316', weight: 4, dashArray: '5, 10' }).addTo(drawLayer); 
-                    window.appState.measureTooltip = L.tooltip({permanent: true, direction: 'right', className: 'bg-orange-500 text-white font-bold p-1 rounded border-0'}).setLatLng(e.latlng).addTo(map);
-                } else { 
-                    window.appState.tempPolyline.setLatLngs(dynamicPath); 
-                    window.appState.measureTooltip.setLatLng(e.latlng);
-                }
-                const len = window.calculateCableLength(dynamicPath);
-                const lenStr = len < 1 ? (len*1000).toFixed(1) + ' m' : len.toFixed(3) + ' km';
-                window.appState.measureTooltip.setContent(lenStr);
-            }
-        });
-
-        window.activeCablePolyline = null;
-        window.selectedCableForModal = null;
-
+        map.on('mousemove', function(e) { if (window.appState.mode === 'drawing_cable' && window.appState.cableStartNodeId !== null) { const endPos = window.appState.snapNodePos ? window.appState.snapNodePos : [e.latlng.lat, e.latlng.lng]; const dynamicPath = [...window.appState.cablePath, endPos]; if (!window.appState.tempPolyline) { window.appState.tempPolyline = L.polyline(dynamicPath, { color: window.appState.cableSetup.color, weight: 4, opacity: 0.8, className: 'preview-line-active' }).addTo(drawLayer); } else { window.appState.tempPolyline.setLatLngs(dynamicPath); } } });
         map.on('click', async function(e) { 
             if (window.appState.mode === 'placing_node') { 
                 const internalState = { hasDIO: false, splitters: [] }; 
@@ -1039,14 +931,7 @@
                     window.appState.cablePath.push([e.latlng.lat, e.latlng.lng]); 
                     if (window.appState.tempPolyline) window.appState.tempPolyline.setLatLngs(window.appState.cablePath); 
                 } 
-            } else if (window.appState.mode === 'measure') {
-                window.appState.measurePath.push([e.latlng.lat, e.latlng.lng]);
-                if (window.appState.tempPolyline) window.appState.tempPolyline.setLatLngs(window.appState.measurePath);
-            } else { 
-                window.closeInfoCard(); document.getElementById('inventory-panel').style.display = 'none';
-                if(window.activeCablePolyline) { window.activeCablePolyline.setStyle({color: window.activeCablePolyline.defaultColor, weight: 5}); window.activeCablePolyline = null; }
-                document.getElementById('fixed-cable-btn').style.display = 'none'; 
-            } 
+            } else { window.closeInfoCard(); document.getElementById('inventory-panel').style.display = 'none'; } 
         });
 
         window.handleNodeInteraction = async function(node, eventType) { 
@@ -1063,10 +948,7 @@
                         await window.saveCableToFirebase({ projectId: window.appState.currentProjectId, name: autoName, capacity: window.appState.cableSetup.capacity, color: window.appState.cableSetup.color, startNode: window.appState.cableStartNodeId, endNode: node.id, path: firebasePath }); 
                         window.showToast(`Cabo finalizado!`, "sucesso"); window.setMode('view'); 
                     } 
-                } else if (window.appState.mode === 'measure') {
-                    window.appState.measurePath.push([node.lat, node.lng]);
-                    if (window.appState.tempPolyline) window.appState.tempPolyline.setLatLngs(window.appState.measurePath);
-                }
+                } 
             } else if (eventType === 'mouseover' && window.appState.mode === 'drawing_cable' && window.appState.cableStartNodeId !== null) { 
                 if(node.id !== window.appState.cableStartNodeId) { window.appState.snapNodePos = [node.lat, node.lng]; } 
             } else if (eventType === 'mouseout' && window.appState.mode === 'drawing_cable') { window.appState.snapNodePos = null; } 
@@ -1135,44 +1017,6 @@
             }
         };
 
-        window.openCableInfoModal = function() {
-            if(!window.selectedCableForModal) return;
-            const c = window.selectedCableForModal;
-            document.getElementById('ci-title').innerText = c.name;
-            
-            let lengthKm = window.calculateCableLength(c.path);
-            let lengthStr = lengthKm < 1 ? (lengthKm*1000).toFixed(0) + ' m' : lengthKm.toFixed(2) + ' km';
-            
-            document.getElementById('ci-details').innerHTML = `
-                <p><b class="text-gray-900">Capacidade:</b> ${c.capacity} Fibras</p>
-                <p><b class="text-gray-900">Metragem Total:</b> ${lengthStr}</p>
-                <p><b class="text-gray-900">Padrão:</b> ABNT</p>
-            `;
-            
-            document.getElementById('cable-info-modal').style.display = 'flex';
-            document.getElementById('fixed-cable-btn').style.display = 'none';
-        };
-        
-        window.promptEditSelectedCable = function() {
-            const c = window.selectedCableForModal;
-            window.showPrompt("Editar Cabo", [{label: "Novo nome do cabo", val: c.name}], async (results) => {
-                if(results[0]) {
-                    await window.updateCableInFirebase(c.id, { name: results[0] });
-                    window.showToast("Cabo atualizado!");
-                    document.getElementById('cable-info-modal').style.display = 'none';
-                }
-            });
-        };
-        
-        window.promptDeleteSelectedCable = function() {
-            const c = window.selectedCableForModal;
-            window.showConfirm("Excluir Cabo", `Tem certeza que deseja excluir o cabo "${c.name}"?`, "Excluir Definitivamente", async () => {
-                await window.deleteCableFromFirebase(c.id);
-                window.showToast("Cabo excluído.", "sucesso");
-                document.getElementById('cable-info-modal').style.display = 'none';
-            });
-        };
-
         window.renderMap = function() { 
             if(!window.appState.currentProjectId) return;
             nodesLayer.clearLayers(); cablesLayer.clearLayers(); 
@@ -1184,19 +1028,13 @@
                 currentCables.forEach(c => { 
                     const linhaCabo = L.polyline(c.path, { color: c.color, weight: 5, opacity: 0.9 }).addTo(cablesLayer);
                     linhaCabo.bindTooltip(`<b>${c.name}</b>`, {sticky: true});
-                    
-                    linhaCabo.defaultColor = c.color;
-                    linhaCabo.on('click', (e) => { 
-                        L.DomEvent.stopPropagation(e);
-                        if (window.appState.mode === 'view') {
-                            if(window.activeCablePolyline) window.activeCablePolyline.setStyle({color: window.activeCablePolyline.defaultColor, weight: 5});
-                            window.activeCablePolyline = linhaCabo;
-                            linhaCabo.setStyle({color: '#f97316', weight: 8}); // Laranja e grosso
-                            window.selectedCableForModal = c;
-                            document.getElementById('fixed-cable-btn').style.display = 'flex';
+                    linhaCabo.on('click', () => { 
+                        if (window.appState.mode === 'view') { 
+                            window.showConfirm("Excluir Cabo", `Excluir o cabo "${c.name}"?`, "Excluir", () => {
+                                window.deleteCableFromFirebase(c.id); window.showToast('Excluído.', 'sucesso');
+                            });
                         } 
                     });
-
                     if (isMovable) {
                         for(let i=1; i < c.path.length-1; i++) {
                             const iconMid = L.divIcon({ html: `<div style="width:12px; height:12px; background:white; border:3px solid ${c.color}; border-radius:50%; box-shadow:0 0 4px rgba(0,0,0,0.5);"></div>`, className: '', iconSize: [12,12], iconAnchor: [6,6] });
@@ -1321,28 +1159,317 @@
 
         window.startCableDrawing = function() { window.appState.cableSetup.name = document.getElementById('input-cabo-nome').value; window.appState.cableSetup.capacity = parseInt(document.getElementById('input-cabo-capacidade').value); window.closeModal('cabo'); window.setMode('drawing_cable'); };
         
-        window.toggleTubete = async function(id, event) {
-            if(event) event.stopPropagation();
-            const fusion = window.appState.fusions.find(f => f.id === id);
-            if(fusion) {
-                const newVal = !fusion.hasTubete;
-                if(typeof db !== 'undefined' && auth && auth.currentUser && !id.startsWith('local_')) {
-                    await window.updateFusionInFirebase(id, { hasTubete: newVal });
-                } else {
-                    fusion.hasTubete = newVal;
-                    window.updateAllFusionLines();
+        window.openInfoCard = function(node) { 
+            window.appState.selectedNodeId = node.id; 
+            const card = document.getElementById('info-card'); 
+            document.getElementById('card-title').innerText = node.name; 
+            document.getElementById('card-coords').innerText = `${node.lat.toFixed(5)}, ${node.lng.toFixed(5)}`; 
+            
+            const iconC = document.getElementById('card-icon-container'); 
+            iconC.style.color = node.color; 
+            iconC.style.backgroundColor = node.color + '15'; 
+            document.getElementById('card-icon').className = `fa-solid ${node.icon}`; 
+
+            // Mocks do print (podem ser ligados ao banco no futuro)
+            document.getElementById('card-det-servico').innerText = 'Atendimento FTTH';
+            document.getElementById('card-det-equip').innerText = 'Passivo';
+            document.getElementById('card-det-dio').innerText = 'N/A';
+            document.getElementById('card-det-spl').innerText = node.type.includes('CTO') ? 'Derivação Final' : 'Passagem / Tronco';
+            document.getElementById('card-det-fibra').innerText = 'N/A';
+            
+            let ptStr = "Passagem";
+            if(node.internal && node.internal.splitters && node.internal.splitters.length > 0) {
+                let s = node.internal.splitters[0].type;
+                if(s) ptStr = s.split('x')[1] + ' portas';
+            }
+            document.getElementById('card-det-portas').innerText = ptStr;
+
+            const btnAction = document.getElementById('btn-card-type-action'); 
+            if (node.type === 'POP / DC' || node.type === 'DC') { btnAction.style.display = 'flex'; } 
+            else { btnAction.style.display = 'none'; } 
+            
+            window.updateInfoCardPower(node);
+            card.style.display = 'block'; 
+        };
+
+        window.closeInfoCard = function() { document.getElementById('info-card').style.display = 'none'; window.appState.selectedNodeId = null; };
+        
+        window.deleteSelectedNode = async function() { 
+            window.showConfirm("Excluir Caixa", "Deseja remover esta caixa e todos os cabos conectados a ela?", "Excluir Definitivamente", async () => {
+                const nId = window.appState.selectedNodeId; if (!nId) return; 
+                const connectedCables = window.appState.cables.filter(c => c.startNode === nId || c.endNode === nId); 
+                for(let c of connectedCables) { await window.deleteCableFromFirebase(c.id); } 
+                await window.deleteNodeFromFirebase(nId); 
+                window.closeInfoCard(); window.showToast('Excluído do banco.', 'sucesso');
+            });
+        };
+
+        window.handleCardAction = function() { const node = window.appState.nodes.find(n => n.id === window.appState.selectedNodeId); if (!node) return; if (node.type === 'POP / DC' || node.type === 'DC') { window.openInsidePlantView(node); } };
+        window.toggleInventory = function() { const p = document.getElementById('inventory-panel'); p.style.display = (p.style.display === 'flex') ? 'none' : 'flex'; if(p.style.display === 'flex') window.renderInventoryList('all'); };
+        window.renderInventoryList = function(filter) { const container = document.getElementById('inventory-list-content'); container.innerHTML = ''; let items = []; if(filter === 'all' || filter === 'nodes') { window.appState.nodes.forEach(n => items.push({ type: 'node', data: n, name: n.name, sub: n.type, icon: n.icon, color: n.color })); } if(filter === 'all' || filter === 'cables') { window.appState.cables.forEach(c => items.push({ type: 'cable', data: c, name: c.name, sub: `${c.capacity} Fibras`, icon: 'fa-share-nodes', color: c.color })); } if(items.length === 0) { container.innerHTML = '<p class="text-sm text-gray-400 text-center p-4">Vazio.</p>'; return; } items.forEach(item => { const el = document.createElement('div'); el.className = 'inv-item'; el.innerHTML = `<div class="flex items-center gap-3"><div class="w-8 h-8 rounded flex items-center justify-center text-white text-xs" style="background-color: ${item.color}"><i class="fa-solid ${item.icon}"></i></div><div><p class="text-sm font-bold text-gray-800 leading-tight">${item.name}</p><p class="text-[10px] text-gray-500 uppercase">${item.sub}</p></div></div><button class="text-gray-400 hover:text-blue-500"><i class="fa-solid fa-crosshairs"></i></button>`; el.onclick = () => { if(item.type === 'node') { map.flyTo([item.data.lat, item.data.lng], 18); window.openInfoCard(item.data); } else if (item.type === 'cable') { map.flyToBounds(L.polyline(item.data.path).getBounds()); } }; container.appendChild(el); }); };
+        window.copyCoords = function() { navigator.clipboard.writeText(document.getElementById('card-coords').innerText); window.showToast("Copiado!"); };
+        window.showToast = function(msg, type='info') { const c = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast-msg show'; t.innerHTML = `<i class="fa-solid fa-info-circle text-blue-400"></i> <span>${msg}</span>`; c.appendChild(t); setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(), 300); }, 3000); };
+
+        // ==========================================
+        // 6. MOTOR DO DIAGRAMA CANVAS OSP E LUZ
+        // ==========================================
+        
+        window.activePowerPort = null;
+
+        window.showPowerCornerBtn = function(e, portId) {
+            e.stopPropagation();
+            window.activePowerPort = portId;
+            let btn = document.getElementById('fixed-power-btn');
+            if(!btn) {
+                btn = document.createElement('div');
+                btn.id = 'fixed-power-btn';
+                btn.innerHTML = '<i class="fa-solid fa-bolt"></i>';
+                btn.onclick = window.openPowerModal;
+                document.body.appendChild(btn);
+            }
+            btn.style.display = 'flex';
+        };
+
+        window.openPowerModal = function() {
+            if(!window.activePowerPort) return;
+            let power = window.appState.portPowers[window.activePowerPort];
+            let displayPower = power === undefined ? "Sem Sinal" : power.toFixed(2) + " dBm";
+            let colorClass = power === undefined ? "text-red-500 bg-red-50 border-red-100" : "text-green-600 bg-green-50 border-green-100";
+            let iconClass = power === undefined ? "fa-circle-xmark" : "fa-check-circle";
+
+            let trace = window.appState.portTraces[window.activePowerPort] || [];
+
+            let modal = document.getElementById('power-analysis-modal');
+            let content = document.getElementById('pa-body-content');
+            
+            // Build the Origin Header
+            let originNode = "DESCONHECIDO";
+            let originEquip = "N/A";
+            let originPower = "N/A";
+            
+            if(trace.length > 0) {
+                originNode = trace[0].nodeName;
+                originEquip = trace[0].equipment;
+                originPower = (trace[0].power > 0 ? '+' : '') + trace[0].power.toFixed(2) + ' dBm';
+            }
+
+            let html = `
+                <div class="pa-origin-card">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 text-lg"><i class="fa-solid fa-server"></i></div>
+                        <div>
+                            <div class="pa-origin-title">Origem do Sinal</div>
+                            <div class="pa-origin-val">${originNode}</div>
+                        </div>
+                    </div>
+                    <div class="pa-grid">
+                        <div><div class="pa-label">Equipamento</div><div class="pa-val">${originEquip}</div></div>
+                        <div><div class="pa-label">Potência Inicial</div><div class="pa-val pa-val-highlight">${originPower}</div></div>
+                    </div>
+                </div>
+            `;
+
+            // Build Timeline
+            if(trace.length > 1) {
+                html += `<div class="pa-timeline">`;
+                for(let i=1; i<trace.length; i++) {
+                    let step = trace[i];
+                    let isLast = (i === trace.length - 1);
+                    
+                    html += `
+                        <div class="pa-step-dot ${isLast ? 'end' : ''}"></div>
+                        <div class="pa-step-title">${step.label} <span class="pa-step-pwr">${step.power.toFixed(2)} dBm</span></div>
+                        <div class="pa-step-box">
+                            <div class="pa-step-box-item"><i class="fa-solid fa-turn-down text-gray-300"></i> ${step.type.toUpperCase()}<span class="pa-loss-tag">Perda: -${step.loss}dB</span></div>
+                        </div>
+                    `;
+                }
+                html += `</div>`;
+            }
+
+            html += `
+                <div class="pa-footer-card">
+                    <div class="text-[10px] font-black uppercase text-gray-500 tracking-widest">Leitura na Porta Atual</div>
+                    <div class="pa-footer-pwr ${power === undefined ? 'text-red-500' : ''}">${displayPower}</div>
+                    <div class="text-xs font-bold mt-2 ${colorClass} py-1.5 rounded-lg border inline-block px-4"><i class="fa-solid ${iconClass}"></i> ${power === undefined ? 'Sem Sinal Óptico' : 'Sinal Ativo'}</div>
+                </div>
+            `;
+
+            content.innerHTML = html;
+            modal.classList.add('open');
+            document.getElementById('fixed-power-btn').style.display = 'none'; 
+        };
+
+        window.zoomDiagram = function(action) {
+            if(action === 'in') window.appState.diagramZoom += 0.1;
+            else if(action === 'out') window.appState.diagramZoom = Math.max(0.3, window.appState.diagramZoom - 0.1);
+            else window.appState.diagramZoom = 1;
+            document.getElementById('diagram-canvas').style.transform = `scale(${window.appState.diagramZoom})`;
+        };
+
+        window.deleteSplitter = async function(id) {
+            window.showConfirm("Excluir Splitter", "Deseja excluir este splitter e perder as conexões dele?", "Excluir", async () => {
+                if(db && auth && auth.currentUser && !id.startsWith('local_')) { 
+                    try {
+                        await deleteDoc(getDocPath('splitters', id)); 
+                        const connectedFusions = window.appState.fusions.filter(f => f.from.includes(id) || f.to.includes(id));
+                        for(let f of connectedFusions) { await deleteDoc(getDocPath('fusions', f.id)); }
+                    } catch(e) { console.error(e); }
+                } else { 
+                    window.appState.splitters = window.appState.splitters.filter(s => s.id !== id); 
+                    window.appState.fusions = window.appState.fusions.filter(f => !f.from.includes(id) && !f.to.includes(id)); 
+                }
+                window.showToast('Splitter removido.', 'sucesso');
+                window.openCanvasDiagram(); 
+                window.calculateNetworkPower(); 
+            });
+        };
+
+        window.deletarFusao = async function(id) {
+            window.showConfirm("Excluir Fusão", "Deseja romper esta conexão de fibra?", "Romper Fibra", async () => {
+                if(db && auth && auth.currentUser && !id.startsWith('local_')) { await deleteDoc(getDocPath('fusions', id)); } 
+                else { window.appState.fusions = window.appState.fusions.filter(f => f.id !== id); }
+                window.showToast('Conexão excluída.', 'sucesso');
+                window.updateAllFusionLines();
+                window.calculateNetworkPower();
+            });
+        };
+
+        window.promptEditOLTPower = async function(id) {
+            const olt = window.appState.olts.find(o => o.id === id);
+            if(!olt) return;
+            window.showPrompt("Editar OLT", [{label: "Nova potência TX da OLT (ex: +2.5)", val: olt.tx}], async (results) => {
+                let tx = results[0];
+                if(tx) {
+                    await window.updateOLTInFirebase(id, { tx: tx });
+                    window.showToast("Potência atualizada!");
                     window.calculateNetworkPower();
                 }
+            });
+        };
+
+        window.rotateBlock = async function(type = window.activeContextMenuType, id = window.activeContextMenuId) {
+            let newRot;
+            if(type === 'splitter') {
+                const sp = window.appState.splitters.find(s => s.id === id); if(!sp) return;
+                newRot = (sp.rotation || 0) + 90; if(newRot >= 360) newRot = 0;
+                await window.updateSplitterInFirebase(id, { rotation: newRot });
+            } else if(type === 'cable') {
+                const cb = window.appState.cables.find(c => c.id === id); if(!cb) return;
+                let diag = cb.diagram || {}; let currentRot = diag[window.appState.selectedNodeId]?.rotation || 0;
+                newRot = currentRot + 90; if(newRot >= 360) newRot = 0;
+                diag[window.appState.selectedNodeId] = { ...diag[window.appState.selectedNodeId], rotation: newRot };
+                await window.updateCableInFirebase(id, { diagram: diag });
+            } else if(type === 'olt') {
+                const olt = window.appState.olts.find(s => s.id === id); if(!olt) return;
+                newRot = (olt.rotation || 0) + 90; if(newRot >= 360) newRot = 0;
+                await window.updateOLTInFirebase(id, { rotation: newRot });
+            } else if(type === 'dio') {
+                const dio = window.appState.dios.find(s => s.id === id); if(!dio) return;
+                newRot = (dio.rotation || 0) + 90; if(newRot >= 360) newRot = 0;
+                await window.updateDIOInFirebase(id, { rotation: newRot });
+            }
+            window.openCanvasDiagram();
+        };
+
+        window.toggleSide = async function() {
+            if(window.activeContextMenuType === 'cable') {
+                const cb = window.appState.cables.find(c => c.id === window.activeContextMenuId); if(!cb) return;
+                let diag = cb.diagram || {}; let currentSide = diag[window.appState.selectedNodeId]?.sideFlipped || false;
+                diag[window.appState.selectedNodeId] = { ...diag[window.appState.selectedNodeId], sideFlipped: !currentSide };
+                await window.updateCableInFirebase(window.activeContextMenuId, { diagram: diag });
+            } else if(window.activeContextMenuType === 'splitter') {
+                const sp = window.appState.splitters.find(s => s.id === window.activeContextMenuId); if(!sp) return;
+                await window.updateSplitterInFirebase(window.activeContextMenuId, { sideFlipped: !sp.sideFlipped });
+            } else if(window.activeContextMenuType === 'olt') {
+                const olt = window.appState.olts.find(s => s.id === window.activeContextMenuId); if(!olt) return;
+                await window.updateOLTInFirebase(window.activeContextMenuId, { sideFlipped: !olt.sideFlipped });
+            } else if(window.activeContextMenuType === 'dio') {
+                const dio = window.appState.dios.find(s => s.id === window.activeContextMenuId); if(!dio) return;
+                await window.updateDIOInFirebase(window.activeContextMenuId, { sideFlipped: !dio.sideFlipped });
+            }
+            window.openCanvasDiagram();
+        };
+
+        window.triggerFlip = async function() {
+            if(window.activeContextMenuType === 'cable') {
+                const cb = window.appState.cables.find(c => c.id === window.activeContextMenuId); if(!cb) return;
+                let diag = cb.diagram || {}; let currentFlipped = diag[window.appState.selectedNodeId]?.flipped || false;
+                diag[window.appState.selectedNodeId] = { ...diag[window.appState.selectedNodeId], flipped: !currentFlipped };
+                await window.updateCableInFirebase(window.activeContextMenuId, { diagram: diag });
+            } else if(window.activeContextMenuType === 'splitter') {
+                const sp = window.appState.splitters.find(s => s.id === window.activeContextMenuId); if(!sp) return;
+                await window.updateSplitterInFirebase(window.activeContextMenuId, { flipped: !sp.flipped });
+            } else if(window.activeContextMenuType === 'olt') {
+                const olt = window.appState.olts.find(s => s.id === window.activeContextMenuId); if(!olt) return;
+                await window.updateOLTInFirebase(window.activeContextMenuId, { flipped: !olt.flipped });
+            } else if(window.activeContextMenuType === 'dio') {
+                const dio = window.appState.dios.find(s => s.id === window.activeContextMenuId); if(!dio) return;
+                await window.updateDIOInFirebase(window.activeContextMenuId, { flipped: !dio.flipped });
+            }
+            window.openCanvasDiagram();
+        };
+
+        window.removeBlock = async function() {
+            if(window.activeContextMenuType === 'splitter') { window.deleteSplitter(window.activeContextMenuId); } 
+            else if (window.activeContextMenuType === 'cable') {
+                window.showConfirm("Remover Cabo do Diagrama", "Isso excluirá o cabo de todo o sistema. Continuar?", "Remover Definitivamente", async () => {
+                    await window.deleteCableFromFirebase(window.activeContextMenuId); window.openCanvasDiagram();
+                });
+            } else if (window.activeContextMenuType === 'olt') {
+                window.deleteOLT(window.activeContextMenuId);
+            } else if (window.activeContextMenuType === 'dio') {
+                window.deleteDIO(window.activeContextMenuId);
             }
         };
 
-        window.updateFusionInFirebase = async (id, data) => { 
-            if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { 
-                const idx = window.appState.fusions.findIndex(f=>f.id===id); 
-                if(idx>-1) window.appState.fusions[idx] = {...window.appState.fusions[idx], ...data}; 
-                window.updateAllFusionLines(); window.calculateNetworkPower(); return; 
-            } 
-            try { await updateDoc(getDocPath('fusions', id), data); } catch(e) { } 
+        window.goToNextNode = function() {
+            const cb = window.appState.cables.find(c => c.id === window.activeContextMenuId); if(!cb) return;
+            const nextNodeId = cb.startNode === window.appState.selectedNodeId ? cb.endNode : cb.startNode;
+            const nextNode = window.appState.nodes.find(n => n.id === nextNodeId);
+            if(nextNode) { window.closeCanvasDiagram(); setTimeout(() => { map.flyTo([nextNode.lat, nextNode.lng], 18); window.openInfoCard(nextNode); }, 100); } 
+            else { window.showToast("Destino não encontrado.", "erro"); }
+        };
+
+        window.promptAddOLT = async function() {
+            window.showPrompt("Adicionar OLT", [
+                {label: "Quantas portas PON? (Ex: 4, 8, 16)", val: "4"},
+                {label: "Potência TX da PON (Ex: +2.5 ou +9)", val: "+2.5"}
+            ], async (results) => {
+                let pons = parseInt(results[0]);
+                let tx = results[1];
+                if(pons) {
+                    await window.saveOLTToFirebase({ nodeId: window.appState.selectedNodeId, pons: pons, tx: tx, x: 200, y: 200, rotation: 0, flipped: false, sideFlipped: false });
+                }
+            });
+        };
+        
+        window.promptAddDIO = async function() {
+            window.showPrompt("Adicionar DIO", [{label: "Quantas portas no DIO? (Ex: 12, 24, 36)", val: "24"}], async (results) => {
+                let ports = parseInt(results[0]);
+                if(ports) {
+                    await window.saveDIOToFirebase({ nodeId: window.appState.selectedNodeId, ports: ports, x: 300, y: 200, rotation: 0, flipped: false, sideFlipped: false });
+                }
+            });
+        };
+
+        window.getPortVector = function(portId, p1X, p1Y, p2X, p2Y) {
+            const portEl = document.getElementById(portId); if(!portEl) return {x:1, y:0};
+            const block = portEl.closest('.cable-block, .splitter-block, .splitter-tri, .olt-block, .dio-block'); if(!block) return {x:1, y:0};
+            let rot = 0; const transform = block.style.transform;
+            if(transform && transform.includes('rotate')) { const match = transform.match(/rotate\((-?\d+)deg\)/); if(match) rot = parseInt(match[1]); }
+            const rad = rot * Math.PI / 180;
+            const isFlippedSide = block.classList.contains('side-flipped');
+            let baseV = {x: 1, y: 0}; 
+
+            if (block.classList.contains('cable-block') || block.classList.contains('olt-block')) {
+                baseV = isFlippedSide ? {x: -1, y: 0} : {x: 1, y: 0};
+            } else if (block.classList.contains('splitter-tri') || block.classList.contains('splitter-block') || block.classList.contains('dio-block')) {
+                const isInPort = portEl.classList.contains('in');
+                if (isInPort) { baseV = isFlippedSide ? {x: 1, y: 0} : {x: -1, y: 0}; } 
+                else { baseV = isFlippedSide ? {x: -1, y: 0} : {x: 1, y: 0}; }
+            }
+            return { x: baseV.x * Math.cos(rad) - baseV.y * Math.sin(rad), y: baseV.x * Math.sin(rad) + baseV.y * Math.cos(rad) };
         };
 
         window.calculateNetworkPower = function() {
@@ -1369,13 +1496,13 @@
                 let pwr = powers[curr];
                 let currTrace = traces[curr] || [];
 
-                // Atravessar Fusões
+                // Atravessar Fusões (Perda Alterada para 0dB)
                 window.appState.fusions.forEach(f => {
                     if(f.from === curr || f.to === curr) {
                         let next = f.from === curr ? f.to : f.from;
                         if(next === 'dead_end') return;
                         
-                        let fusionLoss = f.hasTubete ? 0.1 : 0.0; // Aplica 0.1dB SE tiver tubete
+                        let fusionLoss = 0.0; 
                         let nextPwr = pwr - fusionLoss;
 
                         if(powers[next] === undefined || powers[next] < nextPwr) { 
@@ -1456,6 +1583,329 @@
             });
         };
 
+        window.addSplitterToDiagram = async function(type) {
+            if(!window.appState.selectedNodeId) return; 
+            window.showToast(`Adicionando Splitter ${type}...`);
+            const existingSp = window.appState.splitters.filter(s => s.nodeId === window.appState.selectedNodeId);
+            const newY = 150 + (existingSp.length * 90);
+            await window.saveSplitterToFirebase({ nodeId: window.appState.selectedNodeId, type: type, x: 450, y: newY, rotation: 0, flipped: false, sideFlipped: false });
+            window.openCanvasDiagram();
+        };
+
+        window.openCanvasDiagram = function() { 
+            const node = window.appState.nodes.find(n => n.id === window.appState.selectedNodeId); if(!node) return; 
+            document.getElementById('diag-toolbar-title').innerText = node.name; document.getElementById('diag-center-name').innerText = node.name; 
+            
+            const isDC = (node.type === 'POP / DC' || node.type === 'DC');
+            document.getElementById('btn-add-olt').style.display = isDC ? 'flex' : 'none';
+            document.getElementById('btn-add-dio').style.display = isDC ? 'flex' : 'none';
+
+            const incoming = window.appState.cables.filter(c => c.endNode === node.id); const outgoing = window.appState.cables.filter(c => c.startNode === node.id); 
+            
+            // ==========================================
+            // AUTO CURA DE PORTAS (LIMPA FUSÕES FANTASMAS)
+            // ==========================================
+            const validPorts = new Set();
+            validPorts.add('dead_end');
+            window.appState.splitters.filter(s => s.nodeId === node.id).forEach(sp => {
+                validPorts.add(`sp-${sp.id}-in`);
+                let outs = parseInt(sp.type.split('x')[1]);
+                for(let i=0; i<outs; i++) validPorts.add(`sp-${sp.id}-out-${i}`);
+            });
+            [...incoming, ...outgoing].forEach(c => {
+                for(let i=0; i<c.capacity; i++) validPorts.add(`port-${c.id}-${i}`);
+            });
+            window.appState.olts.filter(o => o.nodeId === node.id).forEach(o => {
+                for(let i=0; i<o.pons; i++) validPorts.add(`olt-${o.id}-pon-${i}`);
+            });
+            window.appState.dios.filter(d => d.nodeId === node.id).forEach(d => {
+                for(let i=0; i<d.ports; i++) { validPorts.add(`dio-${d.id}-in-${i}`); validPorts.add(`dio-${d.id}-out-${i}`); }
+            });
+
+            const fusionsToKeep = [];
+            window.appState.fusions.forEach(f => {
+                if(f.nodeId === node.id) {
+                    if(!validPorts.has(f.from) || !validPorts.has(f.to)) {
+                        if(typeof db !== 'undefined' && auth && auth.currentUser && !f.id.startsWith('local_')) {
+                            deleteDoc(getDocPath('fusions', f.id)).catch(e=>console.log(e));
+                        }
+                    } else {
+                        fusionsToKeep.push(f);
+                    }
+                } else {
+                    fusionsToKeep.push(f);
+                }
+            });
+            window.appState.fusions = fusionsToKeep;
+
+            const canvas = document.getElementById('diagram-canvas'); 
+            const blocks = canvas.querySelectorAll('.cable-block, .splitter-block, .splitter-tri, .olt-block, .dio-block'); blocks.forEach(b => b.remove()); 
+            
+            document.getElementById('fusion-lines').innerHTML = '<defs id="fusion-defs"></defs><path id="active-fusion-line" d="" />'; 
+            let yOffsetIn = 100; let yOffsetOut = 100; 
+            
+            incoming.forEach(cable => { 
+                const origin = window.appState.nodes.find(n => n.id === cable.startNode); 
+                let diag = cable.diagram?.[node.id] || { x: 100, y: yOffsetIn, rotation: 0, flipped: false, sideFlipped: false };
+                if(!cable.diagram || !cable.diagram[node.id]) yOffsetIn += 150;
+                window.createCableBlock(canvas, cable, origin ? origin.name.toUpperCase() : 'ORIGEM', '', diag.x, diag.y, diag.rotation, diag.flipped, diag.sideFlipped); 
+            }); 
+            
+            outgoing.forEach(cable => { 
+                const dest = window.appState.nodes.find(n => n.id === cable.endNode); 
+                let diag = cable.diagram?.[node.id] || { x: 800, y: yOffsetOut, rotation: 0, flipped: false, sideFlipped: true };
+                if(!cable.diagram || !cable.diagram[node.id]) yOffsetOut += 150;
+                window.createCableBlock(canvas, cable, dest ? dest.name.toUpperCase() : 'DESTINO', '', diag.x, diag.y, diag.rotation, diag.flipped, diag.sideFlipped); 
+            }); 
+            
+            const mySplitters = window.appState.splitters.filter(s => s.nodeId === node.id);
+            mySplitters.forEach((sp) => { window.createSplitterBlock(canvas, sp, sp.x || 450, sp.y || 150, sp.rotation || 0, sp.flipped || false, sp.sideFlipped || false); });
+
+            const myOLTs = window.appState.olts.filter(o => o.nodeId === node.id);
+            myOLTs.forEach((olt, index) => { window.createOLTBlock(canvas, olt, olt.x || 150, olt.y || (100 + index * 100), olt.rotation || 0, olt.flipped || false, olt.sideFlipped || false); });
+
+            const myDIOs = window.appState.dios.filter(d => d.nodeId === node.id);
+            myDIOs.forEach((dio, index) => { window.createDIOBlock(canvas, dio, dio.x || 350, dio.y || (100 + index * 100), dio.rotation || 0, dio.flipped || false, dio.sideFlipped || false); });
+
+            setTimeout(() => { 
+                window.updateAllFusionLines(); 
+                window.calculateNetworkPower();
+            }, 100); 
+            document.getElementById('diagram-view').style.display = 'flex'; 
+        };
+        
+        window.closeCanvasDiagram = function() { document.getElementById('diagram-view').style.display = 'none'; };
+
+        window.createCableBlock = function(canvas, cable, title, sub, startX, startY, startRot=0, isFlipped=false, sideFlipped=false) { 
+            const block = document.createElement('div'); block.className = `cable-block ${sideFlipped ? 'side-flipped' : ''}`; 
+            block.dataset.id = cable.id; block.style.left = `${startX}px`; block.style.top = `${startY}px`; block.style.transform = `rotate(${startRot}deg)`;
+            block.setAttribute('oncontextmenu', `window.showContextMenu(event, 'cable', '${cable.id}')`);
+            
+            let infoHtml = `<div class="cable-block-info" onmousedown="window.startDragBlock(event, this.parentElement)">
+                <div style="display: flex; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">
+                    <i class="fa-solid fa-rotate-right cursor-pointer text-gray-400 hover:text-blue-500" onclick="event.stopPropagation(); window.rotateBlock('cable', '${cable.id}')" title="Rotacionar"></i>
+                    <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-gray-400 hover:text-blue-500" onclick="event.stopPropagation(); window.activeContextMenuType='cable'; window.activeContextMenuId='${cable.id}'; window.toggleSide()" title="Inverter Lado"></i>
+                    <i class="fa-solid fa-arrows-up-down cursor-pointer text-gray-400 hover:text-blue-500" onclick="event.stopPropagation(); window.activeContextMenuType='cable'; window.activeContextMenuId='${cable.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
+                </div>
+                <div class="cb-title">${title}</div><div class="cb-cap">${cable.capacity} FIBRAS</div>
+            </div>`; 
+            
+            let fibersHtml = '<div class="fiber-grid">'; 
+            let indexes = []; for(let i=0; i<cable.capacity; i++) indexes.push(i);
+            if(isFlipped) indexes.reverse();
+            indexes.forEach(i => {
+                const colorIdx = i % 12; const portId = `port-${cable.id}-${i}`; 
+                fibersHtml += `<div id="${portId}" class="fiber-port fiber-bg-${colorIdx + 1}" onclick="window.showPowerCornerBtn(event, '${portId}')" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="Fibra ${i+1}">${i+1}</div>`; 
+            });
+            fibersHtml += '</div>'; block.innerHTML = infoHtml + fibersHtml; canvas.appendChild(block); 
+        };
+
+        window.createOLTBlock = function(canvas, olt, startX, startY, startRot=0, isFlipped=false, sideFlipped=false) {
+            const block = document.createElement('div'); block.className = `olt-block cable-block ${sideFlipped ? 'side-flipped' : ''}`; 
+            block.dataset.id = olt.id; block.style.left = `${startX}px`; block.style.top = `${startY}px`; block.style.transform = `rotate(${startRot}deg)`;
+            block.setAttribute('oncontextmenu', `window.showContextMenu(event, 'olt', '${olt.id}')`);
+            
+            let infoHtml = `<div class="cable-block-info" style="background: #e0f2fe; border-left: 4px solid #0284c7;" onmousedown="window.startDragBlock(event, this.parentElement)">
+                <div style="display: flex; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid #bae6fd; padding-bottom: 4px;">
+                    <i class="fa-solid fa-rotate-right cursor-pointer text-slate-500 hover:text-blue-700" onclick="event.stopPropagation(); window.rotateBlock('olt', '${olt.id}')" title="Rotacionar"></i>
+                    <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-slate-500 hover:text-blue-700" onclick="event.stopPropagation(); window.activeContextMenuType='olt'; window.activeContextMenuId='${olt.id}'; window.toggleSide()" title="Inverter Lado"></i>
+                    <i class="fa-solid fa-arrows-up-down cursor-pointer text-slate-500 hover:text-blue-700" onclick="event.stopPropagation(); window.activeContextMenuType='olt'; window.activeContextMenuId='${olt.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
+                    <i class="fa-solid fa-pen cursor-pointer text-slate-500 hover:text-blue-700" onclick="event.stopPropagation(); window.promptEditOLTPower('${olt.id}')" title="Editar Potência"></i>
+                    <i class="fa-solid fa-trash cursor-pointer text-red-400 hover:text-red-600 ml-2" onclick="event.stopPropagation(); window.deleteOLT('${olt.id}')" title="Excluir"></i>
+                </div>
+                <div class="cb-title">OLT</div><div class="cb-cap">${olt.pons} PORTAS PON</div><div class="cb-dest" style="color: #0284c7;">TX: ${olt.tx} dBm</div>
+            </div>`; 
+            
+            let fibersHtml = '<div class="fiber-grid" style="background: #f0f9ff; border-color: #bae6fd;">'; 
+            let indexes = []; for(let i=0; i<olt.pons; i++) indexes.push(i);
+            if(isFlipped) indexes.reverse();
+            indexes.forEach(i => {
+                const portId = `olt-${olt.id}-pon-${i}`; 
+                fibersHtml += `<div id="${portId}" class="fiber-port sp-port out" style="background:#0284c7; color:white;" onclick="window.showPowerCornerBtn(event, '${portId}')" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="PON ${i+1}">${i+1}</div>`; 
+            });
+            fibersHtml += '</div>'; block.innerHTML = infoHtml + fibersHtml; canvas.appendChild(block); 
+        };
+        
+        window.createDIOBlock = function(canvas, dio, startX, startY, startRot=0, isFlipped=false, sideFlipped=false) {
+            const block = document.createElement('div'); block.className = `dio-block splitter-tri ${sideFlipped ? 'side-flipped' : ''}`; 
+            block.dataset.id = dio.id; block.style.left = `${startX}px`; block.style.top = `${startY}px`; block.style.transform = `rotate(${startRot}deg)`;
+            block.setAttribute('oncontextmenu', `window.showContextMenu(event, 'dio', '${dio.id}')`);
+            const outs = dio.ports;
+            const h = Math.max(outs * 24, 60); 
+            
+            let actionsHtml = `<div style="position: absolute; top: -30px; left: 0; display: flex; gap: 8px; background: white; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 10;">
+                <i class="fa-solid fa-rotate-right cursor-pointer text-gray-500 hover:text-blue-500" onclick="event.stopPropagation(); window.rotateBlock('dio', '${dio.id}')" title="Rotacionar"></i>
+                <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-gray-500 hover:text-blue-500" onclick="event.stopPropagation(); window.activeContextMenuType='dio'; window.activeContextMenuId='${dio.id}'; window.toggleSide()" title="Inverter Lado"></i>
+                <i class="fa-solid fa-arrows-up-down cursor-pointer text-gray-500 hover:text-blue-500" onclick="event.stopPropagation(); window.activeContextMenuType='dio'; window.activeContextMenuId='${dio.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
+                <i class="fa-solid fa-trash cursor-pointer text-red-400 hover:text-red-600 ml-2" onclick="event.stopPropagation(); window.deleteDIO('${dio.id}')" title="Excluir"></i>
+            </div>`;
+
+            let portsInHtml = `<div class="sp-in-col" style="display: flex; flex-direction: column; justify-content: space-around; height: ${h}px; z-index: 2;">`;
+            let indexes = []; for(let i=0; i<outs; i++) indexes.push(i);
+            if(isFlipped) indexes.reverse();
+            indexes.forEach(i => { 
+                let portId = `dio-${dio.id}-in-${i}`;
+                portsInHtml += `<div id="${portId}" class="fiber-port sp-port in" style="background:#111827; color:white; width:18px; height:18px; border-radius:2px; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 1px 2px rgba(0,0,0,0.2);" onclick="window.showPowerCornerBtn(event, '${portId}')" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="IN ${i+1}">${i+1}</div>`; 
+            });
+            portsInHtml += '</div>';
+
+            let svgHtml = `<div class="sp-body-svg" style="position: relative; width: 80px; height: ${h}px; display: flex; align-items: center; justify-content: center; margin: 0 -10px; z-index: 1;" onmousedown="window.startDragBlock(event, this.parentElement)">
+                <div style="width: 100%; height: 100%; background: #e2e8f0; border-top: 2px solid #111827; border-bottom: 2px solid #111827;"></div>
+                <div class="sp-label" style="position:absolute; z-index: 3; background: white; border: 1px solid #e2e8f0; font-size: 10px; font-weight: 800; text-align: center; padding: 4px 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">DIO<br><span style="color:#64748b; font-size:9px;">${outs} PORTAS</span></div>
+            </div>`;
+
+            let portsOutHtml = `<div class="sp-out-col" style="display: flex; flex-direction: column; justify-content: space-around; height: ${h}px; z-index: 2;">`;
+            indexes.forEach(i => { 
+                let portId = `dio-${dio.id}-out-${i}`;
+                portsOutHtml += `<div id="${portId}" class="fiber-port sp-port out" style="background:#22c55e; color:white; width:18px; height:18px; border-radius:2px; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 1px 2px rgba(0,0,0,0.2);" onclick="window.showPowerCornerBtn(event, '${portId}')" onmousedown="window.startFusionDrag(event, '${portId}')" onmouseup="window.endFusionDrag(event, '${portId}')" title="OUT ${i+1}">${i+1}</div>`; 
+            });
+            portsOutHtml += '</div>';
+
+            block.innerHTML = actionsHtml + portsInHtml + svgHtml + portsOutHtml; 
+            canvas.appendChild(block);
+        };
+        
+        window.createSplitterBlock = function(canvas, splitter, startX, startY, startRot=0, isFlipped=false, sideFlipped=false) {
+            const block = document.createElement('div'); block.className = `splitter-tri ${sideFlipped ? 'side-flipped' : ''}`; 
+            block.dataset.id = splitter.id; block.style.left = `${startX}px`; block.style.top = `${startY}px`; block.style.transform = `rotate(${startRot}deg)`;
+            block.setAttribute('oncontextmenu', `window.showContextMenu(event, 'splitter', '${splitter.id}')`);
+            
+            const outs = parseInt(splitter.type.split('x')[1]);
+            const h = Math.max(outs * 30, 60); 
+            
+            let actionsHtml = `<div style="position: absolute; top: -30px; left: 0; display: flex; gap: 8px; background: white; padding: 4px 8px; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 10;">
+                <i class="fa-solid fa-rotate-right cursor-pointer text-gray-500 hover:text-blue-500" onclick="event.stopPropagation(); window.rotateBlock('splitter', '${splitter.id}')" title="Rotacionar"></i>
+                <i class="fa-solid fa-arrow-right-arrow-left cursor-pointer text-gray-500 hover:text-blue-500" onclick="event.stopPropagation(); window.activeContextMenuType='splitter'; window.activeContextMenuId='${splitter.id}'; window.toggleSide()" title="Inverter Lado"></i>
+                <i class="fa-solid fa-arrows-up-down cursor-pointer text-gray-500 hover:text-blue-500" onclick="event.stopPropagation(); window.activeContextMenuType='splitter'; window.activeContextMenuId='${splitter.id}'; window.triggerFlip()" title="Inverter Ordem"></i>
+                <i class="fa-solid fa-trash cursor-pointer text-red-400 hover:text-red-600 ml-2" onclick="event.stopPropagation(); window.deleteSplitter('${splitter.id}')" title="Excluir"></i>
+            </div>`;
+
+            let inPortId = `sp-${splitter.id}-in`;
+            let inHtml = `<div class="sp-in-col" style="display: flex; flex-direction: column; justify-content: center; z-index: 2;">
+                <div id="${inPortId}" class="fiber-port sp-port in" style="background:#111827; color:white; width:20px; height:20px; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 2px 4px rgba(0,0,0,0.3);" onclick="window.showPowerCornerBtn(event, '${inPortId}')" onmousedown="window.startFusionDrag(event, '${inPortId}')" onmouseup="window.endFusionDrag(event, '${inPortId}')" title="IN">1</div>
+            </div>`;
+            
+            let pathD = sideFlipped ? `M 80,${h/2} L 10,10 L 10,${h-10} Z` : `M 10,${h/2} L 80,10 L 80,${h-10} Z`;
+
+            let svgHtml = `<div class="sp-body-svg" style="position: relative; width: 90px; height: ${h}px; display: flex; align-items: center; justify-content: center; margin: 0 -10px; z-index: 1;" onmousedown="window.startDragBlock(event, this.parentElement)">
+                <svg viewBox="0 0 90 ${h}" preserveAspectRatio="none" style="position:absolute; width:100%; height:100%; top:0; left:0;">
+                    <path d="${pathD}" fill="#f1f5f9" stroke="#111827" stroke-width="2"/>
+                    <circle cx="${sideFlipped ? 80 : 10}" cy="${h/2}" r="3" fill="#111827" />
+                    <circle cx="${sideFlipped ? 10 : 80}" cy="10" r="3" fill="#111827" />
+                    <circle cx="${sideFlipped ? 10 : 80}" cy="${h-10}" r="3" fill="#111827" />
+                </svg>
+                <div id="sp-lbl-${splitter.id}" class="sp-label" style="z-index: 3; background: white; border: 1px solid #e2e8f0; font-size: 10px; font-weight: 800; text-align: center; padding: 4px 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 20px;">${splitter.type} APC<br><span style="color:#ef4444; font-size:9px;">Sem Sinal</span></div>
+            </div>`;
+
+            let portsHtml = `<div class="sp-out-col" style="display: flex; flex-direction: column; justify-content: space-around; height: ${h}px; z-index: 2;">`;
+            let indexes = []; for(let i=0; i<outs; i++) indexes.push(i);
+            if(isFlipped) indexes.reverse();
+
+            indexes.forEach(i => { 
+                let outPortId = `sp-${splitter.id}-out-${i}`;
+                portsHtml += `<div id="${outPortId}" class="fiber-port sp-port out" style="background:#22c55e; color:white; width:18px; height:18px; border-radius:2px; font-size:9px; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:crosshair; box-shadow:0 1px 2px rgba(0,0,0,0.2);" onclick="window.showPowerCornerBtn(event, '${outPortId}')" onmousedown="window.startFusionDrag(event, '${outPortId}')" onmouseup="window.endFusionDrag(event, '${outPortId}')" title="OUT ${i+1}">${i+1}</div>`; 
+            });
+            portsHtml += '</div>';
+
+            block.innerHTML = actionsHtml + inHtml + svgHtml + portsHtml; 
+            canvas.appendChild(block);
+        };
+
+        let draggedBlock = null; let dragOffset = {x:0, y:0};
+        
+        window.startDragBlock = function(e, block) { 
+            if(e.target.closest('.fiber-port, .sp-port, .fa-trash, .fa-pen, .fa-rotate-right, .fa-arrow-right-arrow-left, .fa-arrows-up-down, .absolute')) return; 
+            draggedBlock = block; const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const canvasContainer = document.getElementById('diagram-canvas').parentElement; const zoom = window.appState.diagramZoom || 1;
+            dragOffset.x = (e.clientX - canvasRect.left + canvasContainer.scrollLeft) / zoom - parseInt(draggedBlock.style.left || 0); dragOffset.y = (e.clientY - canvasRect.top + canvasContainer.scrollTop) / zoom - parseInt(draggedBlock.style.top || 0); 
+            document.onmousemove = window.dragBlockMove; document.onmouseup = window.dragBlockEnd; 
+        };
+        
+        window.dragBlockMove = function(e) { 
+            if(!draggedBlock) return; const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const canvasContainer = document.getElementById('diagram-canvas').parentElement; const zoom = window.appState.diagramZoom || 1;
+            let x = (e.clientX - canvasRect.left + canvasContainer.scrollLeft) / zoom - dragOffset.x; let y = (e.clientY - canvasRect.top + canvasContainer.scrollTop) / zoom - dragOffset.y; 
+            x = Math.max(0, x); y = Math.max(0, y); 
+            draggedBlock.style.left = `${x}px`; draggedBlock.style.top = `${y}px`; window.updateAllFusionLines(); 
+        };
+        
+        window.dragBlockEnd = function() { 
+            if(draggedBlock) {
+                const newX = parseInt(draggedBlock.style.left); const newY = parseInt(draggedBlock.style.top);
+                if(draggedBlock.classList.contains('splitter-tri') || draggedBlock.classList.contains('splitter-block')) {
+                    if (draggedBlock.classList.contains('dio-block')) window.updateDIOInFirebase(draggedBlock.dataset.id, {x: newX, y: newY});
+                    else window.updateSplitterInFirebase(draggedBlock.dataset.id, {x: newX, y: newY});
+                } else if(draggedBlock.classList.contains('cable-block')) {
+                    if (draggedBlock.classList.contains('olt-block')) window.updateOLTInFirebase(draggedBlock.dataset.id, {x: newX, y: newY});
+                    else {
+                        const cbId = draggedBlock.dataset.id; const cable = window.appState.cables.find(c => c.id === cbId);
+                        if(cable) { let diag = cable.diagram || {}; diag[window.appState.selectedNodeId] = { ...diag[window.appState.selectedNodeId], x: newX, y: newY }; window.updateCableInFirebase(cbId, { diagram: diag }); }
+                    }
+                }
+            }
+            draggedBlock = null; document.onmousemove = null; document.onmouseup = null; 
+        };
+        
+        window.startFusionDrag = function(e, portId) { 
+            e.stopPropagation(); 
+            
+            const isOccupied = window.appState.fusions.some(f => f.nodeId === window.appState.selectedNodeId && (f.from === portId || f.to === portId));
+            if(isOccupied) { window.showToast('Erro: Porta já conectada!', 'erro'); return; }
+
+            window.appState.isDraggingFusion = true; window.appState.fusionStartPort = portId; 
+            const port = document.getElementById(portId); const portRect = port.getBoundingClientRect(); const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const zoom = window.appState.diagramZoom || 1;
+            
+            let pX = (portRect.left - canvasRect.left + (portRect.width/2)) / zoom;
+            let pY = (portRect.top - canvasRect.top + (portRect.height/2)) / zoom;
+            window.appState.fusionStartCoords = { x: pX, y: pY }; 
+            
+            const activeLine = document.getElementById('active-fusion-line');
+            activeLine.setAttribute('stroke', window.getPortColor(portId)); 
+            activeLine.setAttribute('d', `M ${window.appState.fusionStartCoords.x} ${window.appState.fusionStartCoords.y} L ${window.appState.fusionStartCoords.x} ${window.appState.fusionStartCoords.y}`); 
+        };
+        
+        window.handleFusionDragMove = function(e) { 
+            if(!window.appState.isDraggingFusion) return; 
+            const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const zoom = window.appState.diagramZoom || 1;
+            const p1El = document.getElementById(window.appState.fusionStartPort); const r1 = p1El.getBoundingClientRect();
+            
+            let p1X = (r1.left - canvasRect.left + (r1.width/2)) / zoom; let p1Y = (r1.top - canvasRect.top + (r1.height/2)) / zoom;
+            let p2X = (e.clientX - canvasRect.left) / zoom; let p2Y = (e.clientY - canvasRect.top) / zoom; 
+            
+            const v1 = window.getPortVector(window.appState.fusionStartPort, p1X, p1Y, p2X, p2Y);
+            const dist = Math.hypot(p2X - p1X, p2Y - p1Y); const offset = Math.max(120, dist / 2); 
+            
+            const cp1X = p1X + v1.x * offset; const cp1Y = p1Y + v1.y * offset;
+            const cp2X = p2X - v1.x * offset; const cp2Y = p2Y - v1.y * offset;
+            
+            const d = `M ${p1X} ${p1Y} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${p2X} ${p2Y}`; 
+            document.getElementById('active-fusion-line').setAttribute('d', d); 
+        };
+        
+        window.handleFusionDragEnd = async function(e) { 
+            if(!window.appState.isDraggingFusion) return; 
+            e.stopPropagation();
+            const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const canvasContainer = document.getElementById('diagram-canvas').parentElement; const zoom = window.appState.diagramZoom || 1;
+            const dropX = (e.clientX - canvasRect.left + canvasContainer.scrollLeft) / zoom; const dropY = (e.clientY - canvasRect.top + canvasContainer.scrollTop) / zoom;
+            
+            await window.saveFusionToFirebase({ nodeId: window.appState.selectedNodeId, from: window.appState.fusionStartPort, to: 'dead_end', deadX: dropX, deadY: dropY });
+            window.showToast('Fibra Morta separada!', 'info');
+            
+            window.appState.isDraggingFusion = false; document.getElementById('active-fusion-line').setAttribute('d', ''); 
+        };
+        
+        window.endFusionDrag = async function(e, targetPortId) { 
+            e.stopPropagation(); if(!window.appState.isDraggingFusion) return; 
+            
+            if(window.appState.fusionStartPort !== targetPortId) { 
+                const existing = window.appState.fusions.find(f => (f.nodeId === window.appState.selectedNodeId) && (f.from === targetPortId || f.to === targetPortId || f.from === window.appState.fusionStartPort || f.to === window.appState.fusionStartPort));
+                if(existing) { window.showToast('Porta ocupada.', 'aviso'); } else {
+                    await window.saveFusionToFirebase({ nodeId: window.appState.selectedNodeId, from: window.appState.fusionStartPort, to: targetPortId });
+                    window.showToast('Fusão salva na nuvem!', 'sucesso'); 
+                }
+            } 
+            window.appState.isDraggingFusion = false; document.getElementById('active-fusion-line').setAttribute('d', ''); 
+            window.calculateNetworkPower(); // Recalcula Luz ao completar fusão
+        };
+
         window.updateAllFusionLines = function() {
             const svg = document.getElementById('fusion-lines'); 
             Array.from(svg.children).forEach(c => { if(c.id !== 'active-fusion-line' && c.tagName !== 'defs') c.remove(); }); 
@@ -1489,44 +1939,14 @@
                     defs.appendChild(grad);
                 }
 
-                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); 
                 path.setAttribute('d', d); path.setAttribute('stroke', `url(#${gradId})`); path.setAttribute('stroke-width', '4'); path.setAttribute('fill', 'none'); path.setAttribute('stroke-linecap', 'round'); 
                 path.classList.add('fusion-line-clickable');
                 path.onmousemove = function(e) { let trash = document.getElementById('floating-trash'); if(!trash) { trash = document.createElement('div'); trash.id = 'floating-trash'; trash.innerHTML = '<i class="fa-solid fa-trash"></i>'; trash.style = 'position:fixed; background:#ef4444; color:white; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; cursor:pointer; z-index:99999; box-shadow:0 4px 6px rgba(0,0,0,0.3);'; document.body.appendChild(trash); } trash.style.display = 'flex'; trash.style.left = (e.clientX + 15) + 'px'; trash.style.top = (e.clientY - 15) + 'px'; trash.onmouseleave = () => trash.style.display = 'none'; trash.onclick = () => { trash.style.display = 'none'; window.deletarFusao(fusion.id); }; };
                 path.onmouseleave = function(e) { setTimeout(() => { const trash = document.getElementById('floating-trash'); if(trash && !trash.matches(':hover')) trash.style.display = 'none'; }, 100); };
                 
-                g.appendChild(path);
-
-                if(isDeadEnd) { 
-                    const deadLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text'); deadLabel.setAttribute('x', p2X + 5); deadLabel.setAttribute('y', p2Y + 4); deadLabel.setAttribute('fill', '#ef4444'); deadLabel.setAttribute('font-size', '10px'); deadLabel.setAttribute('font-weight', 'bold'); deadLabel.textContent = 'MORTA'; const cross = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); cross.setAttribute('cx', p2X); cross.setAttribute('cy', p2Y); cross.setAttribute('r', '4'); cross.setAttribute('fill', '#ef4444'); g.appendChild(cross); g.appendChild(deadLabel); 
-                } else {
-                    // TUBETE DE FUSÃO NO MEIO DA LINHA DE BÉZIER
-                    const midX = 0.125 * p1X + 0.375 * cp1X + 0.375 * cp2X + 0.125 * p2X;
-                    const midY = 0.125 * p1Y + 0.375 * cp1Y + 0.375 * cp2Y + 0.125 * p2Y;
-                    
-                    const tubete = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                    tubete.setAttribute('x', midX - 6);
-                    tubete.setAttribute('y', midY - 12);
-                    tubete.setAttribute('width', '12');
-                    tubete.setAttribute('height', '24');
-                    tubete.setAttribute('rx', '4');
-                    tubete.setAttribute('fill', fusion.hasTubete ? '#22c55e' : '#cbd5e1'); // Verde se ativo, Cinza se inativo
-                    tubete.setAttribute('stroke', '#ffffff');
-                    tubete.setAttribute('stroke-width', '2');
-                    tubete.style.cursor = 'pointer';
-                    tubete.style.pointerEvents = 'all';
-                    tubete.onclick = (e) => window.toggleTubete(fusion.id, e);
-                    
-                    const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-                    title.textContent = fusion.hasTubete ? 'Fusão Inserida (-0.1dB)' : 'Clique para inserir Tubete de Fusão';
-                    tubete.appendChild(title);
-
-                    g.appendChild(tubete);
-                }
-
-                svg.appendChild(g);
+                if(isDeadEnd) { const deadLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text'); deadLabel.setAttribute('x', p2X + 5); deadLabel.setAttribute('y', p2Y + 4); deadLabel.setAttribute('fill', '#ef4444'); deadLabel.setAttribute('font-size', '10px'); deadLabel.setAttribute('font-weight', 'bold'); deadLabel.textContent = 'MORTA'; const cross = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); cross.setAttribute('cx', p2X); cross.setAttribute('cy', p2Y); cross.setAttribute('r', '4'); cross.setAttribute('fill', '#ef4444'); const g = document.createElementNS('http://www.w3.org/2000/svg', 'g'); g.appendChild(path); g.appendChild(cross); g.appendChild(deadLabel); svg.appendChild(g); } 
+                else { svg.appendChild(path); }
             });
         };
 
