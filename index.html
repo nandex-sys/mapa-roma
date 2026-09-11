@@ -2285,46 +2285,90 @@
             draggedBlock = null; document.onmousemove = null; document.onmouseup = null; 
         };
 
-        let draggedTubeteId = null;
-        let tubeteDragMoved = false;
+        let fusionDragId = null;
+        let fusionDragType = null;
+        let fusionDragStartOffset = {x: 0, y: 0};
+        let fusionInitialCustom = {x: 0, y: 0};
+        let fusionDragMoved = false;
 
-        window.startFusionNodeDragCustom = function(e, id) {
+        window.startFusionNodeDragCustom = function(e, id, type) {
             e.stopPropagation();
-            draggedTubeteId = id;
-            tubeteDragMoved = false;
+            fusionDragId = id;
+            fusionDragType = type;
+            fusionDragMoved = false;
+            
+            const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect();
+            const zoom = window.appState.diagramZoom || 1;
+            let mouseX = (e.clientX - canvasRect.left) / zoom;
+            let mouseY = (e.clientY - canvasRect.top) / zoom;
+
+            const f = window.appState.fusions.find(f => f.id === id);
+            if(f.customX === undefined) {
+                const p1El = document.getElementById(f.from); const r1 = p1El.getBoundingClientRect();
+                let p1X = (r1.left - canvasRect.left + (r1.width/2)) / zoom; 
+                let p1Y = (r1.top - canvasRect.top + (r1.height/2)) / zoom;
+                let p2X, p2Y;
+                if(f.to === 'dead_end') { p2X = f.deadX; p2Y = f.deadY; } 
+                else { const p2El = document.getElementById(f.to); const r2 = p2El.getBoundingClientRect(); p2X = (r2.left - canvasRect.left + (r2.width/2)) / zoom; p2Y = (r2.top - canvasRect.top + (r2.height/2)) / zoom; }
+                f.customX = (p1X + p2X) / 2;
+                f.customY = (p1Y + p2Y) / 2;
+            }
+            
+            fusionInitialCustom = { x: f.customX, y: f.customY };
+            fusionDragStartOffset = { x: mouseX, y: mouseY };
+            
             document.onmousemove = window.fusionNodeDragMove;
             document.onmouseup = window.fusionNodeDragEnd;
         };
 
         window.fusionNodeDragMove = function(e) {
-            if(!draggedTubeteId) return;
-            tubeteDragMoved = true;
+            if(!fusionDragId) return;
+            fusionDragMoved = true;
             const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect();
-            const canvasContainer = document.getElementById('diagram-canvas').parentElement;
             const zoom = window.appState.diagramZoom || 1;
+            let mouseX = (e.clientX - canvasRect.left) / zoom;
+            let mouseY = (e.clientY - canvasRect.top) / zoom;
             
-            let x = (e.clientX - canvasRect.left + canvasContainer.scrollLeft) / zoom;
-            let y = (e.clientY - canvasRect.top + canvasContainer.scrollTop) / zoom;
-            
-            const f = window.appState.fusions.find(f => f.id === draggedTubeteId);
-            if(f) {
-                f.customX = x;
-                f.customY = y;
-                window.updateAllFusionLines(); // Redesenha a fibra em tempo real seguindo o mouse
+            const f = window.appState.fusions.find(f => f.id === fusionDragId);
+            if(!f) return;
+
+            if (fusionDragType === 'line') {
+                // Curva a fibra suavemente a partir de onde foi clicada (offset)
+                f.customX = fusionInitialCustom.x + (mouseX - fusionDragStartOffset.x);
+                f.customY = fusionInitialCustom.y + (mouseY - fusionDragStartOffset.y);
+            } else if (fusionDragType === 'tubete') {
+                // Escorrega o tubete pela linha calculando o T (0.0 a 1.0) nativo do SVG
+                const pathEl = document.getElementById(`path-${f.id}`);
+                if (pathEl) {
+                    const totalLen = pathEl.getTotalLength();
+                    let closestT = f.tubeteT || 0.5;
+                    let minDist = Infinity;
+                    for(let i=0; i<=50; i++) {
+                        let t = i / 50;
+                        let pt = pathEl.getPointAtLength(t * totalLen);
+                        let dist = Math.hypot(pt.x - mouseX, pt.y - mouseY);
+                        if (dist < minDist) { minDist = dist; closestT = t; }
+                    }
+                    f.tubeteT = closestT;
+                }
             }
+            window.updateAllFusionLines();
         };
 
         window.fusionNodeDragEnd = async function(e) {
-            if(!draggedTubeteId) return;
-            const f = window.appState.fusions.find(f => f.id === draggedTubeteId);
-            if(!tubeteDragMoved) {
-                window.toggleTubete(draggedTubeteId, e); // Apenas um clique rápido: liga/desliga o tubete
-            } else if(f) {
-                await window.updateFusionInFirebase(f.id, { customX: f.customX, customY: f.customY }); // Salva a posição torta customizada
-            }
-            draggedTubeteId = null;
+            if(!fusionDragId) return;
             document.onmousemove = null;
             document.onmouseup = null;
+            
+            const id = fusionDragId;
+            const f = window.appState.fusions.find(f => f.id === id);
+            fusionDragId = null;
+
+            if(!fusionDragMoved && fusionDragType === 'tubete') {
+                window.toggleTubete(id, e);
+            } else if(f) {
+                await window.updateFusionInFirebase(f.id, { customX: f.customX, customY: f.customY, tubeteT: f.tubeteT });
+            }
         };
         
         window.startFusionDrag = function(e, portId) { 
@@ -2417,26 +2461,22 @@
                 const v1 = window.getPortVector(fusion.from, p1X, p1Y, p2X, p2Y);
                 let v2; if(isDeadEnd) { v2 = { x: -v1.x, y: -v1.y }; } else { v2 = window.getPortVector(fusion.to, p2X, p2Y, p1X, p1Y); }
                 
-                let d = ''; let midX, midY, angle;
+                let d = ''; let midX, midY;
 
                 if (fusion.customX !== undefined && fusion.customY !== undefined) {
                     midX = fusion.customX;
                     midY = fusion.customY;
                     
                     if (window.appState.diagramLineMode === 'straight') {
-                        // Roteamento Ortogonal Dinâmico
+                        const m1X = (p1X + midX) / 2; const m2X = (midX + p2X) / 2;
                         d = `M ${p1X} ${p1Y} L ${midX} ${p1Y} L ${midX} ${midY} L ${p2X} ${midY} L ${p2X} ${p2Y}`;
-                        // Calcula o lado predominante para "deitar" ou "ficar em pé" o tubete
-                        let lenH = Math.abs(p2X - midX); let lenV = Math.abs(midY - p1Y);
-                        angle = lenV > lenH ? 90 : 0;
                     } else {
-                        // Roteamento de Spline Duplo (Curva super orgânica e maleável)
                         let tx = p2X - p1X; let ty = p2Y - p1Y;
                         let len = Math.hypot(tx, ty) || 1;
-                        tx /= len; ty /= len; // Vetor Tangente Direcional
+                        tx /= len; ty /= len; 
                         
                         let dist1 = Math.hypot(midX - p1X, midY - p1Y); let dist2 = Math.hypot(p2X - midX, p2Y - midY);
-                        let f1 = dist1 * 0.4; let f2 = dist2 * 0.4; // Intensidade da elasticidade
+                        let f1 = dist1 * 0.4; let f2 = dist2 * 0.4; 
                         
                         let cp1X = p1X + v1.x * f1; let cp1Y = p1Y + v1.y * f1;
                         let mcp1X = midX - tx * f1; let mcp1Y = midY - ty * f1;
@@ -2444,7 +2484,6 @@
                         let cp2X = p2X + (isDeadEnd ? -v1.x : v2.x) * f2; let cp2Y = p2Y + (isDeadEnd ? -v1.y : v2.y) * f2;
                         
                         d = `M ${p1X} ${p1Y} C ${cp1X} ${cp1Y}, ${mcp1X} ${mcp1Y}, ${midX} ${midY} C ${mcp2X} ${mcp2Y}, ${cp2X} ${cp2Y}, ${p2X} ${p2Y}`;
-                        angle = Math.atan2(ty, tx) * (180 / Math.PI); // Tubete obedece precisamente a inclinação da curva
                     }
                 } else {
                     const dist = Math.hypot(p2X - p1X, p2Y - p1Y); const offset = Math.max(120, dist / 2); 
@@ -2455,18 +2494,11 @@
                         const midX2 = (cp1X + cp2X) / 2; const midY2 = (cp1Y + cp2Y) / 2;
                         if (Math.abs(cp1X - cp2X) > Math.abs(cp1Y - cp2Y)) {
                             d = `M ${p1X} ${p1Y} L ${cp1X} ${cp1Y} L ${midX2} ${cp1Y} L ${midX2} ${cp2Y} L ${cp2X} ${cp2Y} L ${p2X} ${p2Y}`;
-                            midX = midX2; midY = midY2; angle = 90;
                         } else {
                             d = `M ${p1X} ${p1Y} L ${cp1X} ${cp1Y} L ${cp1X} ${midY2} L ${cp2X} ${midY2} L ${cp2X} ${cp2Y} L ${p2X} ${p2Y}`;
-                            midX = midX2; midY = midY2; angle = 0;
                         }
                     } else {
                         d = `M ${p1X} ${p1Y} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${p2X} ${p2Y}`;
-                        midX = 0.125 * p1X + 0.375 * cp1X + 0.375 * cp2X + 0.125 * p2X;
-                        midY = 0.125 * p1Y + 0.375 * cp1Y + 0.375 * cp2Y + 0.125 * p2Y;
-                        const dX = 3 * 0.25 * (cp1X - p1X) + 3 * 0.5 * (cp2X - cp1X) + 3 * 0.25 * (p2X - cp2X);
-                        const dY = 3 * 0.25 * (cp1Y - p1Y) + 3 * 0.5 * (cp2Y - cp1Y) + 3 * 0.25 * (p2Y - cp2Y);
-                        angle = Math.atan2(dY, dX) * (180 / Math.PI);
                     }
                 }
                 
@@ -2484,25 +2516,36 @@
                 const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
 
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); 
+                path.setAttribute('id', `path-${fusion.id}`);
                 path.setAttribute('d', d); path.setAttribute('stroke', `url(#${gradId})`); path.setAttribute('stroke-width', '4'); path.setAttribute('fill', 'none'); path.setAttribute('stroke-linecap', 'round'); 
                 path.classList.add('fusion-line-clickable');
                 path.onmousedown = (e) => { 
                     const trash = document.getElementById('floating-trash'); if(trash) trash.style.display = 'none';
-                    window.startFusionNodeDragCustom(e, fusion.id); 
+                    window.startFusionNodeDragCustom(e, fusion.id, 'line'); 
                 };
-                path.onmousemove = function(e) { if(draggedTubeteId) return; let trash = document.getElementById('floating-trash'); if(!trash) { trash = document.createElement('div'); trash.id = 'floating-trash'; trash.innerHTML = '<i class="fa-solid fa-trash"></i>'; trash.style = 'position:fixed; background:#ef4444; color:white; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; cursor:pointer; z-index:99999; box-shadow:0 4px 6px rgba(0,0,0,0.3);'; document.body.appendChild(trash); } trash.style.display = 'flex'; trash.style.left = (e.clientX + 15) + 'px'; trash.style.top = (e.clientY - 15) + 'px'; trash.onmouseleave = () => trash.style.display = 'none'; trash.onclick = () => { trash.style.display = 'none'; window.deletarFusao(fusion.id); }; };
+                path.onmousemove = function(e) { if(fusionDragId) return; let trash = document.getElementById('floating-trash'); if(!trash) { trash = document.createElement('div'); trash.id = 'floating-trash'; trash.innerHTML = '<i class="fa-solid fa-trash"></i>'; trash.style = 'position:fixed; background:#ef4444; color:white; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; cursor:pointer; z-index:99999; box-shadow:0 4px 6px rgba(0,0,0,0.3);'; document.body.appendChild(trash); } trash.style.display = 'flex'; trash.style.left = (e.clientX + 15) + 'px'; trash.style.top = (e.clientY - 15) + 'px'; trash.onmouseleave = () => trash.style.display = 'none'; trash.onclick = () => { trash.style.display = 'none'; window.deletarFusao(fusion.id); }; };
                 path.onmouseleave = function(e) { setTimeout(() => { const trash = document.getElementById('floating-trash'); if(trash && !trash.matches(':hover')) trash.style.display = 'none'; }, 100); };
                 
                 g.appendChild(path);
+                svg.appendChild(g); // SVG injetado ANTES para conseguirmos medir as curvas!
 
                 if(isDeadEnd) { 
                     const deadLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text'); deadLabel.setAttribute('x', p2X + 5); deadLabel.setAttribute('y', p2Y + 4); deadLabel.setAttribute('fill', '#ef4444'); deadLabel.setAttribute('font-size', '10px'); deadLabel.setAttribute('font-weight', 'bold'); deadLabel.textContent = 'MORTA'; const cross = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); cross.setAttribute('cx', p2X); cross.setAttribute('cy', p2Y); cross.setAttribute('r', '4'); cross.setAttribute('fill', '#ef4444'); g.appendChild(cross); g.appendChild(deadLabel); 
                 } else {
+                    // Calcula a exata posição do tubete baseado no T (0.0 até 1.0) nativo do elemento SVG real
+                    let t = fusion.tubeteT !== undefined ? fusion.tubeteT : 0.5;
+                    let totalLen = path.getTotalLength();
+                    let pt = path.getPointAtLength(t * totalLen);
+                    
+                    let ptNext = path.getPointAtLength(Math.min(totalLen, t * totalLen + 1));
+                    let ptPrev = path.getPointAtLength(Math.max(0, t * totalLen - 1));
+                    let finalAngle = Math.atan2(ptNext.y - ptPrev.y, ptNext.x - ptPrev.x) * (180 / Math.PI);
+
                     const fusionGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                    fusionGroup.setAttribute('transform', `translate(${midX}, ${midY}) rotate(${angle})`);
+                    fusionGroup.setAttribute('transform', `translate(${pt.x}, ${pt.y}) rotate(${finalAngle})`);
                     fusionGroup.style.cursor = 'grab';
                     fusionGroup.style.pointerEvents = 'all';
-                    fusionGroup.onmousedown = (e) => window.startFusionNodeDragCustom(e, fusion.id);
+                    fusionGroup.onmousedown = (e) => window.startFusionNodeDragCustom(e, fusion.id, 'tubete');
                     
                     const tubeteColor = fusion.hasTubete ? '#22c55e' : '#94a3b8';
                     
@@ -2529,8 +2572,6 @@
                     
                     g.appendChild(fusionGroup);
                 }
-
-                svg.appendChild(g);
 
                 svg.appendChild(g);
             });
