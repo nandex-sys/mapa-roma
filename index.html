@@ -2303,18 +2303,22 @@
             let mouseY = (e.clientY - canvasRect.top) / zoom;
 
             const f = window.appState.fusions.find(f => f.id === id);
-            if(f.customX === undefined) {
-                const p1El = document.getElementById(f.from); const r1 = p1El.getBoundingClientRect();
-                let p1X = (r1.left - canvasRect.left + (r1.width/2)) / zoom; 
-                let p1Y = (r1.top - canvasRect.top + (r1.height/2)) / zoom;
-                let p2X, p2Y;
-                if(f.to === 'dead_end') { p2X = f.deadX; p2Y = f.deadY; } 
-                else { const p2El = document.getElementById(f.to); const r2 = p2El.getBoundingClientRect(); p2X = (r2.left - canvasRect.left + (r2.width/2)) / zoom; p2Y = (r2.top - canvasRect.top + (r2.height/2)) / zoom; }
-                f.customX = (p1X + p2X) / 2;
-                f.customY = (p1Y + p2Y) / 2;
+            
+            // CORREÇÃO: Lê o centro EXATO da curva no SVG para evitar saltos.
+            // E só modifica o "customX" se for arrastar a linha. Se for o tubete, deixa a curva intacta!
+            if (type === 'line' && f.customX === undefined) {
+                const pathEl = document.getElementById(`path-${f.id}`);
+                if (pathEl) {
+                    const pt = pathEl.getPointAtLength(pathEl.getTotalLength() / 2);
+                    f.customX = pt.x;
+                    f.customY = pt.y;
+                } else {
+                    f.customX = mouseX;
+                    f.customY = mouseY;
+                }
             }
             
-            fusionInitialCustom = { x: f.customX, y: f.customY };
+            fusionInitialCustom = { x: f.customX || 0, y: f.customY || 0 };
             fusionDragStartOffset = { x: mouseX, y: mouseY };
             
             document.onmousemove = window.fusionNodeDragMove;
@@ -2328,12 +2332,12 @@
             let mouseX = (e.clientX - canvasRect.left) / zoom;
             let mouseY = (e.clientY - canvasRect.top) / zoom;
             
-            // TRAVA DE PULO: Só ativa o arrasto se o mouse mover mais de 4 pixels
+            // TRAVA DE PULO: Só ativa a física se o mouse mover mais de 4 pixels, ignorando cliques simples
             if (Math.abs(mouseX - fusionDragStartOffset.x) > 4 || Math.abs(mouseY - fusionDragStartOffset.y) > 4) {
                 fusionDragMoved = true;
             }
 
-            if(!fusionDragMoved) return; // Se não moveu, sai da função sem alterar a fibra
+            if(!fusionDragMoved) return; 
 
             const f = window.appState.fusions.find(f => f.id === fusionDragId);
             if(!f) return;
@@ -2371,10 +2375,16 @@
             
             const f = window.appState.fusions.find(f => f.id === id);
 
+            // CORREÇÃO: Garante que clicar no tubete não envie lixo pro Firebase que quebre outras linhas
             if(!moved && type === 'tubete') {
                 window.toggleTubete(id, e);
             } else if(f && moved) {
-                await window.updateFusionInFirebase(f.id, { customX: f.customX, customY: f.customY, tubeteT: f.tubeteT });
+                let updateData = { tubeteT: f.tubeteT };
+                if (f.customX !== undefined) {
+                    updateData.customX = f.customX;
+                    updateData.customY = f.customY;
+                }
+                await window.updateFusionInFirebase(f.id, updateData);
             }
         };
         
