@@ -2284,6 +2284,48 @@
             }
             draggedBlock = null; document.onmousemove = null; document.onmouseup = null; 
         };
+
+        let draggedTubeteId = null;
+        let tubeteDragMoved = false;
+
+        window.startFusionNodeDragCustom = function(e, id) {
+            e.stopPropagation();
+            draggedTubeteId = id;
+            tubeteDragMoved = false;
+            document.onmousemove = window.fusionNodeDragMove;
+            document.onmouseup = window.fusionNodeDragEnd;
+        };
+
+        window.fusionNodeDragMove = function(e) {
+            if(!draggedTubeteId) return;
+            tubeteDragMoved = true;
+            const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect();
+            const canvasContainer = document.getElementById('diagram-canvas').parentElement;
+            const zoom = window.appState.diagramZoom || 1;
+            
+            let x = (e.clientX - canvasRect.left + canvasContainer.scrollLeft) / zoom;
+            let y = (e.clientY - canvasRect.top + canvasContainer.scrollTop) / zoom;
+            
+            const f = window.appState.fusions.find(f => f.id === draggedTubeteId);
+            if(f) {
+                f.customX = x;
+                f.customY = y;
+                window.updateAllFusionLines(); // Redesenha a fibra em tempo real seguindo o mouse
+            }
+        };
+
+        window.fusionNodeDragEnd = async function(e) {
+            if(!draggedTubeteId) return;
+            const f = window.appState.fusions.find(f => f.id === draggedTubeteId);
+            if(!tubeteDragMoved) {
+                window.toggleTubete(draggedTubeteId, e); // Apenas um clique rápido: liga/desliga o tubete
+            } else if(f) {
+                await window.updateFusionInFirebase(f.id, { customX: f.customX, customY: f.customY }); // Salva a posição torta customizada
+            }
+            draggedTubeteId = null;
+            document.onmousemove = null;
+            document.onmouseup = null;
+        };
         
         window.startFusionDrag = function(e, portId) { 
             e.stopPropagation(); 
@@ -2375,27 +2417,45 @@
                 const v1 = window.getPortVector(fusion.from, p1X, p1Y, p2X, p2Y);
                 let v2; if(isDeadEnd) { v2 = { x: -v1.x, y: -v1.y }; } else { v2 = window.getPortVector(fusion.to, p2X, p2Y, p1X, p1Y); }
                 
-                const dist = Math.hypot(p2X - p1X, p2Y - p1Y); const offset = Math.max(120, dist / 2); 
-                const cp1X = p1X + v1.x * offset; const cp1Y = p1Y + v1.y * offset;
-                const cp2X = p2X + v2.x * offset; const cp2Y = p2Y + v2.y * offset;
-                
                 let d = ''; let midX, midY, angle;
-                if (window.appState.diagramLineMode === 'straight') {
-                    const midX2 = (cp1X + cp2X) / 2; const midY2 = (cp1Y + cp2Y) / 2;
-                    if (Math.abs(cp1X - cp2X) > Math.abs(cp1Y - cp2Y)) {
-                        d = `M ${p1X} ${p1Y} L ${cp1X} ${cp1Y} L ${midX2} ${cp1Y} L ${midX2} ${cp2Y} L ${cp2X} ${cp2Y} L ${p2X} ${p2Y}`;
-                        midX = midX2; midY = midY2; angle = 90;
+
+                if (fusion.customX !== undefined && fusion.customY !== undefined) {
+                    midX = fusion.customX;
+                    midY = fusion.customY;
+                    angle = 0; // Fixa a rotação no modo manual para ficar mais limpo
+                    
+                    if (window.appState.diagramLineMode === 'straight') {
+                        const m1X = (p1X + midX) / 2; const m2X = (midX + p2X) / 2;
+                        d = `M ${p1X} ${p1Y} L ${m1X} ${p1Y} L ${m1X} ${midY} L ${midX} ${midY} L ${m2X} ${midY} L ${m2X} ${p2Y} L ${p2X} ${p2Y}`;
                     } else {
-                        d = `M ${p1X} ${p1Y} L ${cp1X} ${cp1Y} L ${cp1X} ${midY2} L ${cp2X} ${midY2} L ${cp2X} ${cp2Y} L ${p2X} ${p2Y}`;
-                        midX = midX2; midY = midY2; angle = 0;
+                        const off1 = Math.max(30, Math.abs(midX - p1X) * 0.5);
+                        const off2 = Math.max(30, Math.abs(p2X - midX) * 0.5);
+                        const cp1X = p1X + v1.x * off1; const cp1Y = p1Y + v1.y * off1;
+                        const cp2X = p2X + v2.x * off2; const cp2Y = p2Y + v2.y * off2;
+                        d = `M ${p1X} ${p1Y} C ${cp1X} ${cp1Y}, ${midX - 30} ${midY}, ${midX} ${midY} C ${midX + 30} ${midY}, ${cp2X} ${cp2Y}, ${p2X} ${p2Y}`;
                     }
                 } else {
-                    d = `M ${p1X} ${p1Y} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${p2X} ${p2Y}`;
-                    midX = 0.125 * p1X + 0.375 * cp1X + 0.375 * cp2X + 0.125 * p2X;
-                    midY = 0.125 * p1Y + 0.375 * cp1Y + 0.375 * cp2Y + 0.125 * p2Y;
-                    const dX = 3 * 0.25 * (cp1X - p1X) + 3 * 0.5 * (cp2X - cp1X) + 3 * 0.25 * (p2X - cp2X);
-                    const dY = 3 * 0.25 * (cp1Y - p1Y) + 3 * 0.5 * (cp2Y - cp1Y) + 3 * 0.25 * (p2Y - cp2Y);
-                    angle = Math.atan2(dY, dX) * (180 / Math.PI);
+                    const dist = Math.hypot(p2X - p1X, p2Y - p1Y); const offset = Math.max(120, dist / 2); 
+                    const cp1X = p1X + v1.x * offset; const cp1Y = p1Y + v1.y * offset;
+                    const cp2X = p2X + v2.x * offset; const cp2Y = p2Y + v2.y * offset;
+                    
+                    if (window.appState.diagramLineMode === 'straight') {
+                        const midX2 = (cp1X + cp2X) / 2; const midY2 = (cp1Y + cp2Y) / 2;
+                        if (Math.abs(cp1X - cp2X) > Math.abs(cp1Y - cp2Y)) {
+                            d = `M ${p1X} ${p1Y} L ${cp1X} ${cp1Y} L ${midX2} ${cp1Y} L ${midX2} ${cp2Y} L ${cp2X} ${cp2Y} L ${p2X} ${p2Y}`;
+                            midX = midX2; midY = midY2; angle = 90;
+                        } else {
+                            d = `M ${p1X} ${p1Y} L ${cp1X} ${cp1Y} L ${cp1X} ${midY2} L ${cp2X} ${midY2} L ${cp2X} ${cp2Y} L ${p2X} ${p2Y}`;
+                            midX = midX2; midY = midY2; angle = 0;
+                        }
+                    } else {
+                        d = `M ${p1X} ${p1Y} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${p2X} ${p2Y}`;
+                        midX = 0.125 * p1X + 0.375 * cp1X + 0.375 * cp2X + 0.125 * p2X;
+                        midY = 0.125 * p1Y + 0.375 * cp1Y + 0.375 * cp2Y + 0.125 * p2Y;
+                        const dX = 3 * 0.25 * (cp1X - p1X) + 3 * 0.5 * (cp2X - cp1X) + 3 * 0.25 * (p2X - cp2X);
+                        const dY = 3 * 0.25 * (cp1Y - p1Y) + 3 * 0.5 * (cp2Y - cp1Y) + 3 * 0.25 * (p2Y - cp2Y);
+                        angle = Math.atan2(dY, dX) * (180 / Math.PI);
+                    }
                 }
                 
                 const color1 = window.getPortColor(fusion.from); const color2 = isDeadEnd ? '#ef4444' : window.getPortColor(fusion.to);
@@ -2422,32 +2482,27 @@
                 if(isDeadEnd) { 
                     const deadLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text'); deadLabel.setAttribute('x', p2X + 5); deadLabel.setAttribute('y', p2Y + 4); deadLabel.setAttribute('fill', '#ef4444'); deadLabel.setAttribute('font-size', '10px'); deadLabel.setAttribute('font-weight', 'bold'); deadLabel.textContent = 'MORTA'; const cross = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); cross.setAttribute('cx', p2X); cross.setAttribute('cy', p2Y); cross.setAttribute('r', '4'); cross.setAttribute('fill', '#ef4444'); g.appendChild(cross); g.appendChild(deadLabel); 
                 } else {
-                    // ADIÇÃO: TUBETE DE FUSÃO NO MEIO DA LINHA
                     const fusionGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                     fusionGroup.setAttribute('transform', `translate(${midX}, ${midY}) rotate(${angle})`);
-                    fusionGroup.style.cursor = 'pointer';
+                    fusionGroup.style.cursor = 'grab';
                     fusionGroup.style.pointerEvents = 'all';
-                    fusionGroup.onclick = (e) => window.toggleTubete(fusion.id, e);
+                    fusionGroup.onmousedown = (e) => window.startFusionNodeDragCustom(e, fusion.id);
                     
-                    const tubeteColor = fusion.hasTubete ? '#22c55e' : '#cbd5e1';
+                    const tubeteColor = fusion.hasTubete ? '#22c55e' : '#94a3b8';
                     
-                    // Bolinha esquerda (Fibra de Origem - Agora usa a cor do tubete)
                     const leftDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                     leftDot.setAttribute('cx', '-7'); leftDot.setAttribute('cy', '0'); leftDot.setAttribute('r', '3.5');
                     leftDot.setAttribute('fill', tubeteColor); leftDot.setAttribute('stroke', '#1e293b'); leftDot.setAttribute('stroke-width', '1.5');
                     
-                    // Bolinha direita (Fibra de Destino - Agora usa a cor do tubete)
                     const rightDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                     rightDot.setAttribute('cx', '7'); rightDot.setAttribute('cy', '0'); rightDot.setAttribute('r', '3.5');
                     rightDot.setAttribute('fill', tubeteColor); rightDot.setAttribute('stroke', '#1e293b'); rightDot.setAttribute('stroke-width', '1.5');
                     
-                    // Tubete central (Protetor de Emenda)
                     const centerTubete = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                     centerTubete.setAttribute('cx', '0'); centerTubete.setAttribute('cy', '0'); centerTubete.setAttribute('r', '5');
-                    centerTubete.setAttribute('fill', tubeteColor); // Verde se ativo, Cinza se desativo
+                    centerTubete.setAttribute('fill', tubeteColor);
                     centerTubete.setAttribute('stroke', '#1e293b'); centerTubete.setAttribute('stroke-width', '1.5');
                     
-                    // Tooltip nativo no Tubete
                     const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
                     title.textContent = fusion.hasTubete ? 'Fusão Inserida (-0.1dB)' : 'Clique para inserir Tubete de Fusão';
                     fusionGroup.appendChild(title);
