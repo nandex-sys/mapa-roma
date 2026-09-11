@@ -2323,21 +2323,25 @@
 
         window.fusionNodeDragMove = function(e) {
             if(!fusionDragId) return;
-            fusionDragMoved = true;
             const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect();
             const zoom = window.appState.diagramZoom || 1;
             let mouseX = (e.clientX - canvasRect.left) / zoom;
             let mouseY = (e.clientY - canvasRect.top) / zoom;
             
+            // TRAVA DE PULO: Só ativa o arrasto se o mouse mover mais de 4 pixels
+            if (Math.abs(mouseX - fusionDragStartOffset.x) > 4 || Math.abs(mouseY - fusionDragStartOffset.y) > 4) {
+                fusionDragMoved = true;
+            }
+
+            if(!fusionDragMoved) return; // Se não moveu, sai da função sem alterar a fibra
+
             const f = window.appState.fusions.find(f => f.id === fusionDragId);
             if(!f) return;
 
             if (fusionDragType === 'line') {
-                // Curva a fibra suavemente a partir de onde foi clicada (offset)
                 f.customX = fusionInitialCustom.x + (mouseX - fusionDragStartOffset.x);
                 f.customY = fusionInitialCustom.y + (mouseY - fusionDragStartOffset.y);
             } else if (fusionDragType === 'tubete') {
-                // Escorrega o tubete pela linha calculando o T (0.0 a 1.0) nativo do SVG
                 const pathEl = document.getElementById(`path-${f.id}`);
                 if (pathEl) {
                     const totalLen = pathEl.getTotalLength();
@@ -2357,16 +2361,19 @@
 
         window.fusionNodeDragEnd = async function(e) {
             if(!fusionDragId) return;
+            const id = fusionDragId;
+            const type = fusionDragType;
+            const moved = fusionDragMoved;
+            
+            fusionDragId = null;
             document.onmousemove = null;
             document.onmouseup = null;
             
-            const id = fusionDragId;
             const f = window.appState.fusions.find(f => f.id === id);
-            fusionDragId = null;
 
-            if(!fusionDragMoved && fusionDragType === 'tubete') {
+            if(!moved && type === 'tubete') {
                 window.toggleTubete(id, e);
-            } else if(f) {
+            } else if(f && moved) {
                 await window.updateFusionInFirebase(f.id, { customX: f.customX, customY: f.customY, tubeteT: f.tubeteT });
             }
         };
@@ -2461,44 +2468,61 @@
                 const v1 = window.getPortVector(fusion.from, p1X, p1Y, p2X, p2Y);
                 let v2; if(isDeadEnd) { v2 = { x: -v1.x, y: -v1.y }; } else { v2 = window.getPortVector(fusion.to, p2X, p2Y, p1X, p1Y); }
                 
-                let d = ''; let midX, midY;
+                let d = ''; let midX, midY, angle;
+
+                // Calcula "stubs" (segmentos retos protetores) na saída de cada porta (40 pixels)
+                const stubDist = 40;
+                const s1X = p1X + v1.x * stubDist; const s1Y = p1Y + v1.y * stubDist;
+                const v2Actual = isDeadEnd ? { x: -v1.x, y: -v1.y } : v2;
+                const s2X = p2X + v2Actual.x * stubDist; const s2Y = p2Y + v2Actual.y * stubDist;
 
                 if (fusion.customX !== undefined && fusion.customY !== undefined) {
                     midX = fusion.customX;
                     midY = fusion.customY;
                     
                     if (window.appState.diagramLineMode === 'straight') {
-                        const m1X = (p1X + midX) / 2; const m2X = (midX + p2X) / 2;
-                        d = `M ${p1X} ${p1Y} L ${midX} ${p1Y} L ${midX} ${midY} L ${p2X} ${midY} L ${p2X} ${p2Y}`;
+                        // Roteamento Ortogonal com Stubs (Fica lindo nas saídas das cores)
+                        d = `M ${p1X} ${p1Y} L ${s1X} ${s1Y} L ${midX} ${s1Y} L ${midX} ${s2Y} L ${s2X} ${s2Y} L ${p2X} ${p2Y}`;
+                        let lenH = Math.abs(s2X - midX); let lenV = Math.abs(midY - s1Y);
+                        angle = lenV > lenH ? 90 : 0;
                     } else {
-                        let tx = p2X - p1X; let ty = p2Y - p1Y;
+                        // Spline com Stubs
+                        let tx = s2X - s1X; let ty = s2Y - s1Y;
                         let len = Math.hypot(tx, ty) || 1;
                         tx /= len; ty /= len; 
                         
-                        let dist1 = Math.hypot(midX - p1X, midY - p1Y); let dist2 = Math.hypot(p2X - midX, p2Y - midY);
+                        let dist1 = Math.hypot(midX - s1X, midY - s1Y); let dist2 = Math.hypot(s2X - midX, s2Y - midY);
                         let f1 = dist1 * 0.4; let f2 = dist2 * 0.4; 
                         
-                        let cp1X = p1X + v1.x * f1; let cp1Y = p1Y + v1.y * f1;
+                        let cp1X = s1X + v1.x * f1; let cp1Y = s1Y + v1.y * f1;
                         let mcp1X = midX - tx * f1; let mcp1Y = midY - ty * f1;
                         let mcp2X = midX + tx * f2; let mcp2Y = midY + ty * f2;
-                        let cp2X = p2X + (isDeadEnd ? -v1.x : v2.x) * f2; let cp2Y = p2Y + (isDeadEnd ? -v1.y : v2.y) * f2;
+                        let cp2X = s2X + v2Actual.x * f2; let cp2Y = s2Y + v2Actual.y * f2;
                         
-                        d = `M ${p1X} ${p1Y} C ${cp1X} ${cp1Y}, ${mcp1X} ${mcp1Y}, ${midX} ${midY} C ${mcp2X} ${mcp2Y}, ${cp2X} ${cp2Y}, ${p2X} ${p2Y}`;
+                        d = `M ${p1X} ${p1Y} L ${s1X} ${s1Y} C ${cp1X} ${cp1Y}, ${mcp1X} ${mcp1Y}, ${midX} ${midY} C ${mcp2X} ${mcp2Y}, ${cp2X} ${cp2Y}, ${s2X} ${s2Y} L ${p2X} ${p2Y}`;
+                        angle = Math.atan2(ty, tx) * (180 / Math.PI);
                     }
                 } else {
-                    const dist = Math.hypot(p2X - p1X, p2Y - p1Y); const offset = Math.max(120, dist / 2); 
+                    const dist = Math.hypot(p2X - p1X, p2Y - p1Y); const offset = Math.max(80, dist / 3); 
                     const cp1X = p1X + v1.x * offset; const cp1Y = p1Y + v1.y * offset;
-                    const cp2X = p2X + (isDeadEnd ? -v1.x : v2.x) * offset; const cp2Y = p2Y + (isDeadEnd ? -v1.y : v2.y) * offset;
+                    const cp2X = p2X + v2Actual.x * offset; const cp2Y = p2Y + v2Actual.y * offset;
                     
                     if (window.appState.diagramLineMode === 'straight') {
-                        const midX2 = (cp1X + cp2X) / 2; const midY2 = (cp1Y + cp2Y) / 2;
-                        if (Math.abs(cp1X - cp2X) > Math.abs(cp1Y - cp2Y)) {
-                            d = `M ${p1X} ${p1Y} L ${cp1X} ${cp1Y} L ${midX2} ${cp1Y} L ${midX2} ${cp2Y} L ${cp2X} ${cp2Y} L ${p2X} ${p2Y}`;
+                        const midX2 = (s1X + s2X) / 2; const midY2 = (s1Y + s2Y) / 2;
+                        if (Math.abs(s1X - s2X) > Math.abs(s1Y - s2Y)) {
+                            d = `M ${p1X} ${p1Y} L ${s1X} ${s1Y} L ${midX2} ${s1Y} L ${midX2} ${s2Y} L ${s2X} ${s2Y} L ${p2X} ${p2Y}`;
+                            midX = midX2; midY = midY2; angle = 90;
                         } else {
-                            d = `M ${p1X} ${p1Y} L ${cp1X} ${cp1Y} L ${cp1X} ${midY2} L ${cp2X} ${midY2} L ${cp2X} ${cp2Y} L ${p2X} ${p2Y}`;
+                            d = `M ${p1X} ${p1Y} L ${s1X} ${s1Y} L ${s1X} ${midY2} L ${s2X} ${midY2} L ${s2X} ${s2Y} L ${p2X} ${p2Y}`;
+                            midX = midX2; midY = midY2; angle = 0;
                         }
                     } else {
                         d = `M ${p1X} ${p1Y} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${p2X} ${p2Y}`;
+                        midX = 0.125 * p1X + 0.375 * cp1X + 0.375 * cp2X + 0.125 * p2X;
+                        midY = 0.125 * p1Y + 0.375 * cp1Y + 0.375 * cp2Y + 0.125 * p2Y;
+                        const dX = 3 * 0.25 * (cp1X - p1X) + 3 * 0.5 * (cp2X - cp1X) + 3 * 0.25 * (p2X - cp2X);
+                        const dY = 3 * 0.25 * (cp1Y - p1Y) + 3 * 0.5 * (cp2Y - cp1Y) + 3 * 0.25 * (p2Y - cp2Y);
+                        angle = Math.atan2(dY, dX) * (180 / Math.PI);
                     }
                 }
                 
@@ -2573,7 +2597,7 @@
                     g.appendChild(fusionGroup);
                 }
 
-                svg.appendChild(g);
+                // Remove double append to prevent duplicates
             });
         };
 
