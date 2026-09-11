@@ -2422,22 +2422,34 @@
                 if (fusion.customX !== undefined && fusion.customY !== undefined) {
                     midX = fusion.customX;
                     midY = fusion.customY;
-                    angle = 0; // Fixa a rotação no modo manual para ficar mais limpo
                     
                     if (window.appState.diagramLineMode === 'straight') {
-                        const m1X = (p1X + midX) / 2; const m2X = (midX + p2X) / 2;
-                        d = `M ${p1X} ${p1Y} L ${m1X} ${p1Y} L ${m1X} ${midY} L ${midX} ${midY} L ${m2X} ${midY} L ${m2X} ${p2Y} L ${p2X} ${p2Y}`;
+                        // Roteamento Ortogonal Dinâmico
+                        d = `M ${p1X} ${p1Y} L ${midX} ${p1Y} L ${midX} ${midY} L ${p2X} ${midY} L ${p2X} ${p2Y}`;
+                        // Calcula o lado predominante para "deitar" ou "ficar em pé" o tubete
+                        let lenH = Math.abs(p2X - midX); let lenV = Math.abs(midY - p1Y);
+                        angle = lenV > lenH ? 90 : 0;
                     } else {
-                        const off1 = Math.max(30, Math.abs(midX - p1X) * 0.5);
-                        const off2 = Math.max(30, Math.abs(p2X - midX) * 0.5);
-                        const cp1X = p1X + v1.x * off1; const cp1Y = p1Y + v1.y * off1;
-                        const cp2X = p2X + v2.x * off2; const cp2Y = p2Y + v2.y * off2;
-                        d = `M ${p1X} ${p1Y} C ${cp1X} ${cp1Y}, ${midX - 30} ${midY}, ${midX} ${midY} C ${midX + 30} ${midY}, ${cp2X} ${cp2Y}, ${p2X} ${p2Y}`;
+                        // Roteamento de Spline Duplo (Curva super orgânica e maleável)
+                        let tx = p2X - p1X; let ty = p2Y - p1Y;
+                        let len = Math.hypot(tx, ty) || 1;
+                        tx /= len; ty /= len; // Vetor Tangente Direcional
+                        
+                        let dist1 = Math.hypot(midX - p1X, midY - p1Y); let dist2 = Math.hypot(p2X - midX, p2Y - midY);
+                        let f1 = dist1 * 0.4; let f2 = dist2 * 0.4; // Intensidade da elasticidade
+                        
+                        let cp1X = p1X + v1.x * f1; let cp1Y = p1Y + v1.y * f1;
+                        let mcp1X = midX - tx * f1; let mcp1Y = midY - ty * f1;
+                        let mcp2X = midX + tx * f2; let mcp2Y = midY + ty * f2;
+                        let cp2X = p2X + (isDeadEnd ? -v1.x : v2.x) * f2; let cp2Y = p2Y + (isDeadEnd ? -v1.y : v2.y) * f2;
+                        
+                        d = `M ${p1X} ${p1Y} C ${cp1X} ${cp1Y}, ${mcp1X} ${mcp1Y}, ${midX} ${midY} C ${mcp2X} ${mcp2Y}, ${cp2X} ${cp2Y}, ${p2X} ${p2Y}`;
+                        angle = Math.atan2(ty, tx) * (180 / Math.PI); // Tubete obedece precisamente a inclinação da curva
                     }
                 } else {
                     const dist = Math.hypot(p2X - p1X, p2Y - p1Y); const offset = Math.max(120, dist / 2); 
                     const cp1X = p1X + v1.x * offset; const cp1Y = p1Y + v1.y * offset;
-                    const cp2X = p2X + v2.x * offset; const cp2Y = p2Y + v2.y * offset;
+                    const cp2X = p2X + (isDeadEnd ? -v1.x : v2.x) * offset; const cp2Y = p2Y + (isDeadEnd ? -v1.y : v2.y) * offset;
                     
                     if (window.appState.diagramLineMode === 'straight') {
                         const midX2 = (cp1X + cp2X) / 2; const midY2 = (cp1Y + cp2Y) / 2;
@@ -2474,7 +2486,11 @@
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); 
                 path.setAttribute('d', d); path.setAttribute('stroke', `url(#${gradId})`); path.setAttribute('stroke-width', '4'); path.setAttribute('fill', 'none'); path.setAttribute('stroke-linecap', 'round'); 
                 path.classList.add('fusion-line-clickable');
-                path.onmousemove = function(e) { let trash = document.getElementById('floating-trash'); if(!trash) { trash = document.createElement('div'); trash.id = 'floating-trash'; trash.innerHTML = '<i class="fa-solid fa-trash"></i>'; trash.style = 'position:fixed; background:#ef4444; color:white; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; cursor:pointer; z-index:99999; box-shadow:0 4px 6px rgba(0,0,0,0.3);'; document.body.appendChild(trash); } trash.style.display = 'flex'; trash.style.left = (e.clientX + 15) + 'px'; trash.style.top = (e.clientY - 15) + 'px'; trash.onmouseleave = () => trash.style.display = 'none'; trash.onclick = () => { trash.style.display = 'none'; window.deletarFusao(fusion.id); }; };
+                path.onmousedown = (e) => { 
+                    const trash = document.getElementById('floating-trash'); if(trash) trash.style.display = 'none';
+                    window.startFusionNodeDragCustom(e, fusion.id); 
+                };
+                path.onmousemove = function(e) { if(draggedTubeteId) return; let trash = document.getElementById('floating-trash'); if(!trash) { trash = document.createElement('div'); trash.id = 'floating-trash'; trash.innerHTML = '<i class="fa-solid fa-trash"></i>'; trash.style = 'position:fixed; background:#ef4444; color:white; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; cursor:pointer; z-index:99999; box-shadow:0 4px 6px rgba(0,0,0,0.3);'; document.body.appendChild(trash); } trash.style.display = 'flex'; trash.style.left = (e.clientX + 15) + 'px'; trash.style.top = (e.clientY - 15) + 'px'; trash.onmouseleave = () => trash.style.display = 'none'; trash.onclick = () => { trash.style.display = 'none'; window.deletarFusao(fusion.id); }; };
                 path.onmouseleave = function(e) { setTimeout(() => { const trash = document.getElementById('floating-trash'); if(trash && !trash.matches(':hover')) trash.style.display = 'none'; }, 100); };
                 
                 g.appendChild(path);
