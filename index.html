@@ -497,6 +497,10 @@
             <button class="bg-slate-800 hover:bg-slate-700 text-white font-bold h-12 px-5 rounded-xl shadow-lg transition-all flex items-center gap-2 hover:-translate-y-0.5" onclick="window.voltarESalvar()" title="Salvar e Voltar">
                 <i class="fa-solid fa-arrow-left"></i> Voltar
             </button>
+            <!-- NOVO BOTÃO DESFAZER NO MAPA -->
+            <button class="btn-undo-action bg-red-50 hover:bg-red-100 text-red-600 font-bold h-12 px-4 rounded-xl shadow-sm transition-all items-center gap-2 border border-red-200" onclick="window.desfazerAcao()" style="display: none;" title="Desfazer Última Ação">
+                <i class="fa-solid fa-rotate-left"></i> <span class="hidden md:inline">Desfazer</span>
+            </button>
             <div class="search-bar">
                 <i class="fa-solid fa-magnifying-glass text-gray-400 mr-2"></i>
                 <input type="text" id="search-input" placeholder="Buscar Coordenadas / Endereço...">
@@ -677,6 +681,8 @@
                 <button class="diag-btn font-bold text-blue-600" onclick="window.addSplitterToDiagram('1x8')"><i class="fa-solid fa-sitemap"></i> 1x8</button>
                 <button class="diag-btn font-bold text-blue-600" onclick="window.addSplitterToDiagram('1x16')"><i class="fa-solid fa-sitemap"></i> 1x16</button>
                 <button class="diag-btn font-bold text-purple-600" id="btn-toggle-line-mode" onclick="window.toggleLineMode()"><i class="fa-solid fa-bezier-curve"></i> Linhas Retas</button>
+                <!-- NOVO BOTÃO DESFAZER NO DIAGRAMA -->
+                <button class="btn-undo-action diag-btn font-bold text-red-600 border-red-200 bg-red-50 hover:bg-red-100" onclick="window.desfazerAcao()" style="display: none;" title="Desfazer Última Ação"><i class="fa-solid fa-rotate-left"></i> Desfazer</button>
                 <button class="diag-btn-primary" onclick="window.showToast('Salvo!', 'sucesso')"><i class="fa-solid fa-floppy-disk"></i></button>
             </div>
         </div>
@@ -704,11 +710,6 @@
     <div id="inside-plant-view"><div id="diagram-content-isp"></div></div>
     <div id="toast-container"></div>
 
-    <!-- BOTÃO DESFAZER FLUTUANTE -->
-    <button id="btn-undo" onclick="window.desfazerAcao()" style="display: none; position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 24px; border-radius: 30px; font-weight: 800; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 9999999; border: 2px solid #3b82f6; align-items: center; gap: 8px;">
-        <i class="fa-solid fa-rotate-left text-blue-400"></i> Desfazer Ação
-    </button>
-
 <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -722,9 +723,9 @@
         
         window.registrarUndo = function(action) {
             window.appState.undoStack.push(action);
-            if(window.appState.undoStack.length > 10) window.appState.undoStack.shift(); // Guarda as últimas 10
-            const btn = document.getElementById('btn-undo');
-            if(btn) btn.style.display = 'flex';
+            if(window.appState.undoStack.length > 10) window.appState.undoStack.shift(); 
+            // Mostra todos os botões de desfazer (do mapa e do diagrama)
+            document.querySelectorAll('.btn-undo-action').forEach(btn => btn.style.display = 'flex');
         };
 
         window.desfazerAcao = async function() {
@@ -732,10 +733,11 @@
             if(!action) return;
             
             if (window.appState.undoStack.length === 0) {
-                document.getElementById('btn-undo').style.display = 'none';
+                // Esconde todos os botões se não tiver mais o que desfazer
+                document.querySelectorAll('.btn-undo-action').forEach(btn => btn.style.display = 'none');
             }
 
-            window.showToast("Desfazendo...", "info");
+            window.showToast("Desfazendo ação...", "info");
             try {
                 await action.restore();
                 window.showToast("Ação desfeita com sucesso!", "sucesso");
