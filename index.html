@@ -703,10 +703,50 @@
 
     <div id="inside-plant-view"><div id="diagram-content-isp"></div></div>
     <div id="toast-container"></div>
+
+    <!-- BOTÃO DESFAZER FLUTUANTE -->
+    <button id="btn-undo" onclick="window.desfazerAcao()" style="display: none; position: fixed; bottom: 100px; left: 30px; background: #334155; color: white; padding: 12px 20px; border-radius: 30px; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 10000; transition: all 0.2s; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-rotate-left"></i> Desfazer
+    </button>
+
 <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ==========================================
+        // SISTEMA GLOBAL DE DESFAZER (UNDO)
+        // ==========================================
+        window.appState = window.appState || {};
+        window.appState.undoStack = [];
+        
+        window.registrarUndo = function(action) {
+            window.appState.undoStack.push(action);
+            if(window.appState.undoStack.length > 10) window.appState.undoStack.shift(); // Memória das últimas 10 ações
+            const btn = document.getElementById('btn-undo');
+            if(btn) btn.style.display = 'flex';
+        };
+
+        window.desfazerAcao = async function() {
+            const action = window.appState.undoStack.pop();
+            if(!action) return;
+            
+            if (window.appState.undoStack.length === 0) {
+                document.getElementById('btn-undo').style.display = 'none';
+            }
+
+            window.showToast("Desfazendo ação...", "info");
+            try {
+                await action.restore();
+                window.showToast("Ação desfeita com sucesso!", "sucesso");
+                if (document.getElementById('diagram-view').style.display === 'flex') {
+                    window.openCanvasDiagram();
+                }
+            } catch (e) {
+                console.error(e);
+                window.showToast("Erro ao desfazer.", "erro");
+            }
+        };
 
         // ==========================================
         // 0. SUPORTE TOUCH PARA CELULARES E TABLETS (POLYFILL)
@@ -840,7 +880,24 @@
         window.promptDeleteSelectedCable = function() {
             const c = window.selectedCableForModal;
             window.showConfirm("Excluir Cabo", `Tem certeza que deseja excluir o cabo "${c.name}"?`, "Excluir Definitivamente", async () => {
+                // Salva as fusões que serão perdidas
+                const cableFusions = window.appState.fusions.filter(f => f.from.includes(`port-${c.id}-`) || f.to.includes(`port-${c.id}-`));
+                
                 await window.deleteCableFromFirebase(c.id);
+                for(let f of cableFusions) { await deleteDoc(getDocPath('fusions', f.id)); } // Remove fusões órfãs
+                
+                // Registra o Desfazer
+                window.registrarUndo({
+                    restore: async () => {
+                        let cData = {...c}; delete cData.id;
+                        await setDoc(doc(db, 'upperx_cables', c.id), cData); // Recria o cabo
+                        for(let f of cableFusions) {
+                            let fData = {...f}; delete fData.id;
+                            await setDoc(doc(db, 'upperx_fusions', f.id), fData); // Recria as fusões
+                        }
+                    }
+                });
+
                 window.showToast("Cabo excluído.", "sucesso");
                 document.getElementById('cable-info-modal').style.display = 'none';
                 if(document.getElementById('diagram-view').style.display === 'flex') window.openCanvasDiagram();
@@ -1043,11 +1100,23 @@
         
         window.deleteOLT = async function(id) {
             window.showConfirm("Remover OLT", "As fusões conectadas serão perdidas. Continuar?", "Excluir OLT", async () => {
+                const olt = window.appState.olts.find(x => x.id === id);
+                const connectedFusions = window.appState.fusions.filter(f => f.from.includes(id) || f.to.includes(id));
                 if(db && auth && auth.currentUser && !id.startsWith('local_')) { 
                     try {
                         await deleteDoc(getDocPath('olts', id)); 
-                        const fusions = window.appState.fusions.filter(f => f.from.includes(id) || f.to.includes(id)); 
-                        for(let f of fusions) await deleteDoc(getDocPath('fusions', f.id)); 
+                        for(let f of connectedFusions) await deleteDoc(getDocPath('fusions', f.id)); 
+                        
+                        window.registrarUndo({
+                            restore: async () => {
+                                let oData = {...olt}; delete oData.id;
+                                await setDoc(doc(db, 'upperx_olts', olt.id), oData);
+                                for(let f of connectedFusions) {
+                                    let fData = {...f}; delete fData.id;
+                                    await setDoc(doc(db, 'upperx_fusions', f.id), fData);
+                                }
+                            }
+                        });
                     } catch(e) { console.error(e); }
                 } else { 
                     window.appState.olts = window.appState.olts.filter(s => s.id !== id); 
@@ -1063,11 +1132,23 @@
         window.updateDIOInFirebase = async (id, data) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.dios.findIndex(s=>s.id===id); if(idx>-1) window.appState.dios[idx] = {...window.appState.dios[idx], ...data}; window.openCanvasDiagram(); return; } try { await updateDoc(getDocPath('dios', id), data); } catch(e) { } };
         window.deleteDIO = async function(id) {
             window.showConfirm("Remover DIO", "As fusões conectadas serão perdidas. Continuar?", "Excluir DIO", async () => {
+                const dio = window.appState.dios.find(x => x.id === id);
+                const connectedFusions = window.appState.fusions.filter(f => f.from.includes(id) || f.to.includes(id));
                 if(db && auth && auth.currentUser && !id.startsWith('local_')) { 
                     try {
                         await deleteDoc(getDocPath('dios', id)); 
-                        const fusions = window.appState.fusions.filter(f => f.from.includes(id) || f.to.includes(id)); 
-                        for(let f of fusions) await deleteDoc(getDocPath('fusions', f.id)); 
+                        for(let f of connectedFusions) await deleteDoc(getDocPath('fusions', f.id)); 
+                        
+                        window.registrarUndo({
+                            restore: async () => {
+                                let dData = {...dio}; delete dData.id;
+                                await setDoc(doc(db, 'upperx_dios', dio.id), dData);
+                                for(let f of connectedFusions) {
+                                    let fData = {...f}; delete fData.id;
+                                    await setDoc(doc(db, 'upperx_fusions', f.id), fData);
+                                }
+                            }
+                        });
                     } catch(e) { console.error(e); }
                 } else { 
                     window.appState.dios = window.appState.dios.filter(s => s.id !== id); 
@@ -1627,9 +1708,13 @@
         window.deleteSelectedNode = async function() { 
             window.showConfirm("Excluir Caixa", "Deseja remover esta caixa?", "Excluir", async () => {
                 const nId = window.appState.selectedNodeId; if (!nId) return; 
+                const nodeToRestore = window.appState.nodes.find(n => n.id === nId);
                 const connectedCables = window.appState.cables.filter(c => c.startNode === nId || c.endNode === nId); 
+                const fusionsToRestore = window.appState.fusions.filter(f => f.nodeId === nId || connectedCables.some(c => f.from.includes(`port-${c.id}-`) || f.to.includes(`port-${c.id}-`)));
                 
-                // CORREÇÃO BUG 2: Cura de Sangria (Junta cabos ao deletar a caixa)
+                let mergedCableIdToUndo = null;
+
+                // Cura de Sangria (Junta cabos ao deletar a caixa)
                 if(connectedCables.length === 2 && connectedCables[0].capacity === connectedCables[1].capacity) {
                     let c1 = connectedCables[0], c2 = connectedCables[1];
                     if(c1.startNode === nId && c2.endNode === nId) { let temp = c1; c1 = c2; c2 = temp; }
@@ -1647,10 +1732,11 @@
                         const mergedCableData = { projectId: c1.projectId, name: mergedName, capacity: c1.capacity, color: c1.color, startNode: c1.startNode, endNode: c2.endNode, path: newPath.map(p => ({lat: p[0], lng: p[1]})), diagram: diag };
                         
                         const newCableId = await window.saveCableToFirebase(mergedCableData);
+                        mergedCableIdToUndo = newCableId; // Grava para apagar depois
                         
                         const oldFusions = window.appState.fusions.filter(f => f.from.includes(`port-${c1.id}-`) || f.to.includes(`port-${c1.id}-`) || f.from.includes(`port-${c2.id}-`) || f.to.includes(`port-${c2.id}-`));
                         for(let f of oldFusions) {
-                            if(f.nodeId === nId) continue; // Ignora as fusões que serão apagadas com a caixa
+                            if(f.nodeId === nId) continue; 
                             let updates = {};
                             if(f.from.includes(`port-${c1.id}-`) || f.from.includes(`port-${c2.id}-`)) { let portNum = f.from.split('-').pop(); updates.from = `port-${newCableId}-${portNum}`; }
                             if(f.to.includes(`port-${c1.id}-`) || f.to.includes(`port-${c2.id}-`)) { let portNum = f.to.split('-').pop(); updates.to = `port-${newCableId}-${portNum}`; }
@@ -1664,6 +1750,16 @@
                 
                 await window.deleteNodeFromFirebase(nId); 
                 window.closeInfoCard(); window.showToast('Excluído do banco.', 'sucesso');
+
+                // Registra o Desfazer Gigante (Restaura a Caixa, os Cabos antigose as Fusões perdidas)
+                window.registrarUndo({
+                    restore: async () => {
+                        if (mergedCableIdToUndo) { await deleteDoc(doc(db, 'upperx_cables', mergedCableIdToUndo)); }
+                        if (nodeToRestore) { let data = {...nodeToRestore}; delete data.id; await setDoc(doc(db, 'upperx_nodes', nodeToRestore.id), data); }
+                        for(let c of connectedCables) { let data = {...c}; delete data.id; await setDoc(doc(db, 'upperx_cables', c.id), data); }
+                        for(let f of fusionsToRestore) { let data = {...f}; delete data.id; await setDoc(doc(db, 'upperx_fusions', f.id), data); }
+                    }
+                });
             });
         };
 
@@ -1796,11 +1892,23 @@
 
         window.deleteSplitter = async function(id) {
             window.showConfirm("Excluir Splitter", "Deseja excluir este splitter e perder as conexões dele?", "Excluir", async () => {
+                const sp = window.appState.splitters.find(x => x.id === id);
+                const connectedFusions = window.appState.fusions.filter(f => f.from.includes(id) || f.to.includes(id));
                 if(db && auth && auth.currentUser && !id.startsWith('local_')) { 
                     try {
                         await deleteDoc(getDocPath('splitters', id)); 
-                        const connectedFusions = window.appState.fusions.filter(f => f.from.includes(id) || f.to.includes(id));
                         for(let f of connectedFusions) { await deleteDoc(getDocPath('fusions', f.id)); }
+                        
+                        window.registrarUndo({
+                            restore: async () => {
+                                let spData = {...sp}; delete spData.id;
+                                await setDoc(doc(db, 'upperx_splitters', sp.id), spData);
+                                for(let f of connectedFusions) {
+                                    let fData = {...f}; delete fData.id;
+                                    await setDoc(doc(db, 'upperx_fusions', f.id), fData);
+                                }
+                            }
+                        });
                     } catch(e) { console.error(e); }
                 } else { 
                     window.appState.splitters = window.appState.splitters.filter(s => s.id !== id); 
@@ -1814,7 +1922,18 @@
 
         window.deletarFusao = async function(id) {
             window.showConfirm("Excluir Fusão", "Deseja romper esta conexão de fibra?", "Romper Fibra", async () => {
-                if(db && auth && auth.currentUser && !id.startsWith('local_')) { await deleteDoc(getDocPath('fusions', id)); } 
+                const f = window.appState.fusions.find(x => x.id === id);
+                if(db && auth && auth.currentUser && !id.startsWith('local_')) { 
+                    await deleteDoc(getDocPath('fusions', id)); 
+                    if(f) {
+                        window.registrarUndo({
+                            restore: async () => {
+                                let data = {...f}; delete data.id;
+                                await setDoc(doc(db, 'upperx_fusions', f.id), data);
+                            }
+                        });
+                    }
+                } 
                 else { window.appState.fusions = window.appState.fusions.filter(f => f.id !== id); }
                 window.showToast('Conexão excluída.', 'sucesso');
                 window.updateAllFusionLines();
