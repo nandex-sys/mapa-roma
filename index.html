@@ -325,6 +325,35 @@
 
         /* PAINEL DA TRENA (MEDIDA TOTAL) */
         #measure-panel { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #f97316; color: white; padding: 12px 24px; border-radius: 30px; font-weight: 800; font-size: 16px; box-shadow: 0 10px 25px -5px rgba(249,115,22, 0.4); display: none; align-items: center; gap: 10px; z-index: 10001; }
+
+        /* ================= RESPONSIVIDADE PARA CELULAR ================= */
+        @media (max-width: 768px) {
+            .home-sidebar { display: none; } /* Oculta sidebar principal no mobile */
+            .home-header { flex-direction: column; height: auto; padding: 20px; gap: 15px; align-items: flex-start; }
+            .top-action-bar { flex-direction: column; width: 100%; gap: 10px; }
+            .search-bar-dash { width: 100%; }
+            .project-card { width: 100%; }
+            
+            /* Ajustes Mapa */
+            .top-toolbar { left: 50% !important; top: 10px; width: 95%; flex-wrap: wrap; justify-content: center; }
+            .search-bar { width: 100%; max-width: 100%; }
+            .tools-group { overflow-x: auto; width: 100%; justify-content: flex-start; }
+            .right-toolbar { top: 130px; right: 10px; transform: none; }
+            .workspace-sidebar { display: none; } /* Oculta painel lateral de camadas */
+            .info-card { width: 90%; left: 5%; top: 100px; }
+            #inventory-panel { width: 90%; right: 5%; top: 100px; }
+            
+            /* Ajustes Diagrama de Fusões */
+            .diagram-toolbar { flex-wrap: wrap; height: auto; padding: 10px; gap: 10px; justify-content: center; }
+            .diag-tab-center { position: relative; left: auto; transform: none; width: 100%; justify-content: center; order: -1; }
+            .diag-tb-group { width: 100%; justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 5px; }
+            .diag-btn { flex-shrink: 0; }
+            
+            /* Modais em Geral */
+            .generic-modal-box { width: 90%; padding: 16px; }
+            .modal-content { width: 95%; }
+            .structure-grid { grid-template-columns: repeat(3, 1fr); }
+        }
     </style>
 </head>
 <body class="theme-light" onclick="window.hideContextMenu()">
@@ -680,6 +709,54 @@
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
+        // 0. SUPORTE TOUCH PARA CELULARES E TABLETS (POLYFILL)
+        // ==========================================
+        window.touchTimer = null;
+        window.touchToMouse = function(event) {
+            if (document.getElementById('diagram-view').style.display !== 'flex') return; // Atua só no Diagrama
+            if (event.touches && event.touches.length > 1) return; // Ignora se usar 2 dedos para zoom
+
+            var touch = event.changedTouches[0];
+            var type = "";
+
+            if (event.type === "touchstart") {
+                type = "mousedown";
+                // Timer para "Clique Longo" (Simula o botão direito do Mouse no celular)
+                window.touchTimer = setTimeout(() => {
+                    var contextEvent = new MouseEvent("contextmenu", {
+                        bubbles: true, cancelable: true, view: window, detail: 1,
+                        screenX: touch.screenX, screenY: touch.screenY, clientX: touch.clientX, clientY: touch.clientY, button: 2
+                    });
+                    touch.target.dispatchEvent(contextEvent);
+                }, 600); // Segurou por 600ms = botão direito
+            } else if (event.type === "touchmove") {
+                type = "mousemove";
+                clearTimeout(window.touchTimer); // Cancela o botão direito se arrastar
+            } else if (event.type === "touchend") {
+                type = "mouseup";
+                clearTimeout(window.touchTimer); // Cancela se soltar rápido
+            } else return;
+
+            var simulatedEvent = new MouseEvent(type, {
+                bubbles: true, cancelable: true, view: window, detail: 1,
+                screenX: touch.screenX, screenY: touch.screenY, clientX: touch.clientX, clientY: touch.clientY, button: 0
+            });
+
+            // Descobre se tocou em uma fibra, tubete ou caixa (elementos arrastáveis)
+            let isInteractive = event.target.closest('.cable-block-info, .sp-body-svg, .fiber-port, .sp-port, .fusion-line-clickable') || window.draggedBlock || window.fusionDragId || window.appState.isDraggingFusion;
+            
+            if (isInteractive && event.cancelable) {
+                event.preventDefault(); // Trava a tela do celular para não rolar ou dar zoom acidentalmente enquanto funde
+            }
+
+            touch.target.dispatchEvent(simulatedEvent);
+        };
+
+        document.addEventListener("touchstart", window.touchToMouse, {passive: false});
+        document.addEventListener("touchmove", window.touchToMouse, {passive: false});
+        document.addEventListener("touchend", window.touchToMouse, {passive: false});
+
+        // ==========================================
         // 1. ESTADO GLOBAL E CÁLCULO DE METRAGEM
         // ==========================================
         window.appState = {
@@ -849,7 +926,9 @@
             e.preventDefault(); e.stopPropagation();
             window.activeContextMenuId = id; window.activeContextMenuType = type;
             const menu = document.getElementById('c-menu');
-            menu.style.left = e.pageX + 'px'; menu.style.top = e.pageY + 'px'; menu.style.display = 'block';
+            let px = e.pageX || (e.clientX + window.scrollX);
+            let py = e.pageY || (e.clientY + window.scrollY);
+            menu.style.left = px + 'px'; menu.style.top = py + 'px'; menu.style.display = 'block';
         };
         
         window.hideContextMenu = function() { const menu = document.getElementById('c-menu'); if(menu) menu.style.display = 'none'; };
