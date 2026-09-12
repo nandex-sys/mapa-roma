@@ -497,10 +497,6 @@
             <button class="bg-slate-800 hover:bg-slate-700 text-white font-bold h-12 px-5 rounded-xl shadow-lg transition-all flex items-center gap-2 hover:-translate-y-0.5" onclick="window.voltarESalvar()" title="Salvar e Voltar">
                 <i class="fa-solid fa-arrow-left"></i> Voltar
             </button>
-            <!-- NOVO BOTÃO DESFAZER NO MAPA -->
-            <button class="btn-undo-action bg-red-50 hover:bg-red-100 text-red-600 font-bold h-12 px-4 rounded-xl shadow-sm transition-all items-center gap-2 border border-red-200" onclick="window.desfazerAcao()" style="display: none;" title="Desfazer Última Ação">
-                <i class="fa-solid fa-rotate-left"></i> <span class="hidden md:inline">Desfazer</span>
-            </button>
             <div class="search-bar">
                 <i class="fa-solid fa-magnifying-glass text-gray-400 mr-2"></i>
                 <input type="text" id="search-input" placeholder="Buscar Coordenadas / Endereço...">
@@ -514,13 +510,11 @@
                 <button class="tool-btn" id="btn-cabo" onclick="window.openModal('cabo')"><i class="fa-solid fa-share-nodes"></i> CABO</button>
                 <div class="w-px h-6 bg-gray-200 mx-1"></div>
                 <button class="tool-btn" id="btn-mover" onclick="window.setMode('move')"><i class="fa-solid fa-arrows-up-down-left-right"></i> MOVER</button>
-                <!-- MENU DE MEDIÇÃO COM OPÇÕES -->
                 <div class="w-px h-6 bg-gray-200 mx-1"></div>
                 <div style="position: relative; display: inline-block;">
                     <button class="tool-btn" id="btn-medir" onclick="document.getElementById('measure-menu').style.display = document.getElementById('measure-menu').style.display === 'flex' ? 'none' : 'flex';">
                         <i class="fa-solid fa-ruler"></i> MEDIR <i class="fa-solid fa-chevron-down text-[10px] ml-1"></i>
                     </button>
-                    <!-- Caixinha que desce -->
                     <div id="measure-menu" style="display: none; position: absolute; top: 100%; left: 0; margin-top: 4px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); flex-direction: column; width: 170px; z-index: 2000; overflow: hidden;">
                         <button class="tool-btn" style="width: 100%; border-radius: 0; border-bottom: 1px solid #f3f4f6; justify-content: flex-start;" onclick="document.getElementById('measure-menu').style.display='none'; window.setMode('measure_cable')">
                             <i class="fa-solid fa-share-nodes text-blue-500"></i> Somar Cabos
@@ -530,6 +524,11 @@
                         </button>
                     </div>
                 </div>
+                <div class="w-px h-6 bg-gray-200 mx-1"></div>
+                <!-- NOVO BOTÃO DESFAZER NO MAPA (Lado do Medir) -->
+                <button class="tool-btn btn-undo-action opacity-50 cursor-not-allowed" onclick="window.desfazerAcao()" title="Desfazer Ação" style="color: #ef4444;">
+                    <i class="fa-solid fa-rotate-left"></i> DESFAZER
+                </button>
             </div>
         </div>
 
@@ -682,7 +681,7 @@
                 <button class="diag-btn font-bold text-blue-600" onclick="window.addSplitterToDiagram('1x16')"><i class="fa-solid fa-sitemap"></i> 1x16</button>
                 <button class="diag-btn font-bold text-purple-600" id="btn-toggle-line-mode" onclick="window.toggleLineMode()"><i class="fa-solid fa-bezier-curve"></i> Linhas Retas</button>
                 <!-- NOVO BOTÃO DESFAZER NO DIAGRAMA -->
-                <button class="btn-undo-action diag-btn font-bold text-red-600 border-red-200 bg-red-50 hover:bg-red-100" onclick="window.desfazerAcao()" style="display: none;" title="Desfazer Última Ação"><i class="fa-solid fa-rotate-left"></i> Desfazer</button>
+                <button class="btn-undo-action diag-btn font-bold text-red-600 border-red-200 bg-red-50 opacity-50 cursor-not-allowed" onclick="window.desfazerAcao()" title="Desfazer Última Ação"><i class="fa-solid fa-rotate-left"></i> Desfazer</button>
                 <button class="diag-btn-primary" onclick="window.showToast('Salvo!', 'sucesso')"><i class="fa-solid fa-floppy-disk"></i></button>
             </div>
         </div>
@@ -721,21 +720,29 @@
         window.appState = window.appState || {};
         window.appState.undoStack = [];
         
+        window.updateUndoButtonsState = function() {
+            const hasActions = window.appState.undoStack.length > 0;
+            document.querySelectorAll('.btn-undo-action').forEach(btn => {
+                if (hasActions) {
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    btn.classList.add('hover:bg-red-100');
+                } else {
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    btn.classList.remove('hover:bg-red-100');
+                }
+            });
+        };
+
         window.registrarUndo = function(action) {
             window.appState.undoStack.push(action);
             if(window.appState.undoStack.length > 10) window.appState.undoStack.shift(); 
-            // Mostra todos os botões de desfazer (do mapa e do diagrama)
-            document.querySelectorAll('.btn-undo-action').forEach(btn => btn.style.display = 'flex');
+            window.updateUndoButtonsState();
         };
 
         window.desfazerAcao = async function() {
+            if(window.appState.undoStack.length === 0) return;
             const action = window.appState.undoStack.pop();
-            if(!action) return;
-            
-            if (window.appState.undoStack.length === 0) {
-                // Esconde todos os botões se não tiver mais o que desfazer
-                document.querySelectorAll('.btn-undo-action').forEach(btn => btn.style.display = 'none');
-            }
+            window.updateUndoButtonsState();
 
             window.showToast("Desfazendo ação...", "info");
             try {
