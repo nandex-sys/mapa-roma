@@ -2454,9 +2454,11 @@
             
             const f = window.appState.fusions.find(f => f.id === id);
 
-            // CORREÇÃO: Garante que clicar no tubete não envie lixo pro Firebase que quebre outras linhas
             if(!moved && type === 'tubete') {
                 window.toggleTubete(id, e);
+            } else if (!moved && type === 'line') {
+                // NOVIDADE: Toque rápido na linha deleta a fusão! (Perfeito pro celular)
+                window.deletarFusao(id);
             } else if(f && moved) {
                 let updateData = { tubeteT: f.tubeteT };
                 if (f.customX !== undefined) {
@@ -2473,7 +2475,20 @@
             const isOccupied = window.appState.fusions.some(f => f.nodeId === window.appState.selectedNodeId && (f.from === portId || f.to === portId));
             if(isOccupied) { window.showToast('Erro: Porta já conectada!', 'erro'); return; }
 
-            window.appState.isDraggingFusion = true; window.appState.fusionStartPort = portId; 
+            // NOVIDADE: Verifica se já tinha clicado em outra porta (Clique para Conectar)
+            if (window.appState.fusionClickMode && window.appState.fusionClickMode !== portId) {
+                window.saveFusionToFirebase({ nodeId: window.appState.selectedNodeId, from: window.appState.fusionClickMode, to: portId });
+                window.showToast('Fusão conectada!', 'sucesso');
+                window.appState.fusionClickMode = null;
+                window.appState.isDraggingFusion = false;
+                document.getElementById('active-fusion-line').setAttribute('d', '');
+                return; 
+            }
+
+            window.appState.isDraggingFusion = true; 
+            window.appState.fusionStartPort = portId; 
+            window.appState.fusionClickMode = portId; // Ativa o modo de clique pendente
+            
             const port = document.getElementById(portId); const portRect = port.getBoundingClientRect(); const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const zoom = window.appState.diagramZoom || 1;
             
             let pX = (portRect.left - canvasRect.left + (portRect.width/2)) / zoom;
@@ -2493,8 +2508,14 @@
             let p1X = (r1.left - canvasRect.left + (r1.width/2)) / zoom; let p1Y = (r1.top - canvasRect.top + (r1.height/2)) / zoom;
             let p2X = (e.clientX - canvasRect.left) / zoom; let p2Y = (e.clientY - canvasRect.top) / zoom; 
             
+            // Se o mouse moveu muito, desativa o "modo clique" e vira "modo arrasto" normal
+            if(window.appState.fusionClickMode) {
+                let dist = Math.hypot(p2X - window.appState.fusionStartCoords.x, p2Y - window.appState.fusionStartCoords.y);
+                if (dist > 10) window.appState.fusionClickMode = null;
+            }
+
             const v1 = window.getPortVector(window.appState.fusionStartPort, p1X, p1Y, p2X, p2Y);
-            const dist = Math.hypot(p2X - p1X, p2Y - p1Y); const offset = Math.max(120, dist / 2); 
+            const distPath = Math.hypot(p2X - p1X, p2Y - p1Y); const offset = Math.max(120, distPath / 2); 
             
             const cp1X = p1X + v1.x * offset; const cp1Y = p1Y + v1.y * offset;
             const cp2X = p2X - v1.x * offset; const cp2Y = p2Y - v1.y * offset;
@@ -2519,23 +2540,40 @@
             const canvasRect = document.getElementById('diagram-canvas').getBoundingClientRect(); const canvasContainer = document.getElementById('diagram-canvas').parentElement; const zoom = window.appState.diagramZoom || 1;
             const dropX = (e.clientX - canvasRect.left + canvasContainer.scrollLeft) / zoom; const dropY = (e.clientY - canvasRect.top + canvasContainer.scrollTop) / zoom;
             
+            // Se está no modo "clique", soltar no vazio apenas cancela (não faz fibra morta)
+            if(window.appState.fusionClickMode) {
+                window.appState.isDraggingFusion = false;
+                window.appState.fusionClickMode = null;
+                document.getElementById('active-fusion-line').setAttribute('d', '');
+                return;
+            }
+
             await window.saveFusionToFirebase({ nodeId: window.appState.selectedNodeId, from: window.appState.fusionStartPort, to: 'dead_end', deadX: dropX, deadY: dropY });
             window.showToast('Fibra Morta separada!', 'info');
             
-            window.appState.isDraggingFusion = false; document.getElementById('active-fusion-line').setAttribute('d', ''); 
+            window.appState.isDraggingFusion = false; 
+            document.getElementById('active-fusion-line').setAttribute('d', ''); 
         };
         
         window.endFusionDrag = async function(e, targetPortId) { 
             e.stopPropagation(); if(!window.appState.isDraggingFusion) return; 
             
             if(window.appState.fusionStartPort !== targetPortId) { 
-                const existing = window.appState.fusions.find(f => (f.nodeId === window.appState.selectedNodeId) && (f.from === targetPortId || f.to === targetPortId || f.from === window.appState.fusionStartPort || f.to === window.appState.fusionStartPort));
+                const existing = window.appState.fusions.some(f => (f.nodeId === window.appState.selectedNodeId) && (f.from === targetPortId || f.to === targetPortId));
                 if(existing) { window.showToast('Porta ocupada.', 'aviso'); } else {
                     await window.saveFusionToFirebase({ nodeId: window.appState.selectedNodeId, from: window.appState.fusionStartPort, to: targetPortId });
                     window.showToast('Fusão salva na nuvem!', 'sucesso'); 
                 }
-            } 
-            window.appState.isDraggingFusion = false; document.getElementById('active-fusion-line').setAttribute('d', ''); 
+                window.appState.isDraggingFusion = false; 
+                window.appState.fusionClickMode = null;
+                document.getElementById('active-fusion-line').setAttribute('d', ''); 
+            } else {
+                // Clique simples detectado (mouse subiu na mesma porta)
+                // Mantemos o isDragging = false, ele espera o próximo clique na segunda porta!
+                window.appState.isDraggingFusion = false; 
+                window.showToast('Toque na segunda porta para ligar.', 'info');
+                return; // Impede que limpe a variável
+            }
             window.calculateNetworkPower(); // Recalcula Luz ao completar fusão
         };
 
