@@ -705,8 +705,8 @@
     <div id="toast-container"></div>
 
     <!-- BOTÃO DESFAZER FLUTUANTE -->
-    <button id="btn-undo" onclick="window.desfazerAcao()" style="display: none; position: fixed; bottom: 100px; left: 30px; background: #334155; color: white; padding: 12px 20px; border-radius: 30px; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 10000; transition: all 0.2s; align-items: center; gap: 8px;">
-        <i class="fa-solid fa-rotate-left"></i> Desfazer
+    <button id="btn-undo" onclick="window.desfazerAcao()" style="display: none; position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 24px; border-radius: 30px; font-weight: 800; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 9999999; border: 2px solid #3b82f6; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-rotate-left text-blue-400"></i> Desfazer Ação
     </button>
 
 <script type="module">
@@ -722,7 +722,7 @@
         
         window.registrarUndo = function(action) {
             window.appState.undoStack.push(action);
-            if(window.appState.undoStack.length > 10) window.appState.undoStack.shift(); // Memória das últimas 10 ações
+            if(window.appState.undoStack.length > 10) window.appState.undoStack.shift(); // Guarda as últimas 10
             const btn = document.getElementById('btn-undo');
             if(btn) btn.style.display = 'flex';
         };
@@ -735,10 +735,11 @@
                 document.getElementById('btn-undo').style.display = 'none';
             }
 
-            window.showToast("Desfazendo ação...", "info");
+            window.showToast("Desfazendo...", "info");
             try {
                 await action.restore();
                 window.showToast("Ação desfeita com sucesso!", "sucesso");
+                window.renderMap();
                 if (document.getElementById('diagram-view').style.display === 'flex') {
                     window.openCanvasDiagram();
                 }
@@ -1080,7 +1081,7 @@
 
         window.deleteCableFromFirebase = async (id) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { window.appState.cables = window.appState.cables.filter(c=>c.id!==id); window.renderMap(); return; } try { await deleteDoc(getDocPath('cables', id)); } catch(e) { window.appState.cables = window.appState.cables.filter(c=>c.id!==id); window.renderMap(); } };
         
-        window.saveFusionToFirebase = async (fusionData) => { if(!db || !auth || !auth.currentUser) { window.appState.fusions.push({id: 'local_'+Date.now(), ...fusionData}); window.updateAllFusionLines(); window.calculateNetworkPower(); return; } try { await addDoc(getCollectionPath('fusions'), fusionData); } catch(e) { window.appState.fusions.push({id: 'local_'+Date.now(), ...fusionData}); window.updateAllFusionLines(); window.calculateNetworkPower(); } };
+        window.saveFusionToFirebase = async (fusionData) => { if(!db || !auth || !auth.currentUser) { const id = 'local_'+Date.now(); window.appState.fusions.push({id, ...fusionData}); window.updateAllFusionLines(); window.calculateNetworkPower(); return id; } try { const docRef = await addDoc(getCollectionPath('fusions'), fusionData); return docRef.id; } catch(e) { const id = 'local_'+Date.now(); window.appState.fusions.push({id, ...fusionData}); window.updateAllFusionLines(); window.calculateNetworkPower(); return id; } };
         
         // Atualiza a fusão no firebase para persistir o Tubete clicado
         window.updateFusionInFirebase = async (id, data) => { 
@@ -1365,6 +1366,10 @@
                 const newId = await window.saveNodeToFirebase({ projectId: window.appState.currentProjectId, name: window.appState.nodeSetup.name, type: window.appState.nodeSetup.type, icon: window.appState.nodeSetup.icon, color: window.appState.nodeSetup.color, lat: e.latlng.lat, lng: e.latlng.lng, internal: internalState }); 
                 await window.checkAndSplitCable({ id: newId, lat: e.latlng.lat, lng: e.latlng.lng, name: window.appState.nodeSetup.name });
                 
+                window.registrarUndo({
+                    restore: async () => { await window.deleteNodeFromFirebase(newId); }
+                });
+                
                 let nextName = window.appState.nodeSetup.name;
                 do {
                     const match = nextName.match(/^(.*? )(\d+)(.*)$/); 
@@ -1402,7 +1407,8 @@
                         const firebasePath = window.appState.cablePath.map(coord => ({ lat: coord[0], lng: coord[1] })); 
                         const nodeA = window.appState.nodes.find(n => n.id === window.appState.cableStartNodeId);
                         const autoName = `${window.appState.cableSetup.capacity} FO - ${nodeA.name} sentido ${node.name}`;
-                        await window.saveCableToFirebase({ projectId: window.appState.currentProjectId, name: autoName, capacity: window.appState.cableSetup.capacity, color: window.appState.cableSetup.color, startNode: window.appState.cableStartNodeId, endNode: node.id, path: firebasePath }); 
+                        const newCableId = await window.saveCableToFirebase({ projectId: window.appState.currentProjectId, name: autoName, capacity: window.appState.cableSetup.capacity, color: window.appState.cableSetup.color, startNode: window.appState.cableStartNodeId, endNode: node.id, path: firebasePath }); 
+                        window.registrarUndo({ restore: async () => { await window.deleteCableFromFirebase(newCableId); } });
                         window.showToast(`Cabo finalizado!`, "sucesso"); window.setMode('view'); 
                     } 
                 } 
@@ -2596,7 +2602,9 @@
 
             // NOVIDADE: Verifica se já tinha clicado em outra porta (Clique para Conectar)
             if (window.appState.fusionClickMode && window.appState.fusionClickMode !== portId) {
-                window.saveFusionToFirebase({ nodeId: window.appState.selectedNodeId, from: window.appState.fusionClickMode, to: portId });
+                window.saveFusionToFirebase({ nodeId: window.appState.selectedNodeId, from: window.appState.fusionClickMode, to: portId }).then(newFusionId => {
+                    window.registrarUndo({ restore: async () => { if(db && auth && !newFusionId.startsWith('local_')) { await deleteDoc(doc(db, 'upperx_fusions', newFusionId)); } else { window.appState.fusions = window.appState.fusions.filter(f => f.id !== newFusionId); } window.openCanvasDiagram(); } });
+                });
                 window.showToast('Fusão conectada!', 'sucesso');
                 window.appState.fusionClickMode = null;
                 window.appState.isDraggingFusion = false;
@@ -2680,7 +2688,8 @@
             if(window.appState.fusionStartPort !== targetPortId) { 
                 const existing = window.appState.fusions.some(f => (f.nodeId === window.appState.selectedNodeId) && (f.from === targetPortId || f.to === targetPortId));
                 if(existing) { window.showToast('Porta ocupada.', 'aviso'); } else {
-                    await window.saveFusionToFirebase({ nodeId: window.appState.selectedNodeId, from: window.appState.fusionStartPort, to: targetPortId });
+                    const newFusionId = await window.saveFusionToFirebase({ nodeId: window.appState.selectedNodeId, from: window.appState.fusionStartPort, to: targetPortId });
+                    window.registrarUndo({ restore: async () => { if(db && auth && !newFusionId.startsWith('local_')) { await deleteDoc(doc(db, 'upperx_fusions', newFusionId)); } else { window.appState.fusions = window.appState.fusions.filter(f => f.id !== newFusionId); } window.openCanvasDiagram(); } });
                     window.showToast('Fusão salva na nuvem!', 'sucesso'); 
                 }
                 window.appState.isDraggingFusion = false; 
