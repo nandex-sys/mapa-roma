@@ -526,7 +526,7 @@
                 </div>
                 <div class="w-px h-6 bg-gray-200 mx-1"></div>
                 <!-- NOVO BOTÃO DESFAZER NO MAPA (Lado do Medir) -->
-                <button class="tool-btn btn-undo-action opacity-50 cursor-not-allowed" onclick="window.desfazerAcao()" title="Desfazer Ação" style="color: #ef4444;">
+                <button class="tool-btn btn-undo-action" onclick="window.desfazerAcao()" title="Desfazer Ação" style="color: #ef4444; opacity: 0.5; cursor: not-allowed; pointer-events: none; transition: all 0.3s;">
                     <i class="fa-solid fa-rotate-left"></i> DESFAZER
                 </button>
             </div>
@@ -681,7 +681,9 @@
                 <button class="diag-btn font-bold text-blue-600" onclick="window.addSplitterToDiagram('1x16')"><i class="fa-solid fa-sitemap"></i> 1x16</button>
                 <button class="diag-btn font-bold text-purple-600" id="btn-toggle-line-mode" onclick="window.toggleLineMode()"><i class="fa-solid fa-bezier-curve"></i> Linhas Retas</button>
                 <!-- NOVO BOTÃO DESFAZER NO DIAGRAMA -->
-                <button class="btn-undo-action diag-btn font-bold text-red-600 border-red-200 bg-red-50 opacity-50 cursor-not-allowed" onclick="window.desfazerAcao()" title="Desfazer Última Ação"><i class="fa-solid fa-rotate-left"></i> Desfazer</button>
+                <button class="btn-undo-action diag-btn font-bold text-red-600 border-red-200 bg-red-50" onclick="window.desfazerAcao()" title="Desfazer Última Ação" style="opacity: 0.5; cursor: not-allowed; pointer-events: none; transition: all 0.3s;">
+                    <i class="fa-solid fa-rotate-left"></i> Desfazer
+                </button>
                 <button class="diag-btn-primary" onclick="window.showToast('Salvo!', 'sucesso')"><i class="fa-solid fa-floppy-disk"></i></button>
             </div>
         </div>
@@ -721,16 +723,26 @@
         window.appState.undoStack = [];
 
         window.restaurarDocumento = async function(colecao, id, data) {
-            // ATUALIZAÇÃO IMEDIATA LOCAL: Isso impede o "bug da auto-cura" apagando o que foi desfeito
-            window.appState[colecao].push({id: id, ...data});
+            // FIREBASE ANTI-CRASH: Remove variáveis "undefined" (vazias) do objeto antes de salvar.
+            const cleanData = {};
+            Object.keys(data).forEach(key => {
+                if (data[key] !== undefined) cleanData[key] = data[key];
+            });
+
+            // Restaura na memória local na hora para atualizar o visual
+            window.appState[colecao].push({id: id, ...cleanData});
             
             if(typeof db !== 'undefined' && auth && auth.currentUser && !id.startsWith('local_')) {
-                await setDoc(doc(db, 'upperx_' + colecao, id), data);
+                try {
+                    await setDoc(doc(db, 'upperx_' + colecao, id), cleanData);
+                } catch(e) {
+                    console.error("Erro no Firebase ao Desfazer:", e);
+                }
             }
         };
 
         window.removerDocumento = async function(colecao, id) {
-            // REMOÇÃO IMEDIATA LOCAL
+            // Apaga da memória local na hora
             window.appState[colecao] = window.appState[colecao].filter(item => item.id !== id);
 
             if(typeof db !== 'undefined' && auth && auth.currentUser && !id.startsWith('local_')) {
@@ -742,15 +754,15 @@
             const hasActions = window.appState.undoStack.length > 0;
             document.querySelectorAll('.btn-undo-action').forEach(btn => {
                 if (hasActions) {
-                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                    btn.style.pointerEvents = 'auto'; // LIBERA O CLIQUE REAL
                     btn.classList.add('hover:bg-red-100');
-                    btn.style.pointerEvents = 'auto'; // Libera o clique real
-                    btn.disabled = false;
                 } else {
-                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                    btn.style.pointerEvents = 'none'; // BLOQUEIA CLIQUE FANTASMA
                     btn.classList.remove('hover:bg-red-100');
-                    btn.style.pointerEvents = 'none'; // Bloqueia totalmente o clique fantasma
-                    btn.disabled = true;
                 }
             });
         };
@@ -758,23 +770,24 @@
         window.registrarUndo = function(action) {
             window.appState.undoStack.push(action);
             if(window.appState.undoStack.length > 15) window.appState.undoStack.shift(); 
-            window.updateUndoButtonsState();
+            window.updateUndoButtonsState(); // Acende a luz do botão
         };
 
         window.desfazerAcao = async function() {
             if(window.appState.undoStack.length === 0) return;
             const action = window.appState.undoStack.pop();
-            window.updateUndoButtonsState();
+            window.updateUndoButtonsState(); // Apaga a luz do botão se não tiver mais nada
 
             window.showToast("Desfazendo ação...", "info");
             try {
                 await action.restore();
                 window.showToast("Ação desfeita com sucesso!", "sucesso");
                 
-                // Força o desenho local na hora
+                // Força atualização visual
                 window.renderMap();
                 if (document.getElementById('diagram-view').style.display === 'flex') {
                     window.openCanvasDiagram();
+                    window.updateAllFusionLines();
                     window.calculateNetworkPower();
                 }
             } catch (e) {
