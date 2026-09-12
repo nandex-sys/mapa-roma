@@ -715,27 +715,45 @@
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
-        // SISTEMA GLOBAL DE DESFAZER (UNDO)
+        // SISTEMA GLOBAL DE DESFAZER (UNDO) BLINDADO
         // ==========================================
         window.appState = window.appState || {};
         window.appState.undoStack = [];
-        
+
+        window.restaurarDocumento = async function(colecao, id, data) {
+            if(typeof db !== 'undefined' && auth && auth.currentUser && !id.startsWith('local_')) {
+                await setDoc(doc(db, 'upperx_' + colecao, id), data);
+            } else {
+                window.appState[colecao].push({id: id, ...data});
+            }
+        };
+
+        window.removerDocumento = async function(colecao, id) {
+            if(typeof db !== 'undefined' && auth && auth.currentUser && !id.startsWith('local_')) {
+                await deleteDoc(doc(db, 'upperx_' + colecao, id));
+            } else {
+                window.appState[colecao] = window.appState[colecao].filter(item => item.id !== id);
+            }
+        };
+
         window.updateUndoButtonsState = function() {
             const hasActions = window.appState.undoStack.length > 0;
             document.querySelectorAll('.btn-undo-action').forEach(btn => {
                 if (hasActions) {
                     btn.classList.remove('opacity-50', 'cursor-not-allowed');
                     btn.classList.add('hover:bg-red-100');
+                    btn.style.pointerEvents = 'auto'; // Agora bloqueia o clique real!
                 } else {
                     btn.classList.add('opacity-50', 'cursor-not-allowed');
                     btn.classList.remove('hover:bg-red-100');
+                    btn.style.pointerEvents = 'none'; // Impede o clique fantasma
                 }
             });
         };
 
         window.registrarUndo = function(action) {
             window.appState.undoStack.push(action);
-            if(window.appState.undoStack.length > 10) window.appState.undoStack.shift(); 
+            if(window.appState.undoStack.length > 15) window.appState.undoStack.shift(); 
             window.updateUndoButtonsState();
         };
 
@@ -751,6 +769,7 @@
                 window.renderMap();
                 if (document.getElementById('diagram-view').style.display === 'flex') {
                     window.openCanvasDiagram();
+                    window.calculateNetworkPower();
                 }
             } catch (e) {
                 console.error(e);
@@ -763,28 +782,27 @@
         // ==========================================
         window.touchTimer = null;
         window.touchToMouse = function(event) {
-            if (document.getElementById('diagram-view').style.display !== 'flex') return; // Atua só no Diagrama
-            if (event.touches && event.touches.length > 1) return; // Ignora se usar 2 dedos para zoom
+            if (document.getElementById('diagram-view').style.display !== 'flex') return; 
+            if (event.touches && event.touches.length > 1) return; 
 
             var touch = event.changedTouches[0];
             var type = "";
 
             if (event.type === "touchstart") {
                 type = "mousedown";
-                // Timer para "Clique Longo" (Simula o botão direito do Mouse no celular)
                 window.touchTimer = setTimeout(() => {
                     var contextEvent = new MouseEvent("contextmenu", {
                         bubbles: true, cancelable: true, view: window, detail: 1,
                         screenX: touch.screenX, screenY: touch.screenY, clientX: touch.clientX, clientY: touch.clientY, button: 2
                     });
                     touch.target.dispatchEvent(contextEvent);
-                }, 600); // Segurou por 600ms = botão direito
+                }, 600);
             } else if (event.type === "touchmove") {
                 type = "mousemove";
-                clearTimeout(window.touchTimer); // Cancela o botão direito se arrastar
+                clearTimeout(window.touchTimer); 
             } else if (event.type === "touchend") {
                 type = "mouseup";
-                clearTimeout(window.touchTimer); // Cancela se soltar rápido
+                clearTimeout(window.touchTimer); 
             } else return;
 
             var simulatedEvent = new MouseEvent(type, {
@@ -792,11 +810,10 @@
                 screenX: touch.screenX, screenY: touch.screenY, clientX: touch.clientX, clientY: touch.clientY, button: 0
             });
 
-            // Descobre se tocou em uma fibra, tubete ou caixa (elementos arrastáveis)
             let isInteractive = event.target.closest('.cable-block-info, .sp-body-svg, .fiber-port, .sp-port, .fusion-line-clickable') || window.draggedBlock || window.fusionDragId || window.appState.isDraggingFusion;
             
             if (isInteractive && event.cancelable) {
-                event.preventDefault(); // Trava a tela do celular para não rolar ou dar zoom acidentalmente enquanto funde
+                event.preventDefault(); 
             }
 
             touch.target.dispatchEvent(simulatedEvent);
@@ -816,7 +833,7 @@
             nodeSetup: { name: 'CEO 01', type: 'CEO', icon: 'fa-layer-group', color: '#f97316', splitter: null },
             cableSetup: { name: '', capacity: 12, color: '#3b82f6' },
             cablePath: [], cableStartNodeId: null, tempPolyline: null, snapNodePos: null,
-            measurePath: [], measureTooltip: null, // Ferramenta de medição
+            measurePath: [], measureTooltip: null, 
             isDraggingFusion: false, fusionStartPort: null, fusionStartCoords: {x:0, y:0},
             mapLayerType: 'street',
             visibleLayers: { 'CTO': true, 'CEO': true, 'POP / DC': true, 'CABOS': true, 'Prédio': true, 'Poste': true, 'Cliente': true, 'CTO AP': true, 'Problema': true, 'Reserva': true },
@@ -837,10 +854,10 @@
 
         const THEME_COLORS = ['#0ea5e9', '#1d4ed8', '#f97316', '#ef4444', '#22c55e', '#eab308', '#a855f7', '#ec4899', '#000000', '#737373', '#78350f'];
         const FIBER_COLORS = ['#22c55e', '#eab308', '#cbd5e1', '#3b82f6', '#ef4444', '#a855f7', '#78350f', '#ec4899', '#111827', '#64748b', '#f97316', '#06b6d4'];
-    // Fórmula de Haversine para cálculo de metragem no globo terrestre
+    
         window.calculateCableLength = function(path) {
             if(!path || path.length < 2) return 0;
-            const R = 6371; // Raio da Terra em km
+            const R = 6371; 
             let d = 0;
             for(let i = 0; i < path.length - 1; i++) {
                 let p1 = path[i]; let p2 = path[i+1];
@@ -852,7 +869,7 @@
                 let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
                 d += R * c;
             }
-            return d; // Retorna km
+            return d; 
         };
 
         window.activeCablePolyline = null;
@@ -890,20 +907,18 @@
         window.promptDeleteSelectedCable = function() {
             const c = window.selectedCableForModal;
             window.showConfirm("Excluir Cabo", `Tem certeza que deseja excluir o cabo "${c.name}"?`, "Excluir Definitivamente", async () => {
-                // Salva as fusões que serão perdidas
                 const cableFusions = window.appState.fusions.filter(f => f.from.includes(`port-${c.id}-`) || f.to.includes(`port-${c.id}-`));
                 
                 await window.deleteCableFromFirebase(c.id);
-                for(let f of cableFusions) { await deleteDoc(getDocPath('fusions', f.id)); } // Remove fusões órfãs
+                for(let f of cableFusions) { await window.removerDocumento('fusions', f.id); }
                 
-                // Registra o Desfazer
                 window.registrarUndo({
                     restore: async () => {
                         let cData = {...c}; delete cData.id;
-                        await setDoc(doc(db, 'upperx_cables', c.id), cData); // Recria o cabo
+                        await window.restaurarDocumento('cables', c.id, cData);
                         for(let f of cableFusions) {
                             let fData = {...f}; delete fData.id;
-                            await setDoc(doc(db, 'upperx_fusions', f.id), fData); // Recria as fusões
+                            await window.restaurarDocumento('fusions', f.id, fData);
                         }
                     }
                 });
@@ -912,24 +927,6 @@
                 document.getElementById('cable-info-modal').style.display = 'none';
                 if(document.getElementById('diagram-view').style.display === 'flex') window.openCanvasDiagram();
             });
-        };
-
-        // Fórmula de Haversine para cálculo de metragem no globo terrestre
-        window.calculateCableLength = function(path) {
-            if(!path || path.length < 2) return 0;
-            const R = 6371; // Raio da Terra em km
-            let d = 0;
-            for(let i = 0; i < path.length - 1; i++) {
-                let p1 = path[i]; let p2 = path[i+1];
-                let lat1 = (p1.lat !== undefined) ? p1.lat : p1[0]; let lon1 = (p1.lng !== undefined) ? p1.lng : p1[1];
-                let lat2 = (p2.lat !== undefined) ? p2.lat : p2[0]; let lon2 = (p2.lng !== undefined) ? p2.lng : p2[1];
-                let dLat = (lat2 - lat1) * Math.PI / 180;
-                let dLon = (lon2 - lon1) * Math.PI / 180;
-                let a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-                let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                d += R * c;
-            }
-            return d; // Retorna km
         };
 
         // ==========================================
@@ -1055,9 +1052,9 @@
         function fallbackToLocal() { document.getElementById('sync-status').innerText = 'MODO LOCAL (OFFLINE)'; document.getElementById('sync-dot').className = 'w-2 h-2 rounded-full bg-red-500'; window.appState.nodes = [ { id: 'n1', name: 'POP Central', type: 'POP / DC', icon: 'fa-server', color: '#111827', lat: -2.24455, lng: -49.50444, internal: {hasDIO:false, splitters:[]} }, { id: 'n2', name: 'CEO 01', type: 'CEO', icon: 'fa-layer-group', color: '#f97316', lat: -2.24500, lng: -49.50500, internal: {hasDIO:false, splitters:[]} }, { id: 'n3', name: 'CTO 01', type: 'CTO', icon: 'fa-box', color: '#f59e0b', lat: -2.24600, lng: -49.50600, internal: {hasDIO:false, splitters:[{type:'1x16'}]} } ]; window.appState.cables = [ { id: 'c1', name: 'Cabo Tronco', capacity: 12, color: '#f97316', startNode: 'n1', endNode: 'n2', path: [[-2.24455, -49.50444], [-2.24480, -49.50480], [-2.24500, -49.50500]]} ]; window.renderMap(); }
 
         window.saveNodeToFirebase = async (nodeData) => { 
-            if(!db || !auth || !auth.currentUser) { const id = 'local_'+Date.now(); window.appState.nodes.push({id, ...nodeData}); window.renderMap(); return id; } 
+            if(!db || !auth || !auth.currentUser) { const id = 'local_n_'+Date.now(); window.appState.nodes.push({id, ...nodeData}); window.renderMap(); return id; } 
             try { const docRef = await addDoc(getCollectionPath('nodes'), nodeData); return docRef.id; } 
-            catch(e) { const id = 'local_'+Date.now(); window.appState.nodes.push({id, ...nodeData}); window.renderMap(); return id; } 
+            catch(e) { const id = 'local_n_'+Date.now(); window.appState.nodes.push({id, ...nodeData}); window.renderMap(); return id; } 
         };
         window.updateNodeInFirebase = async (id, nodeData) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.nodes.findIndex(n=>n.id===id); if(idx>-1) window.appState.nodes[idx] = {...window.appState.nodes[idx], ...nodeData}; window.renderMap(); return; } try { await updateDoc(getDocPath('nodes', id), nodeData); } catch(e) { const idx = window.appState.nodes.findIndex(n=>n.id===id); if(idx>-1) window.appState.nodes[idx] = {...window.appState.nodes[idx], ...nodeData}; window.renderMap(); } };
         window.deleteNodeFromFirebase = async (id) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { window.appState.nodes = window.appState.nodes.filter(n=>n.id!==id); window.renderMap(); return; } try { await deleteDoc(getDocPath('nodes', id)); } catch(e) { window.appState.nodes = window.appState.nodes.filter(n=>n.id!==id); window.renderMap(); } };
@@ -1090,9 +1087,8 @@
 
         window.deleteCableFromFirebase = async (id) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { window.appState.cables = window.appState.cables.filter(c=>c.id!==id); window.renderMap(); return; } try { await deleteDoc(getDocPath('cables', id)); } catch(e) { window.appState.cables = window.appState.cables.filter(c=>c.id!==id); window.renderMap(); } };
         
-        window.saveFusionToFirebase = async (fusionData) => { if(!db || !auth || !auth.currentUser) { const id = 'local_'+Date.now(); window.appState.fusions.push({id, ...fusionData}); window.updateAllFusionLines(); window.calculateNetworkPower(); return id; } try { const docRef = await addDoc(getCollectionPath('fusions'), fusionData); return docRef.id; } catch(e) { const id = 'local_'+Date.now(); window.appState.fusions.push({id, ...fusionData}); window.updateAllFusionLines(); window.calculateNetworkPower(); return id; } };
+        window.saveFusionToFirebase = async (fusionData) => { if(!db || !auth || !auth.currentUser) { const id = 'local_f_'+Date.now(); window.appState.fusions.push({id, ...fusionData}); window.updateAllFusionLines(); window.calculateNetworkPower(); return id; } try { const docRef = await addDoc(getCollectionPath('fusions'), fusionData); return docRef.id; } catch(e) { const id = 'local_f_'+Date.now(); window.appState.fusions.push({id, ...fusionData}); window.updateAllFusionLines(); window.calculateNetworkPower(); return id; } };
         
-        // Atualiza a fusão no firebase para persistir o Tubete clicado
         window.updateFusionInFirebase = async (id, data) => { 
             if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { 
                 const idx = window.appState.fusions.findIndex(f=>f.id===id); 
@@ -1102,68 +1098,59 @@
             try { await updateDoc(getDocPath('fusions', id), data); } catch(e) { } 
         };
 
-        window.saveSplitterToFirebase = async (data) => { if(!db || !auth || !auth.currentUser) { window.appState.splitters.push({id: 'local_sp_'+Date.now(), ...data}); window.openCanvasDiagram(); return; } try { await addDoc(getCollectionPath('splitters'), data); } catch(e) { window.appState.splitters.push({id: 'local_sp_'+Date.now(), ...data}); window.openCanvasDiagram(); } };
+        window.saveSplitterToFirebase = async (data) => { if(!db || !auth || !auth.currentUser) { const id = 'local_sp_'+Date.now(); window.appState.splitters.push({id, ...data}); window.openCanvasDiagram(); return id; } try { const docRef = await addDoc(getCollectionPath('splitters'), data); return docRef.id; } catch(e) { const id = 'local_sp_'+Date.now(); window.appState.splitters.push({id, ...data}); window.openCanvasDiagram(); return id; } };
         window.updateSplitterInFirebase = async (id, data) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.splitters.findIndex(s=>s.id===id); if(idx>-1) window.appState.splitters[idx] = {...window.appState.splitters[idx], ...data}; window.openCanvasDiagram(); return; } try { await updateDoc(getDocPath('splitters', id), data); } catch(e) { } };
 
-        window.saveOLTToFirebase = async (data) => { if(!db || !auth || !auth.currentUser) { window.appState.olts.push({id: 'local_olt_'+Date.now(), ...data}); window.openCanvasDiagram(); return; } try { await addDoc(getCollectionPath('olts'), data); } catch(e) {} };
+        window.saveOLTToFirebase = async (data) => { if(!db || !auth || !auth.currentUser) { const id = 'local_olt_'+Date.now(); window.appState.olts.push({id, ...data}); window.openCanvasDiagram(); return id; } try { const docRef = await addDoc(getCollectionPath('olts'), data); return docRef.id; } catch(e) { const id = 'local_olt_'+Date.now(); window.appState.olts.push({id, ...data}); window.openCanvasDiagram(); return id; } };
         window.updateOLTInFirebase = async (id, data) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.olts.findIndex(s=>s.id===id); if(idx>-1) window.appState.olts[idx] = {...window.appState.olts[idx], ...data}; window.openCanvasDiagram(); return; } try { await updateDoc(getDocPath('olts', id), data); } catch(e) { } };
         
         window.deleteOLT = async function(id) {
             window.showConfirm("Remover OLT", "As fusões conectadas serão perdidas. Continuar?", "Excluir OLT", async () => {
                 const olt = window.appState.olts.find(x => x.id === id);
                 const connectedFusions = window.appState.fusions.filter(f => f.from.includes(id) || f.to.includes(id));
-                if(db && auth && auth.currentUser && !id.startsWith('local_')) { 
-                    try {
-                        await deleteDoc(getDocPath('olts', id)); 
-                        for(let f of connectedFusions) await deleteDoc(getDocPath('fusions', f.id)); 
-                        
-                        window.registrarUndo({
-                            restore: async () => {
-                                let oData = {...olt}; delete oData.id;
-                                await setDoc(doc(db, 'upperx_olts', olt.id), oData);
-                                for(let f of connectedFusions) {
-                                    let fData = {...f}; delete fData.id;
-                                    await setDoc(doc(db, 'upperx_fusions', f.id), fData);
-                                }
-                            }
-                        });
-                    } catch(e) { console.error(e); }
-                } else { 
-                    window.appState.olts = window.appState.olts.filter(s => s.id !== id); 
-                    window.appState.fusions = window.appState.fusions.filter(f => !f.from.includes(id) && !f.to.includes(id)); 
-                }
+                
+                await window.removerDocumento('olts', id);
+                for(let f of connectedFusions) await window.removerDocumento('fusions', f.id); 
+                
+                window.registrarUndo({
+                    restore: async () => {
+                        let oData = {...olt}; delete oData.id;
+                        await window.restaurarDocumento('olts', olt.id, oData);
+                        for(let f of connectedFusions) {
+                            let fData = {...f}; delete fData.id;
+                            await window.restaurarDocumento('fusions', f.id, fData);
+                        }
+                    }
+                });
+                
                 window.showToast('OLT removida.', 'sucesso');
                 window.openCanvasDiagram();
                 window.calculateNetworkPower();
             });
         };
 
-        window.saveDIOToFirebase = async (data) => { if(!db || !auth || !auth.currentUser) { window.appState.dios.push({id: 'local_dio_'+Date.now(), ...data}); window.openCanvasDiagram(); return; } try { await addDoc(getCollectionPath('dios'), data); } catch(e) {} };
+        window.saveDIOToFirebase = async (data) => { if(!db || !auth || !auth.currentUser) { const id = 'local_dio_'+Date.now(); window.appState.dios.push({id, ...data}); window.openCanvasDiagram(); return id; } try { const docRef = await addDoc(getCollectionPath('dios'), data); return docRef.id; } catch(e) { const id = 'local_dio_'+Date.now(); window.appState.dios.push({id, ...data}); window.openCanvasDiagram(); return id; } };
         window.updateDIOInFirebase = async (id, data) => { if(!db || !auth || !auth.currentUser || id.startsWith('local_')) { const idx = window.appState.dios.findIndex(s=>s.id===id); if(idx>-1) window.appState.dios[idx] = {...window.appState.dios[idx], ...data}; window.openCanvasDiagram(); return; } try { await updateDoc(getDocPath('dios', id), data); } catch(e) { } };
+        
         window.deleteDIO = async function(id) {
             window.showConfirm("Remover DIO", "As fusões conectadas serão perdidas. Continuar?", "Excluir DIO", async () => {
                 const dio = window.appState.dios.find(x => x.id === id);
                 const connectedFusions = window.appState.fusions.filter(f => f.from.includes(id) || f.to.includes(id));
-                if(db && auth && auth.currentUser && !id.startsWith('local_')) { 
-                    try {
-                        await deleteDoc(getDocPath('dios', id)); 
-                        for(let f of connectedFusions) await deleteDoc(getDocPath('fusions', f.id)); 
-                        
-                        window.registrarUndo({
-                            restore: async () => {
-                                let dData = {...dio}; delete dData.id;
-                                await setDoc(doc(db, 'upperx_dios', dio.id), dData);
-                                for(let f of connectedFusions) {
-                                    let fData = {...f}; delete fData.id;
-                                    await setDoc(doc(db, 'upperx_fusions', f.id), fData);
-                                }
-                            }
-                        });
-                    } catch(e) { console.error(e); }
-                } else { 
-                    window.appState.dios = window.appState.dios.filter(s => s.id !== id); 
-                    window.appState.fusions = window.appState.fusions.filter(f => !f.from.includes(id) && !f.to.includes(id)); 
-                }
+                
+                await window.removerDocumento('dios', id);
+                for(let f of connectedFusions) await window.removerDocumento('fusions', f.id); 
+                
+                window.registrarUndo({
+                    restore: async () => {
+                        let dData = {...dio}; delete dData.id;
+                        await window.restaurarDocumento('dios', dio.id, dData);
+                        for(let f of connectedFusions) {
+                            let fData = {...f}; delete fData.id;
+                            await window.restaurarDocumento('fusions', f.id, fData);
+                        }
+                    }
+                });
+                
                 window.showToast('DIO removido.', 'sucesso');
                 window.openCanvasDiagram();
                 window.calculateNetworkPower();
@@ -1376,7 +1363,7 @@
                 await window.checkAndSplitCable({ id: newId, lat: e.latlng.lat, lng: e.latlng.lng, name: window.appState.nodeSetup.name });
                 
                 window.registrarUndo({
-                    restore: async () => { await window.deleteNodeFromFirebase(newId); }
+                    restore: async () => { await window.removerDocumento('nodes', newId); window.renderMap(); }
                 });
                 
                 let nextName = window.appState.nodeSetup.name;
@@ -1417,7 +1404,7 @@
                         const nodeA = window.appState.nodes.find(n => n.id === window.appState.cableStartNodeId);
                         const autoName = `${window.appState.cableSetup.capacity} FO - ${nodeA.name} sentido ${node.name}`;
                         const newCableId = await window.saveCableToFirebase({ projectId: window.appState.currentProjectId, name: autoName, capacity: window.appState.cableSetup.capacity, color: window.appState.cableSetup.color, startNode: window.appState.cableStartNodeId, endNode: node.id, path: firebasePath }); 
-                        window.registrarUndo({ restore: async () => { await window.deleteCableFromFirebase(newCableId); } });
+                        window.registrarUndo({ restore: async () => { await window.removerDocumento('cables', newCableId); window.renderMap(); } });
                         window.showToast(`Cabo finalizado!`, "sucesso"); window.setMode('view'); 
                     } 
                 } 
@@ -1769,10 +1756,11 @@
                 // Registra o Desfazer Gigante (Restaura a Caixa, os Cabos antigose as Fusões perdidas)
                 window.registrarUndo({
                     restore: async () => {
-                        if (mergedCableIdToUndo) { await deleteDoc(doc(db, 'upperx_cables', mergedCableIdToUndo)); }
-                        if (nodeToRestore) { let data = {...nodeToRestore}; delete data.id; await setDoc(doc(db, 'upperx_nodes', nodeToRestore.id), data); }
-                        for(let c of connectedCables) { let data = {...c}; delete data.id; await setDoc(doc(db, 'upperx_cables', c.id), data); }
-                        for(let f of fusionsToRestore) { let data = {...f}; delete data.id; await setDoc(doc(db, 'upperx_fusions', f.id), data); }
+                        if (mergedCableIdToUndo) { await window.removerDocumento('cables', mergedCableIdToUndo); }
+                        if (nodeToRestore) { let data = {...nodeToRestore}; delete data.id; await window.restaurarDocumento('nodes', nodeToRestore.id, data); }
+                        for(let c of connectedCables) { let data = {...c}; delete data.id; await window.restaurarDocumento('cables', c.id, data); }
+                        for(let f of fusionsToRestore) { let data = {...f}; delete data.id; await window.restaurarDocumento('fusions', f.id, data); }
+                        window.renderMap();
                     }
                 });
             });
@@ -1909,26 +1897,22 @@
             window.showConfirm("Excluir Splitter", "Deseja excluir este splitter e perder as conexões dele?", "Excluir", async () => {
                 const sp = window.appState.splitters.find(x => x.id === id);
                 const connectedFusions = window.appState.fusions.filter(f => f.from.includes(id) || f.to.includes(id));
-                if(db && auth && auth.currentUser && !id.startsWith('local_')) { 
-                    try {
-                        await deleteDoc(getDocPath('splitters', id)); 
-                        for(let f of connectedFusions) { await deleteDoc(getDocPath('fusions', f.id)); }
-                        
-                        window.registrarUndo({
-                            restore: async () => {
-                                let spData = {...sp}; delete spData.id;
-                                await setDoc(doc(db, 'upperx_splitters', sp.id), spData);
-                                for(let f of connectedFusions) {
-                                    let fData = {...f}; delete fData.id;
-                                    await setDoc(doc(db, 'upperx_fusions', f.id), fData);
-                                }
-                            }
-                        });
-                    } catch(e) { console.error(e); }
-                } else { 
-                    window.appState.splitters = window.appState.splitters.filter(s => s.id !== id); 
-                    window.appState.fusions = window.appState.fusions.filter(f => !f.from.includes(id) && !f.to.includes(id)); 
-                }
+                
+                await window.removerDocumento('splitters', id);
+                for(let f of connectedFusions) await window.removerDocumento('fusions', f.id); 
+
+                window.registrarUndo({
+                    restore: async () => {
+                        let spData = {...sp}; delete spData.id;
+                        await window.restaurarDocumento('splitters', sp.id, spData);
+                        for(let f of connectedFusions) {
+                            let fData = {...f}; delete fData.id;
+                            await window.restaurarDocumento('fusions', f.id, fData);
+                        }
+                        window.openCanvasDiagram();
+                    }
+                });
+                
                 window.showToast('Splitter removido.', 'sucesso');
                 window.openCanvasDiagram(); 
                 window.calculateNetworkPower(); 
@@ -1938,18 +1922,19 @@
         window.deletarFusao = async function(id) {
             window.showConfirm("Excluir Fusão", "Deseja romper esta conexão de fibra?", "Romper Fibra", async () => {
                 const f = window.appState.fusions.find(x => x.id === id);
-                if(db && auth && auth.currentUser && !id.startsWith('local_')) { 
-                    await deleteDoc(getDocPath('fusions', id)); 
-                    if(f) {
-                        window.registrarUndo({
-                            restore: async () => {
-                                let data = {...f}; delete data.id;
-                                await setDoc(doc(db, 'upperx_fusions', f.id), data);
-                            }
-                        });
-                    }
-                } 
-                else { window.appState.fusions = window.appState.fusions.filter(f => f.id !== id); }
+                
+                await window.removerDocumento('fusions', id); 
+                
+                if(f) {
+                    window.registrarUndo({
+                        restore: async () => {
+                            let data = {...f}; delete data.id;
+                            await window.restaurarDocumento('fusions', f.id, data);
+                            window.updateAllFusionLines(); window.calculateNetworkPower();
+                        }
+                    });
+                }
+                
                 window.showToast('Conexão excluída.', 'sucesso');
                 window.updateAllFusionLines();
                 window.calculateNetworkPower();
@@ -2060,7 +2045,8 @@
                 let pons = parseInt(results[0]);
                 let tx = results[1];
                 if(pons) {
-                    await window.saveOLTToFirebase({ nodeId: window.appState.selectedNodeId, pons: pons, tx: tx, x: 200, y: 200, rotation: 0, flipped: false, sideFlipped: false });
+                    const newId = await window.saveOLTToFirebase({ nodeId: window.appState.selectedNodeId, pons: pons, tx: tx, x: 200, y: 200, rotation: 0, flipped: false, sideFlipped: false });
+                    window.registrarUndo({ restore: async () => { await window.removerDocumento('olts', newId); window.openCanvasDiagram(); } });
                 }
             });
         };
@@ -2069,7 +2055,8 @@
             window.showPrompt("Adicionar DIO", [{label: "Quantas portas no DIO? (Ex: 12, 24, 36)", val: "24"}], async (results) => {
                 let ports = parseInt(results[0]);
                 if(ports) {
-                    await window.saveDIOToFirebase({ nodeId: window.appState.selectedNodeId, ports: ports, x: 300, y: 200, rotation: 0, flipped: false, sideFlipped: false });
+                    const newId = await window.saveDIOToFirebase({ nodeId: window.appState.selectedNodeId, ports: ports, x: 300, y: 200, rotation: 0, flipped: false, sideFlipped: false });
+                    window.registrarUndo({ restore: async () => { await window.removerDocumento('dios', newId); window.openCanvasDiagram(); } });
                 }
             });
         };
@@ -2242,7 +2229,8 @@
             window.showToast(`Adicionando Splitter ${type}...`);
             const existingSp = window.appState.splitters.filter(s => s.nodeId === window.appState.selectedNodeId);
             const newY = 150 + (existingSp.length * 90);
-            await window.saveSplitterToFirebase({ nodeId: window.appState.selectedNodeId, type: type, x: 450, y: newY, rotation: 0, flipped: false, sideFlipped: false });
+            const newId = await window.saveSplitterToFirebase({ nodeId: window.appState.selectedNodeId, type: type, x: 450, y: newY, rotation: 0, flipped: false, sideFlipped: false });
+            window.registrarUndo({ restore: async () => { await window.removerDocumento('splitters', newId); window.openCanvasDiagram(); } });
             window.openCanvasDiagram();
         };
 
@@ -2612,7 +2600,7 @@
             // NOVIDADE: Verifica se já tinha clicado em outra porta (Clique para Conectar)
             if (window.appState.fusionClickMode && window.appState.fusionClickMode !== portId) {
                 window.saveFusionToFirebase({ nodeId: window.appState.selectedNodeId, from: window.appState.fusionClickMode, to: portId }).then(newFusionId => {
-                    window.registrarUndo({ restore: async () => { if(db && auth && !newFusionId.startsWith('local_')) { await deleteDoc(doc(db, 'upperx_fusions', newFusionId)); } else { window.appState.fusions = window.appState.fusions.filter(f => f.id !== newFusionId); } window.openCanvasDiagram(); } });
+                    window.registrarUndo({ restore: async () => { await window.removerDocumento('fusions', newFusionId); window.updateAllFusionLines(); window.calculateNetworkPower(); } });
                 });
                 window.showToast('Fusão conectada!', 'sucesso');
                 window.appState.fusionClickMode = null;
@@ -2698,7 +2686,7 @@
                 const existing = window.appState.fusions.some(f => (f.nodeId === window.appState.selectedNodeId) && (f.from === targetPortId || f.to === targetPortId));
                 if(existing) { window.showToast('Porta ocupada.', 'aviso'); } else {
                     const newFusionId = await window.saveFusionToFirebase({ nodeId: window.appState.selectedNodeId, from: window.appState.fusionStartPort, to: targetPortId });
-                    window.registrarUndo({ restore: async () => { if(db && auth && !newFusionId.startsWith('local_')) { await deleteDoc(doc(db, 'upperx_fusions', newFusionId)); } else { window.appState.fusions = window.appState.fusions.filter(f => f.id !== newFusionId); } window.openCanvasDiagram(); } });
+                    window.registrarUndo({ restore: async () => { await window.removerDocumento('fusions', newFusionId); window.updateAllFusionLines(); window.calculateNetworkPower(); } });
                     window.showToast('Fusão salva na nuvem!', 'sucesso'); 
                 }
                 window.appState.isDraggingFusion = false; 
@@ -2882,6 +2870,6 @@
         window.addDIOToNode = async function(nodeId) { const node = window.appState.nodes.find(n => n.id === nodeId); if (node) { if(window.updateNodeInFirebase) { await window.updateNodeInFirebase(nodeId, { internal: { hasDIO: true, splitters: node.internal.splitters || [] } }); } else { const idx = window.appState.nodes.findIndex(n=>n.id===nodeId); window.appState.nodes[idx].internal.hasDIO = true; } window.showToast("DIO adicionado!", "sucesso"); window.openInsidePlantView(node); } };
 
         initFirebase();
-    </script>
+</script>
 </body>
 </html>
