@@ -721,18 +721,20 @@
         window.appState.undoStack = [];
 
         window.restaurarDocumento = async function(colecao, id, data) {
+            // ATUALIZAÇÃO IMEDIATA LOCAL: Isso impede o "bug da auto-cura" apagando o que foi desfeito
+            window.appState[colecao].push({id: id, ...data});
+            
             if(typeof db !== 'undefined' && auth && auth.currentUser && !id.startsWith('local_')) {
                 await setDoc(doc(db, 'upperx_' + colecao, id), data);
-            } else {
-                window.appState[colecao].push({id: id, ...data});
             }
         };
 
         window.removerDocumento = async function(colecao, id) {
+            // REMOÇÃO IMEDIATA LOCAL
+            window.appState[colecao] = window.appState[colecao].filter(item => item.id !== id);
+
             if(typeof db !== 'undefined' && auth && auth.currentUser && !id.startsWith('local_')) {
                 await deleteDoc(doc(db, 'upperx_' + colecao, id));
-            } else {
-                window.appState[colecao] = window.appState[colecao].filter(item => item.id !== id);
             }
         };
 
@@ -742,11 +744,13 @@
                 if (hasActions) {
                     btn.classList.remove('opacity-50', 'cursor-not-allowed');
                     btn.classList.add('hover:bg-red-100');
-                    btn.style.pointerEvents = 'auto'; // Agora bloqueia o clique real!
+                    btn.style.pointerEvents = 'auto'; // Libera o clique real
+                    btn.disabled = false;
                 } else {
                     btn.classList.add('opacity-50', 'cursor-not-allowed');
                     btn.classList.remove('hover:bg-red-100');
-                    btn.style.pointerEvents = 'none'; // Impede o clique fantasma
+                    btn.style.pointerEvents = 'none'; // Bloqueia totalmente o clique fantasma
+                    btn.disabled = true;
                 }
             });
         };
@@ -766,6 +770,8 @@
             try {
                 await action.restore();
                 window.showToast("Ação desfeita com sucesso!", "sucesso");
+                
+                // Força o desenho local na hora
                 window.renderMap();
                 if (document.getElementById('diagram-view').style.display === 'flex') {
                     window.openCanvasDiagram();
